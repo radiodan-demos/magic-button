@@ -1,23 +1,26 @@
-var express          = require("express"),
-    connect          = require("connect"),
-    http             = require("http"),
-    utils            = require("radiodan-client").utils,
-    logger           = utils.logger(__filename),
-    bbcServices      = require("./lib/bbc-services").create(),
-    port             = (process.env.PORT || 5000),
-    server           = module.exports = express();
+var express        = require("express"),
+    connect        = require("connect"),
+    http           = require("http"),
+    radiodanClient = require("radiodan-client"),
+    logger         = radiodanClient.utils.logger(__filename),
+    radiodan       = radiodanClient.create(),
+    bbcServices    = require("./lib/bbc-services").create(),
+    Avoider        = require("./lib/avoider")(radiodan, bbcServices),
+    port           = (process.env.PORT || 5000),
+    app            = module.exports = express();
 
-server.configure(function() {
-  server.use(express.errorHandler({
+app.configure(function() {
+  app.use(express.errorHandler({
     dumpExceptions: true,
     showStack: true
   }));
-  server.use(connect.methodOverride());
-  server.use(connect.urlencoded());
-  server.use(connect.json());
-  server.use(server.router);
-  server.use(connect.static("public"));
+  app.use(connect.methodOverride());
+  app.use(connect.urlencoded());
+  app.use(connect.json());
+  app.use(app.router);
+  app.use("/radiodan", radiodanClient.middleware());
+  app.use(connect.static("public"));
 });
 
-http.createServer(server).listen(port);
+http.createServer(app).listen(port);
 logger.info("Started server on port", port);
