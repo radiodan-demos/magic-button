@@ -9,6 +9,12 @@ var express        = require("express"),
     port           = (process.env.PORT || 5000),
     app            = module.exports = express();
 
+
+if (!module.parent) {
+  var gracefulExit = require("./lib/graceful-exit")(radiodan);
+  process.on("SIGINT", gracefulExit).on("SIGTERM", gracefulExit);
+}
+
 app.configure(function() {
   app.use(express.errorHandler({
     dumpExceptions: true,
