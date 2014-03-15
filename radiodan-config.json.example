@@ -6,15 +6,15 @@
   "players": [
     {
       "name": "Main",
-      "id": 1
+      "id": "main"
     },
     {
       "name": "Avoider",
-      "id": 2
+      "id": "avoider"
     },
     {
       "name": "Announcer",
-      "id": 3
+      "id": "announcer"
     }
   ]
 }
