@@ -24,7 +24,8 @@
     "express": "^3.4.8",
     "radiodan-client": "https://github.com/radiodan/radiodan-client.js/archive/master.tar.gz",
     "connect": "^2.14.1",
-    "eventsource": "0.0.10"
+    "eventsource": "0.0.10",
+    "express-namespace": "^0.1.1"
   },
   "devDependencies": {
     "nodemon": "^1.0.15"
