@@ -1,0 +1,20 @@
+{
+  "dataPath": "/tmp/.radiodan",
+  "defaults": {
+    "music": "/media/music"
+  },
+  "players": [
+    {
+      "name": "Main",
+      "id": 1
+    },
+    {
+      "name": "Avoider",
+      "id": 2
+    },
+    {
+      "name": "Announcer",
+      "id": 3
+    }
+  ]
+}
