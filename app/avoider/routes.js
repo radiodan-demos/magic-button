@@ -14,10 +14,10 @@ function routes(importApp, importRadiodan) {
           bbcServices, mainPlayer, avoidPlayer
       );
 
-  return function() {
     app.get('/', index);
     app.get('/avoid', avoid);
-  }
+
+    return app;
 
   function index(req, res) {
     res.send("THIS IS AVOID HOMEPGE<br><a href='/avoider/avoid'>AVOID</a>");
@@ -37,6 +37,6 @@ function routes(importApp, importRadiodan) {
         setTimeout(Avoider.create("radio1").avoid, 5000);
       });
 
-    res.redirect("/avoider");
+    res.redirect("./");
   }
 }

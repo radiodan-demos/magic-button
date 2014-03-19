@@ -25,7 +25,6 @@
     "express": "^4.0.0",
     "radiodan-client": "https://github.com/radiodan/radiodan-client.js/archive/master.tar.gz",
     "eventsource": "0.0.10",
-    "express-namespace": "^0.1.1",
     "method-override": "^1.0.0",
     "body-parser": "^1.0.0",
     "errorhandler": "^1.0.0",

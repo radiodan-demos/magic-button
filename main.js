@@ -1,6 +1,5 @@
 var express        = require("express"),
     http           = require("http"),
-    namespace      = require("express-namespace"),
     radiodanClient = require("radiodan-client"),
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
@@ -23,7 +22,9 @@ app.use(require("serve-static")("public"));
 app.use(require("morgan")("dev"));
 
 app.use("/radiodan", radiodanClient.middleware());
-app.namespace("/avoider", require("./app/avoider/routes")(app,radiodan));
+app.use("/avoider",
+  require("./app/avoider/routes")(express.Router(), radiodan)
+);
 
 http.createServer(app).listen(port);
 logger.info("Started server on port", port);
