@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon main.js"
+    "dev": "nodemon main.js",
+    "start": "node main.js"
   },
   "repository": {
     "type": "git",
@@ -21,11 +22,14 @@
   },
   "homepage": "https://github.com/radiodan/magic-button",
   "dependencies": {
-    "express": "^3.4.8",
+    "express": "^4.0.0",
     "radiodan-client": "https://github.com/radiodan/radiodan-client.js/archive/master.tar.gz",
-    "connect": "^2.14.1",
     "eventsource": "0.0.10",
-    "express-namespace": "^0.1.1"
+    "express-namespace": "^0.1.1",
+    "method-override": "^1.0.0",
+    "body-parser": "^1.0.0",
+    "errorhandler": "^1.0.0",
+    "serve-static": "^1.0.2"
   },
   "devDependencies": {
     "nodemon": "^1.0.15"

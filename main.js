@@ -1,7 +1,6 @@
 var express        = require("express"),
-    connect        = require("connect"),
     http           = require("http"),
-    namespace      = require('express-namespace'),
+    namespace      = require("express-namespace"),
     radiodanClient = require("radiodan-client"),
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
@@ -13,20 +12,16 @@ if (!module.parent) {
   process.on("SIGINT", gracefulExit).on("SIGTERM", gracefulExit);
 }
 
-app.configure(function() {
-  app.use(express.errorHandler({
-    dumpExceptions: true,
-    showStack: true
-  }));
-  app.use(connect.methodOverride());
-  app.use(connect.urlencoded());
-  app.use(connect.json());
-  app.use(app.router);
-  app.use("/radiodan", radiodanClient.middleware());
-  app.use(connect.static("public"));
-});
+app.use(require("errorhandler")({
+  dumpExceptions: true,
+  showStack: true
+}));
+app.use(require("body-parser")());
+app.use(require("method-override")())
+app.use(require("serve-static")("public"));
 
-app.namespace('/avoider', require('./app/avoider/routes')(app,radiodan));
+app.use("/radiodan", radiodanClient.middleware());
+app.namespace("/avoider", require("./app/avoider/routes")(app,radiodan));
 
 http.createServer(app).listen(port);
 logger.info("Started server on port", port);
