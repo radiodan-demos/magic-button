@@ -4,7 +4,9 @@
   "description": "The radiodan demo app",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node_modules/mocha/bin/mocha --recursive",
+    "coverage": "node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha test/**/test*.js -- --ui bdd -R spec -t 5000",
+    "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "dev": "nodemon main.js",
     "start": "node main.js"
   },
@@ -32,6 +34,11 @@
     "morgan": "^1.0.0"
   },
   "devDependencies": {
-    "nodemon": "^1.0.15"
+    "nodemon": "^1.0.15",
+    "mocha": "^1.17.1",
+    "istanbul": "^0.2.6",
+    "chai-as-promised": "^4.1.1",
+    "chai": "^1.9.0",
+    "sinon": "^1.9.0"
   }
 }
