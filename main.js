@@ -1,7 +1,7 @@
 var express        = require("express"),
     http           = require("http"),
     radiodanClient = require("radiodan-client"),
-    bbcServices    = require("./lib/bbc-services").create(),
+    bbcServices    = require("./lib/bbc-services").create().connect(),
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
     port           = (process.env.PORT || 5000),
