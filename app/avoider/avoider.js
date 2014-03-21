@@ -13,10 +13,10 @@ module.exports = function(bbcServices, mainPlayer, avoidPlayer) {
 
     instance.avoid = avoid;
 
-    if(musicStations.indexOf(service) === -1) {
-      instance.avoidTopic = "nowAndNext";
-    } else {
+    if(musicStations.indexOf(service) > -1) {
       instance.avoidTopic = "nowPlaying";
+    } else {
+      instance.avoidTopic = "nowAndNext";
     }
 
     avoidTopic = instance.avoidTopic;
