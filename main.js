@@ -1,6 +1,7 @@
 var express        = require("express"),
     http           = require("http"),
     radiodanClient = require("radiodan-client"),
+    bbcServices    = require("./lib/bbc-services").create(),
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
     port           = (process.env.PORT || 5000),
@@ -23,7 +24,7 @@ app.use(require("morgan")("dev"));
 
 app.use("/radiodan", radiodanClient.middleware());
 app.use("/avoider",
-  require("./app/avoider/routes")(express.Router(), radiodan)
+  require("./app/avoider/routes")(express.Router(), radiodan, bbcServices)
 );
 
 http.createServer(app).listen(port);

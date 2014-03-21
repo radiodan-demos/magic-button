@@ -1,16 +1,10 @@
-var app, radiodan;
-
 module.exports = routes;
 
-function routes(importApp, importRadiodan) {
-  app = importApp;
-  radiodan = importRadiodan;
-
+function routes(app, radiodan, bbcServices) {
   var avoidPlayer    = radiodan.player.get("avoider"),
       mainPlayer     = radiodan.player.get("main"),
       announcePlayer = radiodan.player.get("announcer"),
-      bbcServices    = require("../../lib/bbc-services").create(),
-      Avoider        = require("../../lib/avoider")(
+      Avoider        = require("./avoider")(
           bbcServices, mainPlayer, avoidPlayer
       );
 
