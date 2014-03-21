@@ -56,18 +56,18 @@ describe("on eventstream", function(){
 
   it("emits events from recieved topic", function(done){
     var self = this,
-        data = {service: "radio1", topic: "liveData", data: {"a": "b"}},
+        data = {service: "1xtra", topic: "nowPlaying", data: {"a": "b"}},
         stationPromise = utils.promise.defer(),
         topicPromise = utils.promise.defer();
 
-    self.subject.once("radio1", function(topic, emitData) {
+    self.subject.once("1xtra", function(topic, emitData) {
       assert.deepEqual(data.topic, topic);
       assert.deepEqual(data.data, emitData);
 
       stationPromise.resolve();
     });
 
-    self.subject.once("radio1/liveData", function(emitData) {
+    self.subject.once("1xtra/nowPlaying", function(emitData) {
       assert.deepEqual(data.data, emitData);
 
       topicPromise.resolve();
