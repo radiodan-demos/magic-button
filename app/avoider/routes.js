@@ -9,7 +9,8 @@ function routes(app, radiodan, bbcServices) {
       announcePlayer = radiodan.player.get("announcer"),
       Avoider        = require("./avoider")(
           bbcServices, mainPlayer, avoidPlayer
-      );
+      ),
+      settings       = require("./settings").create();
 
     app.get("/", index);
     app.get("/avoid", avoid);
@@ -17,8 +18,12 @@ function routes(app, radiodan, bbcServices) {
     return app;
 
   function index(req, res) {
-    res.send("THIS IS AVOID HOMEPGE<br><a href=\"/avoider/avoid\">AVOID</a>");
-    res.end();
+    settings.get().then(function(settings) {
+      res.render(
+        __dirname+"/views/index",
+        { settings: JSON.stringify(settings) }
+      );
+    }).then(null, utils.failedPromiseHandler(logger));
   }
 
   function avoid(req, res) {

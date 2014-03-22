@@ -1,5 +1,6 @@
 var express        = require("express"),
     http           = require("http"),
+    swig           = require("swig"),
     radiodanClient = require("radiodan-client"),
     bbcServices    = require("./lib/bbc-services").create().connect(),
     logger         = radiodanClient.utils.logger(__filename),
@@ -11,6 +12,9 @@ if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);
   process.on("SIGINT", gracefulExit).on("SIGTERM", gracefulExit);
 }
+
+app.engine("html", swig.renderFile);
+app.set("view engine", "html");
 
 app.use(require("errorhandler")({
   dumpExceptions: true,
