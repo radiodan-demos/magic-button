@@ -1,25 +1,18 @@
 var EventEmitter  = require("events").EventEmitter,
     logger        = require("radiodan-client").utils.logger(__filename),
-    musicStations = ["radio1","1xtra","radio2","radio3","6music"];
+    musicServices = ["radio1","1xtra","radio2","radio3","6music"];
 
 module.exports = function(bbcServices, mainPlayer, avoidPlayer) {
   return { create: create };
 
-  function create(service, myLogger) {
+  function create(service, avoidTopic, myLogger) {
     var instance = new EventEmitter,
         avoidTopic;
 
     logger = myLogger || logger;
 
+    instance.avoidTopic = avoidTopic || topicFromService(service);
     instance.avoid = avoid;
-
-    if(musicStations.indexOf(service) > -1) {
-      instance.avoidTopic = "nowPlaying";
-    } else {
-      instance.avoidTopic = "nowAndNext";
-    }
-
-    avoidTopic = instance.avoidTopic;
 
     return instance;
 
@@ -48,3 +41,11 @@ module.exports = function(bbcServices, mainPlayer, avoidPlayer) {
     }
   }
 };
+
+function topicFromService(service) {
+  if(musicServices.indexOf(service) > -1) {
+    return "nowPlaying";
+  } else {
+    return "nowAndNext";
+  }
+}
