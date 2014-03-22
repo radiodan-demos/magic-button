@@ -11,13 +11,13 @@ function routes(app, radiodan, bbcServices) {
           bbcServices, mainPlayer, avoidPlayer
       );
 
-    app.get('/', index);
-    app.get('/avoid', avoid);
+    app.get("/", index);
+    app.get("/avoid", avoid);
 
     return app;
 
   function index(req, res) {
-    res.send("THIS IS AVOID HOMEPGE<br><a href='/avoider/avoid'>AVOID</a>");
+    res.send("THIS IS AVOID HOMEPGE<br><a href=\"/avoider/avoid\">AVOID</a>");
     res.end();
   }
 
