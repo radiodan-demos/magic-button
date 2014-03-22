@@ -5,19 +5,18 @@ var Datastore = require("nedb"),
 module.exports = { create: create };
 
 function create(options, myLogger) {
-  var instance = {},
-      db;
+  var instance = { get: get, set: set },
+      query    = { type: "avoid" },
+      db       = prepareDatastore(options);
 
   logger = myLogger || logger;
-  db     = prepareDatastore(options);
-  instance = { get: get, set: set };
 
   return instance;
 
   function get() {
     var getPromise = utils.promise.defer();
 
-    db.findOne({type: "avoid"}, function(err, settings) {
+    db.findOne(query, function(err, settings) {
       if(err) {
         getPromise.reject(err);
       } else {
@@ -34,7 +33,17 @@ function create(options, myLogger) {
   }
 
   function set(settings) {
-    return db.store(settings)
+    var setPromise = utils.promise.defer();
+
+    db.update(query, settings, function(err) {
+      if(err) {
+        setPromise.reject(err);
+      } else {
+        setPromise.resolve();
+      }
+    });
+
+    return setPromise.promise
       .then(null, utils.failedPromiseHandler(logger));
   }
 
