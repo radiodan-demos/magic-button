@@ -16,4 +16,4 @@ node_modules
 
 .env
 radiodan-config.json
-db/*.db
+db/*db*

@@ -25,21 +25,30 @@ function create(options, myLogger) {
     });
 
     return getPromise.promise
-      .then(function(settings) {
-        settings = settings || db.emptySet;
-        return settings;
+      .then(function(data) {
+        var settings = data || db.emptySet;
+
+        delete settings["type"];
+        delete settings["_id"];
+
+        return utils.promise.resolve(settings);
       })
       .then(null, utils.failedPromiseHandler(logger));
   }
 
-  function set(settings) {
-    var setPromise = utils.promise.defer();
+  function set(data) {
+    var setPromise = utils.promise.defer(),
+        options    = { upsert: true },
+        settings;
 
-    db.update(query, settings, function(err) {
+    settings = JSON.parse(JSON.stringify(data));
+    settings.type = "avoid";
+
+    db.update(query, settings, options, function(err, numReplaced) {
       if(err) {
         setPromise.reject(err);
       } else {
-        setPromise.resolve();
+        setPromise.resolve(numReplaced);
       }
     });
 
@@ -49,14 +58,13 @@ function create(options, myLogger) {
 
   function prepareDatastore(options) {
     var defaultOptions = {
-          filename: "../../db/avoider.db",
+          filename: __dirname+"/../../db/avoider.db",
           autoload: true
         },
         emptySet = {
           station: false,
           avoidType: "programme"
         },
-        query = { type: "avoid" },
         db, fetch, store;
 
     options = options || {};
