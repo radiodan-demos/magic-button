@@ -7,6 +7,7 @@ function routes(app, radiodan, bbcServices) {
   var avoidPlayer    = radiodan.player.get("avoider"),
       mainPlayer     = radiodan.player.get("main"),
       announcePlayer = radiodan.player.get("announcer"),
+      audio          = radiodan.audio.get("default"),
       currentServiceId;
 
     app.use("/assets", require("serve-static")(__dirname + "/static"));
@@ -26,15 +27,19 @@ function routes(app, radiodan, bbcServices) {
         nowAndNext = currentService.nowAndNext;
       }
 
-      res.render(
-        __dirname+"/views/index",
-        {
-          currentService : currentService,
-          services       : bbcServices.cache,
-          nowPlaying     : nowPlaying,
-          nowAndNext     : nowAndNext
-        }
-      );
+      audio.status()
+           .then(function (status) {
+              res.render(
+                __dirname+"/views/index",
+                {
+                  currentService : currentService,
+                  services       : bbcServices.cache,
+                  nowPlaying     : nowPlaying,
+                  nowAndNext     : nowAndNext,
+                  volume         : status.volume
+                }
+              );
+           });
     }
 
     function playService(req, res) {

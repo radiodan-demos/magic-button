@@ -9,6 +9,11 @@
   <body>
     <h1>Radiodan</h1>
 
+    <section id="volume" class="volume">
+      <h2>Volume</h2>
+      <input type="range" min="0" max="100" value="{{volume}}" />
+    </section>
+
     <section id="services" class="service">
       <h2>Change service</h2>
       <ul class="service-list">
@@ -53,6 +58,7 @@
       </ul>
     </section>
 
+    <script src="/radiodan/client.js"></script>
     <script src="assets/js/app.js"></script>
   </body>
 </html>
