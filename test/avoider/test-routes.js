@@ -18,21 +18,23 @@ app.use("/", routes(express.Router(), mockRD));
 
 var utils = require("radiodan-client").utils;
 
-describe("index", function(){
-  it("does whatever that is", function(done){
-    request(app)
+describe("/avoider", function(){
+  describe("/index", function(){
+    it("does whatever that is", function(done){
+      request(app)
       .get("/")
       .expect(200)
       .expect(/THIS IS AVOID HOMEPGE/, done);
+    });
   });
-});
 
-describe("avoid", function(){
-  it("starts the avoider");
-  it("redirects to index");
-});
+  describe("/avoid", function(){
+    it("starts the avoider");
+    it("redirects to index");
+  });
 
-describe("settings", function(){
-  it("saves settings to persistence");
-  it("redirects to index");
+  describe("/settings", function(){
+    it("saves settings to persistence");
+    it("redirects to index");
+  });
 });
