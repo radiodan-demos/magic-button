@@ -34,24 +34,15 @@ describe("on eventstream", function(){
     this.subject.listenForEvents(this.eventMock);
   });
 
-  it("resolves ready promise when first message arrives", function(done){
-    this.eventMock.onmessage({});
-
-    assert.isFulfilled(this.subject.ready).then(done);
-  });
-
-  it("stores data in cache", function(done){
+  it("stores data in cache", function(){
     var self = this,
-        data = {service: "radio1", topic: "liveData", data: {"a": "b"}};
+        data = {service: "radio1", topic: "liveData", data: {"a": "b"}},
+        cached;
 
     this.eventMock.onmessage({data: JSON.stringify(data)});
 
-    assert.isFulfilled(self.subject.ready)
-      .then(function(){
-        var cached = self.subject.cache["radio1"]["liveData"];
-        assert.deepEqual(data.data, cached);
-      })
-      .then(done, done);
+    cached = self.subject.cache["radio1"]["liveData"];
+    assert.deepEqual(data.data, cached);
   });
 
   it("emits events from recieved topic", function(done){
