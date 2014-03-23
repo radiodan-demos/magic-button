@@ -7,7 +7,7 @@
     "test": "node_modules/mocha/bin/mocha --recursive --reporter=spec",
     "coverage": "node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha test/**/test*.js -- --ui bdd -R spec -t 5000",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "dev": "nodemon main.js",
+    "dev": "NODE_ENV=development nodemon main.js",
     "start": "node main.js"
   },
   "repository": {

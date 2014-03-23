@@ -16,6 +16,13 @@ if (!module.parent) {
 app.engine("html", swig.renderFile);
 app.set("view engine", "html");
 
+var env = process.env.NODE_ENV || 'production';
+if ('development' == env) {
+  swig.setDefaults({ cache: false });
+}
+
+logger.info('ENVIRONMENT', env);
+
 app.use(require("errorhandler")({
   dumpExceptions: true,
   showStack: true
