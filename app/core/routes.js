@@ -6,7 +6,8 @@ module.exports = routes;
 function routes(app, radiodan, bbcServices) {
   var avoidPlayer    = radiodan.player.get("avoider"),
       mainPlayer     = radiodan.player.get("main"),
-      announcePlayer = radiodan.player.get("announcer");
+      announcePlayer = radiodan.player.get("announcer"),
+      currentService;
 
     app.use("/assets", require("serve-static")(__dirname + "/static"));
     app.get("/playing", playService);
@@ -16,6 +17,7 @@ function routes(app, radiodan, bbcServices) {
       res.render(
         __dirname+"/views/index",
         {
+          currentService: currentService,
           services: bbcServices.cache
         }
       );
@@ -31,10 +33,11 @@ function routes(app, radiodan, bbcServices) {
       }
 
       if (url) {
-        console.log('ADD', url);
         mainPlayer.clear();
         mainPlayer.add({ playlist: [url] });
         mainPlayer.play();
+
+        currentService = service;
       }
 
       res.redirect('back');

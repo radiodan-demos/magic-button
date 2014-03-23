@@ -12,8 +12,9 @@
       <h2>Change service</h2>
       <ul>
         {% for service in services %}
-          <li>
+          <li {% if currentService.id == service.id %}class="is-playing"{% endif %}>
             <a href="playing?id={{ service.id }}">
+              {% if currentService.id == service.id %}> {% endif %}
               {{ service.title }}
             </a>
           </li>
