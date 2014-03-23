@@ -7,7 +7,22 @@
 
   <body>
     <h1>Radiodan</h1>
+
+    <section id="services">
+      <h2>Change service</h2>
+      <ul>
+        {% for service in services %}
+          <li>
+            <a href="playing?id={{ service.id }}">
+              {{ service.title }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+
     <section id="behaviours">
+      <h2>Magic Button</h2>
       <ul>
         <li><a href="/avoider/">Avoider</a></li>
       </ul>

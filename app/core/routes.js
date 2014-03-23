@@ -9,14 +9,36 @@ function routes(app, radiodan, bbcServices) {
       announcePlayer = radiodan.player.get("announcer");
 
     app.use("/assets", require("serve-static")(__dirname + "/static"));
+    app.get("/playing", playService);
     app.get("/", showIndex);
 
-    return app;
-}
+    function showIndex(req, res) {
+      res.render(
+        __dirname+"/views/index",
+        {
+          services: bbcServices.cache
+        }
+      );
+    }
 
-function showIndex(req, res) {
-  res.render(
-    __dirname+"/views/index",
-    {}
-  );
+    function playService(req, res) {
+      var id  = req.query.id,
+          service = bbcServices.cache[id],
+          url;
+
+      if (service && service.streams && service.streams[0]) {
+        url = service.streams[0].url;
+      }
+
+      if (url) {
+        console.log('ADD', url);
+        mainPlayer.clear();
+        mainPlayer.add({ playlist: [url] });
+        mainPlayer.play();
+      }
+
+      res.redirect('back');
+    };
+
+    return app;
 }
