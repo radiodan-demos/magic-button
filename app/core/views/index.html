@@ -3,19 +3,20 @@
   <head>
     <title>Radiodan Remote Control</title>
     <link rel="stylesheet" href="assets/css/lib/pure-min.css">
+    <link rel="stylesheet" href="assets/css/app.css">
   </head>
 
   <body>
     <h1>Radiodan</h1>
 
-    <section id="services">
+    <section id="services" class="service">
       <h2>Change service</h2>
-      <ul>
+      <ul class="service-list">
         {% for service in services %}
-          <li {% if currentService.id == service.id %}class="is-playing"{% endif %}>
+          <li class="service-item{% if currentService.id == service.id %} is-playing{% endif %}">
             <a href="playing?id={{ service.id }}">
-              {% if currentService.id == service.id %}> {% endif %}
-              {{ service.title }}
+              <img  alt="{{ service.title }}"
+                    src="{{ service.logos.svg }}" />
             </a>
           </li>
         {% endfor %}

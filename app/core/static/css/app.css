@@ -1,0 +1,33 @@
+/*
+  Spot colour: rgba(37, 182, 224, 1);
+
+*/
+.service-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.service-item {
+  display: inline-block;
+  height: 3em;
+  padding: 0.5em;
+}
+
+.service-item:hover {
+  background-color: #eee;
+}
+
+.service-item.is-playing {
+  background-color: rgba(37, 182, 224, 0.3);
+}
+
+/*.service-item > a {
+  display: inline-block;
+  height: 100%;
+}*/
+
+.service-item img {
+  display: inline-block;
+  height: 3em;
+}
