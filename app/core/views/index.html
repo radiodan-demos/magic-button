@@ -22,6 +22,29 @@
       </ul>
     </section>
 
+    {% if nowPlaying %}
+    <section id="now-playing">
+      <h2>Now Playing</h2>
+      {% if nowPlaying.contributions.length > 0 && nowPlaying.contributions[0].image_pid %}
+        <img src="http://ichef.bbci.co.uk/images/ic/112x63/{{ nowPlaying.contributions[0].image_pid }}" />
+      {% endif %}
+      <p>{{ nowPlaying.title }}</p>
+      <p>{{ nowPlaying.artist }}</p>
+    </section>
+    {% endif %}
+
+    {% if nowAndNext %}
+    <section id="current-show">
+      <h2>Current show</h2>
+      <p>
+        <a  target="_blank"
+            href="http://www.bbc.co.uk/programmes/{{ nowAndNext[0].pid }}">
+        {{ nowAndNext[0].brand }}
+        </a>
+      </p>
+    </section>
+    {% endif %}
+
     <section id="behaviours">
       <h2>Magic Button</h2>
       <ul>
