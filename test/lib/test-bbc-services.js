@@ -23,6 +23,40 @@ describe("cache", function(){
   });
 });
 
+describe("fetch service data", function(){
+  beforeEach(function(){
+    var data    = {radio1:{a:1}, radio2:{b:2}},
+        subject = BBCServices.create();
+
+    subject.cache = data;
+
+    this.subject  = subject;
+    this.data     = data;
+  });
+
+  it("returns data for all services", function(){
+    var subject = this.subject;
+
+    assert.deepEqual(
+      [{id: "radio1", a: 1}, {id: "radio2", b: 2}],
+      subject.get()
+    );
+  });
+
+  it("returns data for a specific service", function(){
+    var subject = this.subject,
+        data    = this.data;
+
+    assert.deepEqual({a:1}, subject.get("radio1"));
+  });
+
+  it("returns null when service is not found", function(){
+    var subject = this.subject;
+
+    assert.equal(null, subject.get("NOSERVICE"));
+  });
+});
+
 describe("on eventstream", function(){
   beforeEach(function() {
     var noOp = function(){},
