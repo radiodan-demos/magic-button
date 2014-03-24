@@ -1,4 +1,5 @@
-var utils = require("radiodan-client").utils,
+var eventSource = require("express-eventsource"),
+    utils = require("radiodan-client").utils,
     logger = utils.logger(__filename);
 
 module.exports = routes;
@@ -8,12 +9,24 @@ function routes(app, radiodan, bbcServices) {
       mainPlayer     = radiodan.player.get("main"),
       announcePlayer = radiodan.player.get("announcer"),
       audio          = radiodan.audio.get("default"),
+      eventStream    = eventSource(),
       currentServiceId;
 
+    app.use("/events", eventStream.middleware());
     app.use("/assets", require("serve-static")(__dirname + "/static"));
     app.get("/playing", playService);
     app.get("/", showIndex);
 
+    // Broadcast along event stream
+    bbcServices.on('nowPlaying', function (service, data) {
+      eventStream.send(data, 'nowPlaying');
+    });
+
+    bbcServices.on('liveText', function (service, data) {
+      eventStream.send(data, 'liveText');
+    });
+
+    // Route implementations
     function showIndex(req, res) {
       var currentService = bbcServices.cache[currentServiceId],
           nowPlaying = null,
