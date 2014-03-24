@@ -10,7 +10,8 @@ function routes(app, radiodan, eventStream, bbcServices) {
       audio          = radiodan.audio.get("default"),
       currentServiceId;
 
-    app.use("/assets", require("serve-static")(__dirname + "/static"));
+    app.use("/assets", require("serve-static")(__dirname + "/static/"));
+
     app.get("/playing", playService);
     app.get("/", showIndex);
 

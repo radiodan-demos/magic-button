@@ -1,11 +1,14 @@
 console.log('Core app started');
 
-var audio = radiodan.audio.create('default');
+var volume = require('./controls/volume')('default');
+var volumeUi = require('./ui/volume')('.volume input');
 
-var volEl = document.querySelector('.volume input');
-volEl.addEventListener('click', function (evt) {
-  var value = volEl.value;
-  audio.volume({ value: value });
+volume.on('volume', function (value) {
+  volumeUi.set({ volume: value });
+});
+
+volumeUi.on('volume', function (value) {
+  volume.set({ value: value });
 });
 
 var eventSource = new EventSource('/events');
