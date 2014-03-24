@@ -28,8 +28,8 @@ function routes(app, radiodan, bbcServices) {
 
   function avoid(req, res) {
     bbcServices.ready.then(function() {
-      var radio1 = bbcServices.cache["radio1"].audioStream[0].url,
-          radio4 = bbcServices.cache["radio4/fm"].audioStream[0].url;
+      var radio1 = bbcServices.get("radio1").audioStreams[0].url,
+          radio4 = bbcServices.get("radio4").audioStreams[0].url;
 
       mainPlayer.add({playlist: [radio1], clear: true})
         .then(mainPlayer.play)
