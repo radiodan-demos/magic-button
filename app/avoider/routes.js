@@ -1,16 +1,20 @@
-var utils = require("radiodan-client").utils,
-    logger = utils.logger(__filename);
+var utils    = require("radiodan-client").utils,
+    logger   = utils.logger(__filename);
 
 module.exports = routes;
 
-function routes(app, radiodan, bbcServices) {
+function routes(app, radiodan, bbcServices, Settings) {
   var avoidPlayer    = radiodan.player.get("avoider"),
       mainPlayer     = radiodan.player.get("main"),
       announcePlayer = radiodan.player.get("announcer"),
       Avoider        = require("./avoider")(
           bbcServices, mainPlayer, avoidPlayer
       ),
-      settings       = require("./settings").create();
+      settings       = Settings.build(
+        "avoider",
+        { station: false, avoidType: "programme" }
+      );
+
 
     app.get("/", index);
     app.get("/avoid", avoid);

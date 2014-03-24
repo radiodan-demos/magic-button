@@ -1,20 +1,21 @@
 /* globals describe, it, before */
 "use strict";
 
-var chai    = require("chai"),
-    assert  = chai.assert,
-    swig    = require("swig"),
-    sinon   = require("sinon"),
-    request = require("supertest"),
-    express = require("express"),
-    routes  = require("../../app/avoider/routes"),
-    mockRD  = { player: {get: function(){}} },
-    app     = express();
+var chai     = require("chai"),
+    assert   = chai.assert,
+    swig     = require("swig"),
+    sinon    = require("sinon"),
+    request  = require("supertest"),
+    express  = require("express"),
+    routes   = require("../../app/avoider/routes"),
+    settings = require("../../lib/settings").create({ inMemoryOnly: true }),
+    mockRD   = { player: {get: function(){}} },
+    app      = express();
 
 app.engine("html", swig.renderFile);
 app.set("view engine", "html");
 
-app.use("/", routes(express.Router(), mockRD));
+app.use("/", routes(express.Router(), mockRD, {}, settings));
 
 var utils = require("radiodan-client").utils;
 

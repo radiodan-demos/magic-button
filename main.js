@@ -4,6 +4,7 @@ var express        = require("express"),
     swig           = require("swig"),
     radiodanClient = require("radiodan-client"),
     bbcServices    = require("./lib/bbc-services").create().connect(),
+    Settings       = require("./lib/settings").create(),
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
     port           = (process.env.PORT || 5000),
@@ -41,10 +42,14 @@ app.use("/events", eventStream.middleware());
 
 app.use("/radiodan", radiodanClient.middleware());
 app.use("/avoider",
-  require("./app/avoider/routes")(express.Router(), radiodan, bbcServices)
+  require("./app/avoider/routes")(
+    express.Router(), radiodan, bbcServices, Settings
+  )
 );
 app.use("/",
-  require("./app/core/routes")(express.Router(), radiodan, eventStream, bbcServices)
+  require("./app/core/routes")(
+    express.Router(), radiodan, eventStream, bbcServices
+  )
 );
 
 http.createServer(app).listen(port);

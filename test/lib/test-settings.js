@@ -8,13 +8,16 @@ var chai = require("chai"),
 
 var utils = require("radiodan-client").utils;
 
-var Settings = require("../../app/avoider/settings");
+var Settings = require("../../lib/settings");
 
 chai.use(chaiAsPromised);
 
 beforeEach(function() {
   var options  = { inMemoryOnly: true };
-  this.subject = Settings.create(options);
+  this.subject = Settings.create(options).build(
+    "avoider",
+    { station: false, avoidType: "programme" }
+  );
 });
 
 describe("settings", function(){
@@ -38,7 +41,7 @@ describe("settings", function(){
     get = subject.set(data).then(subject.get);
 
     assert.isFulfilled(get).then(function(settings){
-      assert.deepEqual(data, settings);
+      assert.deepEqual(settings, data);
     }).then(done,done);
   });
 
@@ -48,8 +51,8 @@ describe("settings", function(){
 
     assert.isFulfilled(settingsPromise).then(function(settings) {
       assert.deepEqual(
-        { station: false, avoidType: "programme" },
-        settings
+        settings,
+        { station: false, avoidType: "programme" }
       );
     }).then(done, done);
   });
