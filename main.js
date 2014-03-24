@@ -1,4 +1,5 @@
 var express        = require("express"),
+    eventSource    = require("express-eventsource"),
     http           = require("http"),
     swig           = require("swig"),
     radiodanClient = require("radiodan-client"),
@@ -6,7 +7,8 @@ var express        = require("express"),
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
     port           = (process.env.PORT || 5000),
-    app            = module.exports = express();
+    app            = module.exports = express(),
+    eventStream    = eventSource();
 
 if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);
@@ -33,12 +35,16 @@ app.use(require("method-override")())
 app.use(require("serve-static")("public"));
 app.use(require("morgan")("dev"));
 
+// Shared eventsource
+// To send data call: eventStream.send(dataObj, 'eventName');
+app.use("/events", eventStream.middleware());
+
 app.use("/radiodan", radiodanClient.middleware());
 app.use("/avoider",
   require("./app/avoider/routes")(express.Router(), radiodan, bbcServices)
 );
 app.use("/",
-  require("./app/core/routes")(express.Router(), radiodan, bbcServices)
+  require("./app/core/routes")(express.Router(), radiodan, eventStream, bbcServices)
 );
 
 http.createServer(app).listen(port);
