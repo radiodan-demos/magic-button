@@ -51,11 +51,11 @@ function routes(app, radiodan, eventStream, bbcServices) {
 
     function playService(req, res) {
       var id  = req.query.id,
-          service = bbcServices.cache[id],
+          service = bbcServices.get(id),
           url;
 
-      if (service && service.streams && service.streams[0]) {
-        url = service.streams[0].url;
+      if (service) {
+        url = service.audioStreams[0].url;
       }
 
       if (url) {
