@@ -19,10 +19,6 @@ function routes(app, radiodan, eventStream, bbcServices) {
       eventStream.send(data, 'nowPlaying');
     });
 
-    bbcServices.on('liveText', function (service, data) {
-      eventStream.send(data, 'liveText');
-    });
-
     // Route implementations
     function showIndex(req, res) {
       var currentService = bbcServices.cache[currentServiceId],
