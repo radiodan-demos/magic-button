@@ -25,13 +25,12 @@ describe("cache", function(){
 
 describe("fetch service data", function(){
   beforeEach(function(){
-    var data    = {radio1:{a:1}, radio2:{b:2}},
-        subject = BBCServices.create();
+    var subject = BBCServices.create();
 
-    subject.cache = data;
+    subject.cacheStore("radio1", "a", 1);
+    subject.cacheStore("radio2", "b", 2);
 
-    this.subject  = subject;
-    this.data     = data;
+    this.subject = subject;
   });
 
   it("returns data for all services", function(){
