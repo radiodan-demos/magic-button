@@ -2,43 +2,53 @@ var EventEmitter  = require("events").EventEmitter,
     logger        = require("radiodan-client").utils.logger(__filename),
     musicServices = ["radio1","1xtra","radio2","radio3","6music"];
 
-module.exports = function(bbcServices, mainPlayer, avoidPlayer) {
+module.exports = function(eventBus, states, bbcServices) {
   return { create: create };
 
-  function create(service, avoidTopic, myLogger) {
-    var instance = new EventEmitter,
-        avoidTopic;
+  function create(from, to, avoidTopic, myLogger) {
+    var instance = new EventEmitter;
+
+    avoidTopic = avoidTopic || topicFromService(from);
 
     logger = myLogger || logger;
 
-    instance.avoidTopic = avoidTopic || topicFromService(service);
     instance.avoid = avoid;
+    instance.cancel = cancel;
+
+    states.register('avoid', {
+      enter: function (players, services) {
+        players.main.stop();
+        players.avoider
+               .add({ clear: true, playlist: services.get(to) })
+               .then(players.avoider.play);
+      },
+      exit: function (players) {
+        logger.info('exit state');
+        players.main.play();
+        players.avoider.stop();
+      }
+    });
 
     return instance;
 
     function avoid() {
-      var avoidingEvent = service+"/"+avoidTopic;
+      var avoidingEvent = from + "." + avoidTopic;
 
       logger.debug(
-        "Begin avoiding", service,
-        "duration", avoidTopic,
+        "Begin avoiding", from,
+        "avoidTopic", avoidTopic,
         "event", avoidingEvent
       );
 
-      //start avoiding
-      mainPlayer.stop(); // pause if it's not radio
-      avoidPlayer.play();
-      instance.emit("begin", service);
+      states.enter('avoid');
+      logger.info('avoiding enter');
 
-      bbcServices.once(avoidingEvent, function() {
-        //stop avoiding
-        avoidPlayer.stop(); // pause if it's not radio
-        mainPlayer.play();
-
-        logger.debug("end avoiding");
-        instance.emit("end", service);
+      bbcServices.once(avoidingEvent, function () {
+        logger.info('avoiding finish');
+        states.exit('avoid');
       });
     }
+
   }
 };
 

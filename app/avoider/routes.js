@@ -3,14 +3,11 @@ var utils = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, radiodan, bbcServices) {
-  var avoidPlayer    = radiodan.player.get("avoider"),
-      mainPlayer     = radiodan.player.get("main"),
-      announcePlayer = radiodan.player.get("announcer"),
-      Avoider        = require("./avoider")(
-          bbcServices, mainPlayer, avoidPlayer
+function routes(app, eventBus, states, bbcServices) {
+  var Avoider  = require("./avoider")(
+          eventBus, states, bbcServices
       ),
-      settings       = require("./settings").create();
+      settings = require("./settings").create();
 
     app.get("/", index);
     app.get("/avoid", avoid);
@@ -27,20 +24,7 @@ function routes(app, radiodan, bbcServices) {
   }
 
   function avoid(req, res) {
-    bbcServices.ready.then(function() {
-      var radio1 = bbcServices.get("radio1").audioStreams[0].url,
-          radio4 = bbcServices.get("radio4").audioStreams[0].url;
-
-      mainPlayer.add({playlist: [radio1], clear: true})
-        .then(mainPlayer.play)
-        .then(function() {
-          avoidPlayer.add({playlist: [radio4], clear: true});
-        })
-        .then(function() {
-          setTimeout(Avoider.create("radio1").avoid, 5000);
-        });
-
-      res.redirect("./");
-    }, utils.failedPromiseHandler(logger));
+    Avoider.create("radio1", "radio4").avoid();
+    res.redirect("./");
   }
 }

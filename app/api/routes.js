@@ -3,9 +3,10 @@ var utils = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, eventBus, radiodan) {
+function routes(app, eventBus, radiodan, states) {
 
-  var audio = radiodan.audio.get('default');
+  var audio  = radiodan.audio.get('default'),
+      player = radiodan.player.get('main');
 
   /*
     /volume/value/60
@@ -46,9 +47,25 @@ function routes(app, eventBus, radiodan) {
          .then(null, utils.failedPromiseHandler(logger));
   }
 
+  function registerStateForServiceId(id) {
+    var stateId = 'radio-' + id;
+    states.register(stateId, {
+      enter: function (players, services) {
+        players.main.add({ clear: true, playlist: services.get(id) })
+              .then(players.main.play);
+      },
+      exit: function (players, services) {
+        players.main.stop();
+      }
+    });
+    return stateId;
+  }
+
   function changeService(req, res) {
     var id = req.params.id;
-    eventBus.emit('service.change', id, 'main');
+    var stateId = registerStateForServiceId(id);
+    //eventBus.emit('service.change', id, player);
+    states.enter(stateId);
     res.send(200);
   }
 
