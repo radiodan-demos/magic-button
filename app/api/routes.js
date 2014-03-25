@@ -3,39 +3,82 @@ var utils = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, radiodan, eventStream, bbcServices) {
-  var avoidPlayer    = radiodan.player.get("avoider"),
-      mainPlayer     = radiodan.player.get("main"),
-      announcePlayer = radiodan.player.get("announcer"),
-      audio          = radiodan.audio.get("default"),
-      currentServiceId;
+function routes(app, radiodan) {
 
-    app.get("/playing", playService);
+  var audio = radiodan.audio.get('default');
 
-    // Broadcast along event stream
-    bbcServices.on('nowPlaying', function (service, data) {
-      eventStream.send(data, 'nowPlaying');
-    });
+  // /volume/value/N
+  // /volume/diff/N
+  app.get('/volume', getVolume);
+  app.post('/volume/:action/:value', changeVolume);
 
-    function playService(req, res) {
-      var id  = req.query.id,
-          service = bbcServices.get(id),
-          url;
+  function getVolume(req, res) {
+    audio.status()
+         .then(
+          respondWithSuccess(req, res),
+          utils.failedPromiseHandler(logger)
+         );
+  }
 
-      if (service) {
-        url = service.audioStreams[0].url;
-      }
+  function changeVolume(req, res) {
+    var action = req.params.action,
+        value  = req.params.value,
+        params = {};
 
-      if (url) {
-        mainPlayer.clear();
-        mainPlayer.add({ playlist: [url] });
-        mainPlayer.play();
+    params[action] = value;
 
-        currentServiceId = id;
-      }
+    audio.volume(params)
+         .then(
+            respondWithSuccess(req, res),
+            respondWithError(req, res)
+          )
+         .then(null, utils.failedPromiseHandler(logger));
+  }
 
-      res.redirect('back');
+  function respondWithSuccess(req, res) {
+    return function (result) {
+      res.json(result);
     };
+  }
+
+  function respondWithError(req, res) {
+    return function (error) {
+      res.json(500, { error: error });
+    };
+  }
+
+  // var avoidPlayer    = radiodan.player.get("avoider"),
+  //     mainPlayer     = radiodan.player.get("main"),
+  //     announcePlayer = radiodan.player.get("announcer"),
+  //     audio          = radiodan.audio.get("default"),
+  //     currentServiceId;
+
+  //   app.get("/playing", playService);
+
+  //   // Broadcast along event stream
+  //   bbcServices.on('nowPlaying', function (service, data) {
+  //     eventStream.send(data, 'nowPlaying');
+  //   });
+
+  //   function playService(req, res) {
+  //     var id  = req.query.id,
+  //         service = bbcServices.get(id),
+  //         url;
+
+  //     if (service) {
+  //       url = service.audioStreams[0].url;
+  //     }
+
+  //     if (url) {
+  //       mainPlayer.clear();
+  //       mainPlayer.add({ playlist: [url] });
+  //       mainPlayer.play();
+
+  //       currentServiceId = id;
+  //     }
+
+  //     res.redirect('back');
+  //   };
 
     return app;
 }
