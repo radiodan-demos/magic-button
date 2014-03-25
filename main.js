@@ -43,8 +43,11 @@ app.use("/radiodan", radiodanClient.middleware());
 app.use("/avoider",
   require("./app/avoider/routes")(express.Router(), radiodan, bbcServices)
 );
+app.use("/api",
+  require("./app/api/routes")(express.Router(), radiodan, eventStream, bbcServices)
+);
 app.use("/",
-  require("./app/core/routes")(express.Router(), radiodan, eventStream, bbcServices)
+  require("./app/ui/routes")(express.Router(), radiodan, eventStream, bbcServices)
 );
 
 http.createServer(app).listen(port);
