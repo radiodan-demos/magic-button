@@ -9,7 +9,8 @@ var express        = require("express"),
     radiodan       = radiodanClient.create(),
     port           = (process.env.PORT || 5000),
     app            = module.exports = express(),
-    eventStream    = eventSource();
+    eventStream    = eventSource(),
+    eventBus       = new require('events').EventEmitter();
 
 if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);
@@ -40,17 +41,16 @@ app.use(require("morgan")("dev"));
 // To send data call: eventStream.send(dataObj, 'eventName');
 app.use("/events", eventStream.middleware());
 
-app.use("/radiodan", radiodanClient.middleware());
 app.use("/avoider",
   require("./app/avoider/routes")(
     express.Router(), radiodan, bbcServices, Settings
   )
 );
 app.use("/api",
-  require("./app/api/routes")(express.Router(), radiodan, eventStream, bbcServices)
+  require("./app/api/routes")(express.Router(), radiodan)
 );
 app.use("/",
-  require("./app/ui/routes")(express.Router(), radiodan, eventStream, bbcServices)
+  require("./app/ui/routes")(express.Router())
 );
 
 http.createServer(app).listen(port);
