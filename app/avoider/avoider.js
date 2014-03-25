@@ -5,48 +5,43 @@ var EventEmitter  = require("events").EventEmitter,
 module.exports = function(eventBus, states, bbcServices) {
   return { create: create };
 
-  function create(from, to, avoidTopic, myLogger) {
+  function create(to, avoidTopic, myLogger) {
     var instance = new EventEmitter;
-
-    avoidTopic = avoidTopic || topicFromService(from);
 
     logger = myLogger || logger;
 
     instance.avoid = avoid;
-    instance.cancel = cancel;
-
-    states.register('avoid', {
-      enter: function (players, services) {
-        players.main.stop();
-        players.avoider
-               .add({ clear: true, playlist: services.get(to) })
-               .then(players.avoider.play);
-      },
-      exit: function (players) {
-        logger.info('exit state');
-        players.main.play();
-        players.avoider.stop();
-      }
-    });
+    // instance.cancel = cancel;
 
     return instance;
 
     function avoid() {
-      var avoidingEvent = from + "." + avoidTopic;
+      states.register('avoid', {
+        enter: function (players, services) {
+          var currentId = services.current();
+          var avoidingEvent = currentId + "." + (avoidTopic || topicFromService(currentId));
 
-      logger.debug(
-        "Begin avoiding", from,
-        "avoidTopic", avoidTopic,
-        "event", avoidingEvent
-      );
+          logger.debug('avoidingEvent', avoidingEvent);
+
+          bbcServices.once(avoidingEvent, function () {
+            logger.info('avoiding finish');
+            states.exit('avoid');
+          });
+
+          players.main.stop();
+          players.avoider
+                 .add({ clear: true, playlist: services.get(to) })
+                 .then(players.avoider.play);
+        },
+        exit: function (players) {
+          logger.info('exit state');
+          players.main.play();
+          players.avoider.stop();
+        }
+      });
 
       states.enter('avoid');
       logger.info('avoiding enter');
-
-      bbcServices.once(avoidingEvent, function () {
-        logger.info('avoiding finish');
-        states.exit('avoid');
-      });
     }
 
   }

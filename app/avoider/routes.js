@@ -24,7 +24,7 @@ function routes(app, eventBus, states, bbcServices) {
   }
 
   function avoid(req, res) {
-    Avoider.create("radio1", "radio4").avoid();
+    Avoider.create("radio4").avoid();
     res.redirect("./");
   }
 }

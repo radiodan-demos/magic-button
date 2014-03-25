@@ -53,9 +53,11 @@ function routes(app, eventBus, radiodan, states) {
       enter: function (players, services) {
         players.main.add({ clear: true, playlist: services.get(id) })
               .then(players.main.play);
+        services.change(id);
       },
       exit: function (players, services) {
         players.main.stop();
+        // services.change(null);
       }
     });
     return stateId;
