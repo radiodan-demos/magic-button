@@ -10,44 +10,12 @@ function routes(app, radiodan, eventStream, bbcServices) {
       audio          = radiodan.audio.get("default"),
       currentServiceId;
 
-    app.use("/assets", require("serve-static")(__dirname + "/static/"));
-
     app.get("/playing", playService);
-    app.get("/", showIndex);
 
     // Broadcast along event stream
     bbcServices.on('nowPlaying', function (service, data) {
       eventStream.send(data, 'nowPlaying');
     });
-
-    // Route implementations
-    function showIndex(req, res) {
-      var currentService = bbcServices.cache[currentServiceId],
-          nowPlaying = null,
-          nowAndNext = null;
-
-      if (currentService && currentService.nowPlaying) {
-        nowPlaying = currentService.nowPlaying;
-      }
-
-      if (currentService && currentService.nowAndNext) {
-        nowAndNext = currentService.nowAndNext;
-      }
-
-      audio.status()
-           .then(function (status) {
-              res.render(
-                __dirname+"/views/index",
-                {
-                  currentService : currentService,
-                  services       : bbcServices.cache,
-                  nowPlaying     : nowPlaying,
-                  nowAndNext     : nowAndNext,
-                  volume         : status.volume
-                }
-              );
-           });
-    }
 
     function playService(req, res) {
       var id  = req.query.id,
