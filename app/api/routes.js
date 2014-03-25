@@ -7,10 +7,17 @@ function routes(app, eventBus, radiodan) {
 
   var audio = radiodan.audio.get('default');
 
-  // /volume/value/N
-  // /volume/diff/N
+  /*
+    /volume/value/60
+    /volume/diff/-10
+  */
   app.get('/volume', getVolume);
   app.post('/volume/:action/:value', changeVolume);
+
+  /*
+    /radio/service/radio1
+  */
+  app.post('/radio/service/:id', changeService);
 
   function getVolume(req, res) {
     audio.status()
@@ -37,6 +44,12 @@ function routes(app, eventBus, radiodan) {
             respondWithError(req, res)
           )
          .then(null, utils.failedPromiseHandler(logger));
+  }
+
+  function changeService(req, res) {
+    var id = req.params.id;
+    eventBus.emit('service.change', id, 'main');
+    res.send(200);
   }
 
   function respondWithSuccess(req, res) {

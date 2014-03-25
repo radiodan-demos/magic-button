@@ -2,12 +2,12 @@ var express        = require("express"),
     http           = require("http"),
     swig           = require("swig"),
     radiodanClient = require("radiodan-client"),
-    bbcServices    = require("./lib/bbc-services").create().connect(),
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
     port           = (process.env.PORT || 5000),
     app            = module.exports = express(),
-    eventBus       = require('./lib/event-bus').create();
+    eventBus       = require('./lib/event-bus').create(),
+    Playlists      = require('./lib/playlists');
 
 if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);
@@ -35,7 +35,7 @@ app.use(require("serve-static")("public"));
 app.use(require("morgan")("dev"));
 
 app.use("/avoider",
-  require("./app/avoider/routes")(express.Router(), radiodan, bbcServices)
+  require("./app/avoider/routes")(express.Router(), radiodan)
 );
 app.use("/api",
   require("./app/api/routes")(express.Router(), eventBus, radiodan)
@@ -46,6 +46,8 @@ app.use("/events",
 app.use("/",
   require("./app/ui/routes")(express.Router())
 );
+
+Playlists.create(eventBus, radiodan);
 
 http.createServer(app).listen(port);
 logger.info("Started server on port", port);
