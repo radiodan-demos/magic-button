@@ -2,7 +2,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     browserify: {
-      'public/assets/js/app.js': ['app/core/static/js/app.js']
+      'public/assets/js/app.js': ['app/ui/static/js/app.js']
     },
     uglify : {
       js: {
