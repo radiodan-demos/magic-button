@@ -2,13 +2,17 @@ var express        = require("express"),
     http           = require("http"),
     swig           = require("swig"),
     radiodanClient = require("radiodan-client"),
+<<<<<<< HEAD
     bbcServices    = require("./lib/bbc-services").create().connect(),
     Settings       = require("./lib/settings").create(),
+=======
+>>>>>>> Play a service
     logger         = radiodanClient.utils.logger(__filename),
     radiodan       = radiodanClient.create(),
     port           = (process.env.PORT || 5000),
     app            = module.exports = express(),
-    eventBus       = require('./lib/event-bus').create();
+    eventBus       = require('./lib/event-bus').create(),
+    Playlists      = require('./lib/playlists');
 
 if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);
@@ -49,6 +53,8 @@ app.use("/events",
 app.use("/",
   require("./app/ui/routes")(express.Router())
 );
+
+Playlists.create(eventBus, radiodan);
 
 http.createServer(app).listen(port);
 logger.info("Started server on port", port);
