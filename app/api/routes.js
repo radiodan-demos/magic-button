@@ -3,7 +3,7 @@ var utils = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, radiodan) {
+function routes(app, eventBus, radiodan) {
 
   var audio = radiodan.audio.get('default');
 
@@ -28,6 +28,10 @@ function routes(app, radiodan) {
     params[action] = value;
 
     audio.volume(params)
+         .then(function (result) {
+          eventBus.emit('audio.volume', result);
+          return result;
+         })
          .then(
             respondWithSuccess(req, res),
             respondWithError(req, res)
