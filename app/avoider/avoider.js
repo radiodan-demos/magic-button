@@ -28,6 +28,8 @@ module.exports = function(eventBus, states, bbcServices) {
             states.exit('avoid');
           });
 
+          eventBus.emit('avoider.start', { from: currentId, to: to });
+
           players.main.stop();
           players.avoider
                  .add({ clear: true, playlist: services.get(to) })
@@ -37,6 +39,7 @@ module.exports = function(eventBus, states, bbcServices) {
           logger.info('exit state');
           players.main.play();
           players.avoider.stop();
+          eventBus.emit('avoider.stop', { from: to, to: currentId });
         }
       });
 
