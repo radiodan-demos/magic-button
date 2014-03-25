@@ -34,12 +34,15 @@ module.exports = function(eventBus, states, bbcServices) {
           players.avoider
                  .add({ clear: true, playlist: services.get(to) })
                  .then(players.avoider.play);
+
+          services.change(to);
         },
         exit: function (players) {
           logger.info('exit state');
           players.main.play();
           players.avoider.stop();
           eventBus.emit('avoider.stop', { from: to, to: currentId });
+          services.change(currentId);
         }
       });
 
