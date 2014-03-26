@@ -22,6 +22,13 @@ module.exports = function(states, bbcServices) {
 
     function startAvoiding (state, players, services, emit) {
       currentId = services.current();
+
+      if (!currentId) {
+        logger.warn('No current service -- will not avoid');
+        state.exit();
+        return;
+      }
+
       instance.avoidTopic = (instance.avoidTopic || topicFromService(currentId));
       var avoidingEvent = currentId + "." + instance.avoidTopic;
 

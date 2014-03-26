@@ -3,7 +3,7 @@ var utils = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, eventBus, radiodan, states) {
+function routes(app, eventBus, radiodan, states, services, bbcServices) {
 
   var audio  = radiodan.audio.get('default');
 
@@ -18,10 +18,27 @@ function routes(app, eventBus, radiodan, states) {
     /radio/service/radio1
   */
   app.post('/service/:id', changeService);
+  app.get('/service', function (req, res) {
+    var current = services.current(),
+        data = {};
+    if (current) {
+      data = bbcServices.get(current);
+    }
+    res.json(200, data);
+  });
+  app.get('/services', listServices);
+
+  function listServices(req, res) {
+    bbcServices.ready
+               .then(function () {
+                  res.json(bbcServices.get());
+               });
+  }
 
   /*
     Change state
   */
+  app.put('/power', start); // tee hee
   app.post('/power', start);
   app.delete('/power', standby);
 
@@ -31,14 +48,16 @@ function routes(app, eventBus, radiodan, states) {
       clear: true,
       playlist: services.get('6music')
     }).then(players.main.play);
+    services.change('6music');
   };
 
   var powerOff = function (states, players, services, emit) {
-      emit('power.off');
-      players.main.stop();
-      players.avoid.stop();
-      players.speak.stop();
-    };
+    emit('power.off');
+    players.main.clear();
+    players.avoid.clear();
+    players.speak.clear();
+    services.change(null);
+  };
 
   function start(req, res) {
     states.create({
