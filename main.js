@@ -44,8 +44,8 @@ app.use("/avoider",
     express.Router(), radiodan, bbcServices, states, Settings
   )
 );
-app.use("/api",
-  require("./app/api/routes")(express.Router(), eventBus, radiodan, states)
+app.use("/radio",
+  require("./app/radio/routes")(express.Router(), eventBus, radiodan, states)
 );
 app.use("/events",
   require("./app/events/routes")(express.Router(), eventBus, bbcServices)

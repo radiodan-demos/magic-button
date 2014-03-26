@@ -17,13 +17,13 @@ function routes(app, eventBus, radiodan, states) {
   /*
     /radio/service/radio1
   */
-  app.post('/radio/service/:id', changeService);
+  app.post('/service/:id', changeService);
 
   /*
     Change state
   */
-  app.post('/radio/power', start);
-  app.delete('/radio/power', standby);
+  app.post('/power', start);
+  app.delete('/power', standby);
 
   var powerOn = function (states, players, services, emit) {
     emit('power.on');
