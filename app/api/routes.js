@@ -5,8 +5,7 @@ module.exports = routes;
 
 function routes(app, eventBus, radiodan, states) {
 
-  var audio  = radiodan.audio.get('default'),
-      player = radiodan.player.get('main');
+  var audio  = radiodan.audio.get('default');
 
   /*
     /volume/value/60

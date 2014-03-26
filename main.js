@@ -48,7 +48,7 @@ app.use("/api",
   require("./app/api/routes")(express.Router(), eventBus, radiodan, states)
 );
 app.use("/events",
-  require("./app/events/routes")(express.Router(), eventBus)
+  require("./app/events/routes")(express.Router(), eventBus, bbcServices)
 );
 app.use("/",
   require("./app/ui/routes")(express.Router())
