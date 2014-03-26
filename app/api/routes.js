@@ -19,6 +19,47 @@ function routes(app, eventBus, radiodan, states) {
   */
   app.post('/radio/service/:id', changeService);
 
+  /*
+    Change state
+  */
+  app.post('/radio/power', start);
+  app.delete('/radio/power', standby);
+
+  var powerOn = function (states, players, services, emit) {
+    emit('power.on');
+    players.main.add({
+      clear: true,
+      playlist: services.get('6music')
+    }).then(players.main.play);
+  };
+
+  var powerOff = function (states, players, services, emit) {
+      emit('power.off');
+      players.main.stop();
+      players.avoid.stop();
+      players.speak.stop();
+    };
+
+  function start(req, res) {
+    states.create({
+      name: 'powerOn',
+      enter: powerOn,
+      exit:  powerOff
+    }).enter();
+
+    res.send(200);
+  }
+
+  function standby(req, res) {
+    states.create({
+      name: 'powerOff',
+      enter: powerOff,
+      exit:  function () {}
+    }).enter();
+
+    res.send(200);
+  }
+
   function getVolume(req, res) {
     audio.status()
          .then(
