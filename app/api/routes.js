@@ -47,9 +47,9 @@ function routes(app, eventBus, radiodan, states) {
          .then(null, utils.failedPromiseHandler(logger));
   }
 
-  function registerStateForServiceId(id) {
-    var stateId = 'radio-' + id;
-    states.register(stateId, {
+  function createStateForServiceId(id) {
+    var state = states.create({
+      name: 'changeService',
       enter: function (players, services) {
         players.main.add({ clear: true, playlist: services.get(id) })
               .then(players.main.play);
@@ -57,17 +57,15 @@ function routes(app, eventBus, radiodan, states) {
       },
       exit: function (players, services) {
         players.main.stop();
-        // services.change(null);
       }
     });
-    return stateId;
+    return state;
   }
 
   function changeService(req, res) {
     var id = req.params.id;
-    var stateId = registerStateForServiceId(id);
-    //eventBus.emit('service.change', id, player);
-    states.enter(stateId);
+    var state = createStateForServiceId(id);
+    state.enter();
     res.send(200);
   }
 

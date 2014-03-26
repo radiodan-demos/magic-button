@@ -16,16 +16,18 @@ module.exports = function(eventBus, states, bbcServices) {
     return instance;
 
     function avoid() {
-      states.register('avoid', {
+      var currentId;
+      var state = states.create({
+        name: 'avoider',
         enter: function (players, services) {
-          var currentId = services.current();
+          currentId = services.current();
           var avoidingEvent = currentId + "." + (avoidTopic || topicFromService(currentId));
 
           logger.debug('avoidingEvent', avoidingEvent);
 
           bbcServices.once(avoidingEvent, function () {
             logger.info('avoiding finish');
-            states.exit('avoid');
+            state.exit();
           });
 
           eventBus.emit('avoider.start', { from: currentId, to: to });
@@ -37,7 +39,7 @@ module.exports = function(eventBus, states, bbcServices) {
 
           services.change(to);
         },
-        exit: function (players) {
+        exit: function (players, services) {
           logger.info('exit state');
           players.main.play();
           players.avoider.stop();
@@ -46,7 +48,7 @@ module.exports = function(eventBus, states, bbcServices) {
         }
       });
 
-      states.enter('avoid');
+      state.enter();
       logger.info('avoiding enter');
     }
 

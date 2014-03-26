@@ -8,9 +8,9 @@ var express        = require("express"),
     app            = module.exports = express(),
     eventBus       = require('./lib/event-bus').create(),
     bbcServices    = require("./lib/bbc-services").create().connect(),
-    playlists      = require('./lib/playlists').create(eventBus, radiodan, bbcServices),
+    services      = require('./lib/services').create(eventBus, radiodan, bbcServices),
     config         = require('./radiodan-config.json'),
-    states         = require('./lib/states').create(config, radiodan, playlists);
+    states         = require('./lib/states').create(config, radiodan, services);
 
 if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);
