@@ -22,7 +22,11 @@ describe("setup", function(){
 
 describe("on avoid", function(){
   beforeEach(function() {
-    this.services    = { change: sinon.spy(), current: sinon.spy(), get: sinon.spy() };
+    this.services    = {
+      change: sinon.spy(),
+      current: sinon.stub().returns("radio1"),
+      get: sinon.spy()
+    };
     this.bbcServices = { once: sinon.spy() };
     function createResolvedStub() {
       return sinon.stub().returns(utils.promise.resolve());
