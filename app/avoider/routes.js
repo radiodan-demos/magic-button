@@ -7,10 +7,12 @@ function routes(app, eventBus, states, bbcServices) {
   var Avoider  = require("./avoider")(
           eventBus, states, bbcServices
       ),
-      settings = require("./settings").create();
+      settings = require("./settings").create(),
+      avoider;
 
     app.get("/", index);
-    app.get("/avoid", avoid);
+    app.post("/", avoid);
+    app.delete("/", cancel);
 
     return app;
 
@@ -24,7 +26,19 @@ function routes(app, eventBus, states, bbcServices) {
   }
 
   function avoid(req, res) {
-    Avoider.create("radio4").avoid();
+    if (avoider) {
+      avoider.cancel();
+    }
+    avoider = Avoider.create("radio4");
+    avoider.avoid();
+    res.redirect("./");
+  }
+
+  function cancel(req, res) {
+    logger.info('/avoid', avoider);
+    if (avoider) {
+      avoider.cancel();
+    }
     res.redirect("./");
   }
 }

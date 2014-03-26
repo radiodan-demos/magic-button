@@ -6,18 +6,19 @@ module.exports = function(eventBus, states, bbcServices) {
   return { create: create };
 
   function create(to, avoidTopic, myLogger) {
-    var instance = new EventEmitter;
+    var instance = new EventEmitter,
+        state;
 
     logger = myLogger || logger;
 
     instance.avoid = avoid;
-    // instance.cancel = cancel;
+    instance.cancel = cancel;
 
     return instance;
 
     function avoid() {
       var currentId;
-      var state = states.create({
+      state = states.create({
         name: 'avoider',
         enter: function (players, services) {
           currentId = services.current();
@@ -52,6 +53,12 @@ module.exports = function(eventBus, states, bbcServices) {
       logger.info('avoiding enter');
     }
 
+    function cancel() {
+      if (state) {
+        state.exit();
+        state = null;
+      }
+    }
   }
 };
 
