@@ -12,7 +12,10 @@ module.exports = function (app, eventBus, bbcServices) {
   });
 
   eventBus.on('*', function (eventName, args) {
-    eventStream.send(JSON.stringify(args), eventName);
+    if (args.length === 1) {
+      args = args[0];
+    }
+    eventStream.send(JSON.stringify({ topic: eventName, data: args }));
   });
 
   return app;
