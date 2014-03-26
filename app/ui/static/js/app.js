@@ -1,18 +1,17 @@
 console.log('Core app started');
 
-// var volume = require('./controls/volume')('default');
-// var volumeUi = require('./ui/volume')('.volume input');
+var volume = require('./controls/volume')('default');
+var volumeUi = require('./ui/volume')('.volume input');
 
-// volume.on('volume', function (value) {
-//   volumeUi.set({ volume: value });
-// });
+volume.on('volume', function (value) {
+  volumeUi.set({ volume: value });
+});
 
-// volumeUi.on('volume', function (value) {
-//   volume.set({ value: value });
-// });
+volumeUi.on('volume', function (value) {
+  volume.set({ value: value });
+});
 
 var eventSource = new EventSource('/events');
-window.e = eventSource;
 
 eventSource.addEventListener('nowPlaying', function (evt) {
   var data = JSON.parse(evt.data);

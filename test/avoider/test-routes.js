@@ -15,7 +15,7 @@ var chai     = require("chai"),
 app.engine("html", swig.renderFile);
 app.set("view engine", "html");
 
-app.use("/", routes(express.Router(), mockRD, {}, settings));
+app.use("/", routes(express.Router(), mockRD, {}, {}, settings));
 
 var utils = require("radiodan-client").utils;
 

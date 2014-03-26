@@ -4,7 +4,8 @@
 var chai = require("chai"),
     assert = chai.assert,
     chaiAsPromised = require("chai-as-promised"),
-    sinon  = require("sinon");
+    sinon  = require("sinon"),
+    EventEmitter = require('events').EventEmitter;
 
 var utils = require("radiodan-client").utils;
 
@@ -62,7 +63,8 @@ describe("on eventstream", function(){
         nullLog = {error: noOp, debug: noOp, warn: noOp};
 
     this.subject = BBCServices.create(nullLog),
-    this.eventMock = {};
+    this.eventMock = new EventEmitter();
+    this.eventMock.addEventListener = this.eventMock.on;
 
     this.subject.listenForEvents(this.eventMock);
   });
@@ -72,7 +74,7 @@ describe("on eventstream", function(){
         data = {service: "radio1", topic: "liveData", data: {"a": "b"}},
         cached;
 
-    this.eventMock.onmessage({data: JSON.stringify(data)});
+    this.eventMock.emit('message', {data: JSON.stringify(data)});
 
     cached = self.subject.cache["radio1"]["liveData"];
     assert.deepEqual(data.data, cached);
@@ -91,13 +93,13 @@ describe("on eventstream", function(){
       stationPromise.resolve();
     });
 
-    self.subject.once("1xtra/nowPlaying", function(emitData) {
+    self.subject.once("1xtra.nowPlaying", function(emitData) {
       assert.deepEqual(data.data, emitData);
 
       topicPromise.resolve();
     });
 
-    this.eventMock.onmessage({data: JSON.stringify(data)});
+    this.eventMock.emit('message', {data: JSON.stringify(data)});
 
     assert.isFulfilled(stationPromise.promise)
       .then(function(){
