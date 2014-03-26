@@ -10,7 +10,7 @@ var express        = require("express"),
     bbcServices    = require("./lib/bbc-services").create().connect(),
     services      = require('./lib/services').create(eventBus, radiodan, bbcServices),
     config         = require('./radiodan-config.json'),
-    states         = require('./lib/states').create(config, radiodan, services);
+    states         = require('./lib/states').create(config, radiodan, services, eventBus);
 
 if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);

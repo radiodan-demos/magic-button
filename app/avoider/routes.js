@@ -5,7 +5,7 @@ module.exports = routes;
 
 function routes(app, eventBus, states, bbcServices) {
   var Avoider  = require("./avoider")(
-          eventBus, states, bbcServices
+          states, bbcServices
       ),
       settings = require("./settings").create(),
       avoider;

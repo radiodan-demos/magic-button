@@ -2,51 +2,57 @@ var EventEmitter  = require("events").EventEmitter,
     logger        = require("radiodan-client").utils.logger(__filename),
     musicServices = ["radio1","1xtra","radio2","radio3","6music"];
 
-module.exports = function(eventBus, states, bbcServices) {
+module.exports = function(states, bbcServices) {
   return { create: create };
 
   function create(to, avoidTopic, myLogger) {
     var instance = new EventEmitter,
+        currentId,
         state;
 
     logger = myLogger || logger;
 
+    instance.startAvoiding = startAvoiding;
+    instance.stopAvoiding = stopAvoiding;
     instance.avoid = avoid;
     instance.cancel = cancel;
+    instance.avoidTopic = avoidTopic;
 
     return instance;
 
+    function startAvoiding (state, players, services, emit) {
+      currentId = services.current();
+      instance.avoidTopic = (instance.avoidTopic || topicFromService(currentId));
+      var avoidingEvent = currentId + "." + instance.avoidTopic;
+
+      bbcServices.once(avoidingEvent, function () {
+        state.exit();
+      });
+
+      emit('avoider.start', { from: currentId, to: to });
+
+      players.main.stop();
+      players.avoider
+             .add({ clear: true, playlist: services.get(to) })
+             .then(players.avoider.play);
+
+      services.change(to);
+    }
+
+    function stopAvoiding (state, players, services, emit) {
+      logger.info('exit state');
+      players.main.play();
+      players.avoider.stop();
+      emit('avoider.stop', { from: to, to: currentId });
+      instance.avoidTopic = null;
+      services.change(currentId);
+    }
+
     function avoid() {
-      var currentId;
       state = states.create({
         name: 'avoider',
-        enter: function (players, services) {
-          currentId = services.current();
-          var avoidingEvent = currentId + "." + (avoidTopic || topicFromService(currentId));
-
-          logger.debug('avoidingEvent', avoidingEvent);
-
-          bbcServices.once(avoidingEvent, function () {
-            logger.info('avoiding finish');
-            state.exit();
-          });
-
-          eventBus.emit('avoider.start', { from: currentId, to: to });
-
-          players.main.stop();
-          players.avoider
-                 .add({ clear: true, playlist: services.get(to) })
-                 .then(players.avoider.play);
-
-          services.change(to);
-        },
-        exit: function (players, services) {
-          logger.info('exit state');
-          players.main.play();
-          players.avoider.stop();
-          eventBus.emit('avoider.stop', { from: to, to: currentId });
-          services.change(currentId);
-        }
+        enter: startAvoiding,
+        exit: stopAvoiding
       });
 
       state.enter();
