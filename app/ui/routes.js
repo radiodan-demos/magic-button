@@ -25,7 +25,7 @@ function routes(app, radiodan, bbcServices) {
                       : false,
             json: JSON.stringify({
               services: stations,
-              volume  : status.volume
+              audio   : { volume  : status.volume }
             })
           }
         );

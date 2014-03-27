@@ -6,14 +6,16 @@ var Ractive = require('ractive'),
 
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
+    defaults  = {
+      services: [],
+      audio   : {}
+    },
     ui;
 
 window.ui = ui = new Ractive({
   el: container,
   template: template,
-  data: {
-    audio: { volume: 0 }
-  }
+  data: data || defaults
 });
 
 /*
