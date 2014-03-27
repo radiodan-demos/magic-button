@@ -3,7 +3,7 @@ var utils  = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, radiodan, bbcServices, services) {
+function routes(app, radiodan, bbcServices, services, power) {
   var audio = radiodan.audio.get('default');
 
   app.use("/assets", require("serve-static")(__dirname + "/static/"));
@@ -24,6 +24,7 @@ function routes(app, radiodan, bbcServices, services) {
                       ? true
                       : false,
             json: JSON.stringify({
+              power   : { isOn: power.isOn() },
               services: stations,
               current : services.current(),
               audio   : { volume  : status.volume }

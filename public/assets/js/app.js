@@ -47,6 +47,7 @@ function failure(err) {
 */
 ui.on('volume', utils.debounce(uiVolumeChange, 250));
 ui.on('service', uiServiceChange);
+ui.on('power', uiPower);
 
 function uiVolumeChange(evt) {
   var value = evt.context.volume;
@@ -62,6 +63,14 @@ function uiServiceChange(evt) {
   xhr.post('/radio/service/' + id ).then(success, failure);
 }
 
+function uiPower(evt) {
+  evt.original.preventDefault();
+  var isOn = evt.context.isOn,
+      method = isOn ? 'DELETE' : 'PUT';
+
+  xhr(method, '/radio/power');
+}
+
 /*
   State -> UI
 */
@@ -69,11 +78,18 @@ var eventSource = new EventSource('/events');
 
 eventSource.addEventListener('message', function (evt) {
   var content = JSON.parse(evt.data);
-  console.log('%o for %o', content.topic, content);
+
   switch(content.topic) {
     case 'audio.volume':
       ui.set(content.topic, content.data.volume);
       break;
+    case 'service.changed':
+      ui.set('current', content.data.id);
+      break;
+    case 'power':
+      ui.set('power', content.data)
+    default:
+      console.log('Unhandled topic', content.topic, content);
   }
 });
 

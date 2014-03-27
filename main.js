@@ -11,7 +11,8 @@ var express        = require("express"),
     bbcServices    = require("./lib/bbc-services").create().connect(),
     services       = require('./lib/services').create(eventBus, radiodan, bbcServices),
     config         = require('./radiodan-config.json'),
-    states         = require('./lib/states').create(config, radiodan, services, eventBus);
+    states         = require('./lib/states').create(config, radiodan, services, eventBus),
+    power          = require('./lib/power')(states);
 
 if (!module.parent) {
   var gracefulExit = require("./lib/graceful-exit")(radiodan);
@@ -44,13 +45,13 @@ app.use("/avoider",
   )
 );
 app.use("/radio",
-  require("./app/radio/routes")(express.Router(), eventBus, radiodan, states, services, bbcServices)
+  require("./app/radio/routes")(express.Router(), eventBus, radiodan, states, services, bbcServices, power)
 );
 app.use("/events",
   require("./app/events/routes")(express.Router(), eventBus, bbcServices)
 );
 app.use("/",
-  require("./app/ui/routes")(express.Router(), radiodan, bbcServices, services)
+  require("./app/ui/routes")(express.Router(), radiodan, bbcServices, services, power)
 );
 
 http.createServer(app).listen(port);

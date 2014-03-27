@@ -14,6 +14,16 @@
 
     <script data-ui-template type="text/ractive">
       {% raw %}
+        {{#power}}
+        <section>
+          <p>
+            Power {{ isOn ? 'On' : 'Off' }}
+            <a  on-tap="power"
+                href="/power">Turn {{ isOn ? 'Off' : 'On' }}</a>
+          </p>
+        </section>
+        {{/power}}
+
         {{#audio}}
         <section id="volume" class="volume">
           <h2>Volume</h2>
