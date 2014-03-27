@@ -20,6 +20,9 @@ function routes(app, radiodan, bbcServices) {
         res.render(
           __dirname+"/views/index",
           {
+            isDebug : (process.env.NODE_ENV === 'development')
+                      ? true
+                      : false,
             json: JSON.stringify({
               services: stations,
               volume  : status.volume

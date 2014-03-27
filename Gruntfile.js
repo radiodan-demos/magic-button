@@ -2,7 +2,21 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     browserify: {
-      'public/assets/js/app.js': ['app/ui/static/js/app.js']
+      debug: {
+        files: {
+          'public/assets/js/app.debug.js': ['app/ui/static/js/app.js']
+        },
+        options: {
+          bundleOptions: {
+            debug: true
+          }
+        }
+      },
+      app: {
+        files: {
+          'public/assets/js/app.js': ['app/ui/static/js/app.js']
+        }
+      }
     },
     uglify : {
       js: {
