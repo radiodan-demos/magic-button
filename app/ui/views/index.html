@@ -45,18 +45,28 @@
           {{/services}}
           </ul>
         </section>
+
+        <section id="behaviours">
+          <h2>Magic Button</h2>
+          <ul>
+            {{#avoider}}
+            <li on-tap="avoid">
+              {{^isAvoiding}}
+                <a href="/avoider/">Avoider</a>
+              {{/isAvoiding}}
+              {{#isAvoiding}}
+                <a href="/avoider/">Cancel avoiding</a>
+              {{/isAvoiding}}
+
+            </li>
+            {{/avoider}}
+          </ul>
+        </section>
       {% endraw %}
     </script>
 
     <div data-ui-container>
     </div>
-
-    <section id="behaviours">
-      <h2>Magic Button</h2>
-      <ul>
-        <li><a href="/avoider/">Avoider</a></li>
-      </ul>
-    </section>
 
     <script src="assets/js/app.{% if isDebug %}debug.{% endif %}js"></script>
   </body>

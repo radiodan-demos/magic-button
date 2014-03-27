@@ -36,7 +36,7 @@ module.exports = function(states, bbcServices) {
         state.exit();
       });
 
-      emit('avoider.start', { from: currentId, to: to });
+      emit('avoider', { isAvoiding: true, from: currentId, to: to });
 
       players.main.stop();
       players.avoider
@@ -50,7 +50,7 @@ module.exports = function(states, bbcServices) {
       logger.info('exit state');
       players.main.play();
       players.avoider.stop();
-      emit('avoider.stop', { from: to, to: currentId });
+      emit('avoider', { isAvoiding: false, from: to, to: currentId });
       instance.avoidTopic = null;
       services.change(currentId);
     }

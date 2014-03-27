@@ -27,7 +27,8 @@ function routes(app, radiodan, bbcServices, services, power) {
               power   : { isOn: power.isOn() },
               services: stations,
               current : services.current(),
-              audio   : { volume  : status.volume }
+              audio   : { volume  : status.volume },
+              avoider : { isAvoiding: false }
             })
           }
         );

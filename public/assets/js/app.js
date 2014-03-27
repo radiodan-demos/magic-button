@@ -48,6 +48,7 @@ function failure(err) {
 ui.on('volume', utils.debounce(uiVolumeChange, 250));
 ui.on('service', uiServiceChange);
 ui.on('power', uiPower);
+ui.on('avoid', uiAvoid);
 
 function uiVolumeChange(evt) {
   var value = evt.context.volume;
@@ -71,6 +72,14 @@ function uiPower(evt) {
   xhr(method, '/radio/power');
 }
 
+function uiAvoid(evt) {
+  evt.original.preventDefault();
+  var method = evt.context.isAvoiding
+                ? 'DELETE'
+                : 'POST';
+  xhr(method, '/avoider');
+}
+
 /*
   State -> UI
 */
@@ -87,7 +96,11 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('current', content.data.id);
       break;
     case 'power':
-      ui.set('power', content.data)
+      ui.set('power', content.data);
+      break;
+    case 'avoider':
+      ui.set('avoider', content.data);
+      break;
     default:
       console.log('Unhandled topic', content.topic, content);
   }
