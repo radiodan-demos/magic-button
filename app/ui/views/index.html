@@ -9,47 +9,21 @@
   <body>
     <h1>Radiodan</h1>
 
-    <section id="volume" class="volume">
-      <h2>Volume</h2>
-      <input type="range" min="0" max="100" value="{{volume}}" />
-    </section>
+    <script data-ui-template type="text/ractive">
+      {% raw %}
+        {{#audio}}
+        <section id="volume" class="volume">
+          <h2>Volume</h2>
+          <input type="range"
+                 on-change="volume"
+                 min="0" max="100" value="{{volume}}" />
+        </section>
+        {{/audio}}
+      {% endraw %}
+    </script>
 
-    <section id="services" class="service">
-      <h2>Change service</h2>
-      <ul class="service-list">
-        {% for service in services %}
-          <li class="service-item{% if currentService.id == service.id %} is-playing{% endif %}">
-            <a href="playing?id={{ service.id }}">
-              <img  alt="{{ service.title }}"
-                    src="{{ service.logos.svg }}" />
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
-    </section>
-
-    {% if nowPlaying %}
-    <section id="now-playing">
-      <h2>Now Playing</h2>
-      {% if nowPlaying.contributions.length > 0 && nowPlaying.contributions[0].image_pid %}
-        <img src="http://ichef.bbci.co.uk/images/ic/112x63/{{ nowPlaying.contributions[0].image_pid }}" />
-      {% endif %}
-      <p>{{ nowPlaying.title }}</p>
-      <p>{{ nowPlaying.artist }}</p>
-    </section>
-    {% endif %}
-
-    {% if nowAndNext %}
-    <section id="current-show">
-      <h2>Current show</h2>
-      <p>
-        <a  target="_blank"
-            href="http://www.bbc.co.uk/programmes/{{ nowAndNext[0].pid }}">
-        {{ nowAndNext[0].brand }}
-        </a>
-      </p>
-    </section>
-    {% endif %}
+    <div data-ui-container>
+    </div>
 
     <section id="behaviours">
       <h2>Magic Button</h2>

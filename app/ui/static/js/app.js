@@ -1,19 +1,58 @@
 console.log('Core app started');
 
-var volume = require('./controls/volume')('default');
-var volumeUi = require('./ui/volume')('.volume input');
+var Ractive = require('ractive'),
+    xhr     = require('./xhr');
 
-volume.on('volume', function (value) {
-  volumeUi.set({ volume: value });
+var container = document.querySelector('[data-ui-container]'),
+    template  = document.querySelector('[data-ui-template]').innerText,
+    ui;
+
+window.ui = ui = new Ractive({
+  el: container,
+  template: template,
+  data: {
+    audio: { volume: 0 }
+  }
 });
 
-volumeUi.on('volume', function (value) {
-  volume.set({ value: value });
+/*
+  Logging
+*/
+ui.on('set', function (keypath, value) {
+  console.log('set', keypath, value);
 });
 
+/*
+  Generic promise success or failure options
+*/
+function success(content) {
+  console.log('success', content);
+}
+
+function failure(err) {
+  console.warn('failure', err);
+}
+
+/*
+  UI -> State
+*/
+ui.on('volume', function (evt) {
+  var value = evt.context.volume;
+  console.log('ui: volume changed', value);
+  xhr.post('/radio/volume/value/' + value ).then(success, failure);
+});
+
+/*
+  State -> UI
+*/
 var eventSource = new EventSource('/events');
 
-eventSource.addEventListener('nowPlaying', function (evt) {
-  var data = JSON.parse(evt.data);
-  console.log('Now Playing for %o:', data.service, data);
+eventSource.addEventListener('message', function (evt) {
+  var content = JSON.parse(evt.data);
+  console.log('%o for %o', content.topic, content);
+  switch(content.topic) {
+    case 'audio.volume':
+      ui.set(content.topic, content.data.volume);
+      break;
+  }
 });

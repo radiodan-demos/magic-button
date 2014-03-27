@@ -50,7 +50,7 @@ app.use("/events",
   require("./app/events/routes")(express.Router(), eventBus, bbcServices)
 );
 app.use("/",
-  require("./app/ui/routes")(express.Router())
+  require("./app/ui/routes")(express.Router(), radiodan, bbcServices)
 );
 
 http.createServer(app).listen(port);

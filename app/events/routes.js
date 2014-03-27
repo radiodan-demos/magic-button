@@ -8,14 +8,14 @@ module.exports = function (app, eventBus, bbcServices) {
   app.use("/", eventStream.middleware());
 
   bbcServices.on('*', function (data) {
-    eventStream.send(JSON.stringify(data));
+    eventStream.send(data);
   });
 
   eventBus.on('*', function (eventName, args) {
     if (args.length === 1) {
       args = args[0];
     }
-    eventStream.send(JSON.stringify({ topic: eventName, data: args }));
+    eventStream.send({ topic: eventName, data: args });
   });
 
   return app;
