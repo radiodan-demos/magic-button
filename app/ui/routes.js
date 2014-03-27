@@ -3,16 +3,30 @@ var utils  = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app) {
+function routes(app, radiodan, bbcServices) {
+  var audio = radiodan.audio.get('default');
+
   app.use("/assets", require("serve-static")(__dirname + "/static/"));
   app.get("/", showIndex);
 
   // Route implementations
   function showIndex(req, res) {
-    res.render(
-      __dirname+"/views/index",
-      {}
-    );
+    utils.promise.spread(
+      [
+        audio.status(),
+        bbcServices.stations()
+      ],
+      function (status, stations) {
+        res.render(
+          __dirname+"/views/index",
+          {
+            json: JSON.stringify({
+              services: stations,
+              volume  : status.volume
+            })
+          }
+        );
+      });
   }
 
   return app;
