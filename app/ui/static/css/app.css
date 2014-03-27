@@ -22,11 +22,6 @@
   background-color: rgba(37, 182, 224, 0.3);
 }
 
-/*.service-item > a {
-  display: inline-block;
-  height: 100%;
-}*/
-
 .service-item img {
   display: inline-block;
   height: 3em;

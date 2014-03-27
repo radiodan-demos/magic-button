@@ -22,6 +22,19 @@
                  min="0" max="100" value="{{volume}}" />
         </section>
         {{/audio}}
+
+        <section id="services" class="services">
+          <ul class="service-list">
+          {{#services}}
+            <li on-tap="service"
+                class="service-item {{ current === id ? 'is-playing' : '' }}">
+              <a  href="/radio/service/{{ id }}">
+                <img src="{{ logos.svg }}" alt="{{ title }}" />
+              </a>
+            </li>
+          {{/services}}
+          </ul>
+        </section>
       {% endraw %}
     </script>
 
