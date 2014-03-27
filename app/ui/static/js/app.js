@@ -1,7 +1,8 @@
 console.log('Core app started');
 
 var Ractive = require('ractive'),
-    xhr     = require('./xhr');
+    xhr     = require('./xhr'),
+    utils   = require('./utils');
 
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
@@ -36,11 +37,13 @@ function failure(err) {
 /*
   UI -> State
 */
-ui.on('volume', function (evt) {
+ui.on('volume', utils.debounce(uiVolumeChange, 250));
+
+function uiVolumeChange(evt) {
   var value = evt.context.volume;
   console.log('ui: volume changed', value);
   xhr.post('/radio/volume/value/' + value ).then(success, failure);
-});
+}
 
 /*
   State -> UI

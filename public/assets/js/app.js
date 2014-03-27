@@ -2,7 +2,8 @@
 console.log('Core app started');
 
 var Ractive = require('ractive'),
-    xhr     = require('./xhr');
+    xhr     = require('./xhr'),
+    utils   = require('./utils');
 
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
@@ -37,11 +38,13 @@ function failure(err) {
 /*
   UI -> State
 */
-ui.on('volume', function (evt) {
+ui.on('volume', utils.debounce(uiVolumeChange, 250));
+
+function uiVolumeChange(evt) {
   var value = evt.context.volume;
   console.log('ui: volume changed', value);
   xhr.post('/radio/volume/value/' + value ).then(success, failure);
-});
+}
 
 /*
   State -> UI
@@ -58,7 +61,43 @@ eventSource.addEventListener('message', function (evt) {
   }
 });
 
-},{"./xhr":2,"ractive":15}],2:[function(require,module,exports){
+},{"./utils":2,"./xhr":3,"ractive":16}],2:[function(require,module,exports){
+module.exports = {
+  debounce: function debounce(fn, delay) {
+    var timer = null;
+    return function () {
+      var context = this, args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        fn.apply(context, args);
+      }, delay);
+    };
+  },
+  throttle: function throttle(fn, threshhold, scope) {
+    threshhold || (threshhold = 250);
+    var last,
+        deferTimer;
+    return function () {
+      var context = scope || this;
+
+      var now = +new Date,
+          args = arguments;
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+};
+
+},{}],3:[function(require,module,exports){
 var Promise = Promise || require('es6-promise').Promise;
 
 module.exports = xhr;
@@ -107,7 +146,7 @@ function xhr(method, url) {
   });
 }
 
-},{"es6-promise":4}],3:[function(require,module,exports){
+},{"es6-promise":5}],4:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -162,13 +201,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":9,"./promise/promise":10}],5:[function(require,module,exports){
+},{"./promise/polyfill":10,"./promise/promise":11}],6:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -262,7 +301,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":14}],6:[function(require,module,exports){
+},{"./utils":15}],7:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -326,7 +365,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":3}],7:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":4}],8:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -394,7 +433,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -410,7 +449,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -439,7 +478,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":10,"./utils":14}],10:[function(require,module,exports){
+},{"./promise":11,"./utils":15}],11:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -653,7 +692,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":5,"./asap":6,"./cast":7,"./config":8,"./race":11,"./reject":12,"./resolve":13,"./utils":14}],11:[function(require,module,exports){
+},{"./all":6,"./asap":7,"./cast":8,"./config":9,"./race":12,"./reject":13,"./resolve":14,"./utils":15}],12:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -743,7 +782,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":14}],12:[function(require,module,exports){
+},{"./utils":15}],13:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -791,7 +830,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -834,7 +873,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -857,7 +896,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*
 
 	Ractive - v0.3.9-317-d23e408 - 2014-03-21
