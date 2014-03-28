@@ -1,4 +1,5 @@
 var utils    = require("radiodan-client").utils,
+    settingsRoutes = require("../settings/routes"),
     logger   = utils.logger(__filename);
 
 module.exports = routes;
@@ -9,28 +10,12 @@ function routes(app, states, Settings) {
         { speak: false, announcer: "marvin" }
       );
 
-    app.get("/", index);
+  app.get("/", index);
+  app.use(settingsRoutes(app, settings));
 
-    app.get("/settings.json",  settingsIndex);
-    app.post("/settings.json", settingsUpdate);
-
-    return app;
+  return app;
 
   function index(req, res) {
     res.json({page: "Announcer"});
-  }
-
-  function settingsIndex(req, res) {
-    settings.get().then(function(settings) {
-      res.json(settings);
-    });
-  }
-
-  function settingsUpdate(req, res) {
-    var newSettings = req.body;
-
-    settings.set(newSettings).then(function() {
-      res.json(newSettings);
-    }, function(err) { res.json(500, {error: err.toString()}) });
   }
 }

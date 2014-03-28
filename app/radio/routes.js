@@ -1,11 +1,18 @@
 var utils = require("radiodan-client").utils,
+    settingsRoutes = require("../settings/routes"),
     logger = utils.logger(__filename);
 
 module.exports = routes;
 
-function routes(app, eventBus, radiodan, states, services, bbcServices, power) {
+function routes(app, eventBus, radiodan, states, services, bbcServices, Settings, power) {
 
-  var audio  = radiodan.audio.get('default');
+  var audio  = radiodan.audio.get('default'),
+      settings = Settings.build(
+        "radio",
+        { serviceId: "radio4", playing: true }
+      );
+
+  app.use(settingsRoutes(app, settings));
 
   /*
     /volume/value/60
@@ -113,5 +120,5 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, power) {
     };
   }
 
-    return app;
+  return app;
 }

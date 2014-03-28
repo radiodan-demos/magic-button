@@ -53,7 +53,7 @@ app.use("/avoider",
 
 app.use("/radio",
   require("./app/radio/routes")(
-    express.Router(), eventBus, radiodan, states, services, bbcServices, power
+    express.Router(), eventBus, radiodan, states, services, bbcServices, Settings, power
   )
 );
 

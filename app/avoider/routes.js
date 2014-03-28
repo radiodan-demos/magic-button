@@ -1,4 +1,5 @@
 var utils    = require("radiodan-client").utils,
+    settingsRoutes = require("../settings/routes"),
     logger   = utils.logger(__filename);
 
 module.exports = routes;
@@ -13,14 +14,13 @@ function routes(app, bbcServices, states, Settings) {
       ),
       avoider;
 
-    app.get("/", index);
-    app.post("/", avoid);
-    app.delete("/", cancel);
+  app.get("/", index);
+  app.post("/", avoid);
+  app.delete("/", cancel);
 
-    app.get("/settings.json",  settingsIndex);
-    app.post("/settings.json", settingsUpdate);
+  app.use(settingsRoutes(app, settings));
 
-    return app;
+  return app;
 
   function index(req, res) {
     res.render(
@@ -43,19 +43,5 @@ function routes(app, bbcServices, states, Settings) {
       avoider.cancel();
     }
     res.redirect("./");
-  }
-
-  function settingsIndex(req, res) {
-    settings.get().then(function(settings) {
-      res.json(settings);
-    });
-  }
-
-  function settingsUpdate(req, res) {
-    var newSettings = req.body;
-
-    settings.set(newSettings).then(function() {
-      res.json(newSettings);
-    }, function(err) { res.json(500, {error: err.toString()}) });
   }
 }
