@@ -1,0 +1,23 @@
+.layout {
+  position: relative;
+}
+
+.lo-left,
+.lo-center,
+.lo-right {
+  position: absolute;
+}
+
+.lo-left {
+  left: 0;
+}
+
+.lo-center {
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.lo-right {
+  right: 0;
+}

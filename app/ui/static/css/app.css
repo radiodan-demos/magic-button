@@ -1,4 +1,24 @@
 /*
+  Layout of panels
+*/
+#masthead {
+  height: 50px;
+}
+
+#playout {
+  height: 50px;
+}
+
+#volume {
+  height: 50px;
+}
+
+#stations {
+  overflow: hidden;
+  height: 0;
+}
+
+/*
   Spot colour: rgba(37, 182, 224, 1);
 
 */

@@ -3,6 +3,7 @@
   <head>
     <title>Radiodan Remote Control</title>
     <link rel="stylesheet" href="assets/css/lib/pure-min.css">
+    <link rel="stylesheet" href="assets/css/modules/layout.css">
     <link rel="stylesheet" href="assets/css/app.css">
     <script data-initial-data>
       var data = JSON.parse('{{ json | safe }}');
@@ -10,30 +11,47 @@
   </head>
 
   <body>
-    <h1>Radiodan</h1>
-
     <script data-ui-template type="text/ractive">
       {% raw %}
-        {{#power}}
-        <section>
-          <p>
-            Power {{ isOn ? 'On' : 'Off' }}
+        <section id="masthead" class="layout">
+          {{#power}}
+          <p class="lo-left {{ isOn ? 'is-on' : 'is-off' }}">
             <a  on-tap="power"
                 href="/power">Turn {{ isOn ? 'Off' : 'On' }}</a>
           </p>
+          {{/power}}
+          <p class="lo-center">
+            <span>Radiodan icon</span>
+          </p>
+          <p class="lo-right {{ isOn ? 'is-on' : 'is-off' }}">
+            <a>setup</a>
+          </p>
         </section>
-        {{/power}}
 
-        {{#audio}}
-        <section id="volume" class="volume">
-          <h2>Volume</h2>
-          <input type="range"
-                 on-change="volume"
-                 min="0" max="100" value="{{volume}}" />
+        <section id="playout" class="layout">
+          {{#current}}
+          <p class="lo-left">
+            <a  on-tap="stations">
+              {{current}}
+            </a>
+          </p>
+          {{/current}}
+          <p class="lo-right">
+            <a>Volume</a>
+          </p>
         </section>
-        {{/audio}}
 
-        <section id="services" class="services">
+        <section id="volume" class="layout">
+          {{#audio}}
+          <p class="lo-center">
+            <input type="range"
+                   on-change="volume"
+                   min="0" max="100" value="{{volume}}" />
+          </p>
+          {{/audio}}
+        </section>
+
+        <section id="services" class="layout services">
           <ul class="service-list">
           {{#services}}
             <li on-tap="service"
