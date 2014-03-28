@@ -54,6 +54,11 @@ function routes(app, radiodan, bbcServices, states, Settings) {
   function settingsUpdate(req, res) {
     var newSettings = req.body;
 
+    console.log("newSettings", newSettings);
+    if(!(newSettings.avoidType) || !(newSettings.serviceId)) {
+      return res.json(500, {error: "Settings are malformed"});
+    }
+
     settings.set(newSettings).then(function() {
       res.json(newSettings);
     }, function(err) { res.json(500, {error: err}) });
