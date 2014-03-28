@@ -39,6 +39,12 @@ app.use(require("method-override")())
 app.use(require("serve-static")("public"));
 app.use(require("morgan")("dev"));
 
+app.use("/announcer",
+  require("./app/announcer/routes")(
+    express.Router(), states, Settings
+  )
+);
+
 app.use("/avoider",
   require("./app/avoider/routes")(
     express.Router(), radiodan, bbcServices, states, Settings
