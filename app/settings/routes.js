@@ -1,12 +1,16 @@
-module.exports = function(app, settings) {
+var express = require("express")
+
+module.exports = function(settings) {
+  var app = express.Router();
+
   app.get("/settings.json",  settingsIndex);
   app.post("/settings.json", settingsUpdate);
 
   return app;
 
   function settingsIndex(req, res) {
-    settings.get().then(function(settings) {
-      res.json(settings);
+    settings.get().then(function(fetched) {
+      res.json(fetched);
     });
   }
 

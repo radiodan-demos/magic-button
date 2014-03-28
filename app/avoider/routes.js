@@ -18,7 +18,7 @@ function routes(app, bbcServices, states, Settings) {
   app.post("/", avoid);
   app.delete("/", cancel);
 
-  app.use(settingsRoutes(app, settings));
+  app.use(settingsRoutes(settings));
 
   return app;
 

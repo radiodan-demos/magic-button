@@ -11,7 +11,7 @@ function routes(app, states, Settings) {
       );
 
   app.get("/", index);
-  app.use(settingsRoutes(app, settings));
+  app.use(settingsRoutes(settings));
 
   return app;
 

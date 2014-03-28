@@ -12,8 +12,6 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
         { serviceId: "radio4", playing: true }
       );
 
-  app.use(settingsRoutes(app, settings));
-
   /*
     /volume/value/60
     /volume/diff/-10
@@ -119,6 +117,8 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
       res.json(500, { error: error });
     };
   }
+
+  app.use(settingsRoutes(settings));
 
   return app;
 }
