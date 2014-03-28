@@ -3,7 +3,7 @@ var utils    = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, radiodan, bbcServices, states, Settings) {
+function routes(app, bbcServices, states, Settings) {
   var Avoider  = require("./avoider")(
           states, bbcServices
       ),
