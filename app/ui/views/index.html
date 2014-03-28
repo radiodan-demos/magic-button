@@ -5,9 +5,6 @@
     <link rel="stylesheet" href="assets/css/lib/pure-min.css">
     <link rel="stylesheet" href="assets/css/modules/layout.css">
     <link rel="stylesheet" href="assets/css/app.css">
-    <script data-initial-data>
-      var data = JSON.parse('{{ json | safe }}');
-    </script>
   </head>
 
   <body>
@@ -62,6 +59,23 @@
             </li>
           {{/services}}
           </ul>
+        </section>
+
+        <section id="metadata" class="layout">
+          {{#current}}
+            {{#first(nowAndNext)}}
+            <div class="current-programme">
+              <p>{{ brand }}</p>
+              <p>{{ episode }}</p>
+            </div>
+            {{/nowAndNext}}
+            {{#nowPlaying}}
+            <div class="current-programme">
+              <p>{{ title }}</p>
+              <p>{{ artist }}</p>
+            </div>
+            {{/nowPlaying}}
+          {{/current}}
         </section>
 
         <section id="behaviours">

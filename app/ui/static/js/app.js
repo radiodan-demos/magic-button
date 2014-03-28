@@ -2,6 +2,7 @@ console.log('Core app started');
 
 var Ractive = require('ractive'),
     xhr     = require('./xhr'),
+    Services= require('./services'),
     utils   = require('./utils');
 
 /*
@@ -16,40 +17,52 @@ var container = document.querySelector('[data-ui-container]'),
       services: [],
       audio   : {}
     },
-    state = data || defaults,
+    // Reference to services to be
+    // kept up to date with new data
+    services,
+    state = defaults,
     ui;
 
-window.ui = ui = new Ractive({
-  el        : container,
-  template  : template,
-  data      : state
-});
+xhr.get('/radio/state.json')
+   .then(initWithData, failure);
 
-/*
-  Logging
-*/
-ui.on('change', function (keypath, value) {
-  console.log('set', keypath, value);
-});
+function initWithData(data) {
+  console.log('initWithData');
 
-/*
-  Generic promise success or failure options
-*/
-function success(content) {
-  console.log('success', content);
+  state = JSON.parse(data);
+  services = Services.create(state.services)
+  state.services = services.list();
+
+  console.log('state', state);
+  console.log('services', services.list());
+
+  // Helper functions for templates
+  state.first = function (array) {
+    console.log('first');
+    return array[0];
+  };
+
+  window.ui = ui = new Ractive({
+    el        : container,
+    template  : template,
+    data      : state
+  });
+
+  /*
+    Logging
+  */
+  ui.on('change', function (keypath, value) {
+    console.log('set', keypath, value);
+  });
+
+  /*
+    UI -> State
+  */
+  ui.on('volume', utils.debounce(uiVolumeChange, 250));
+  ui.on('service', uiServiceChange);
+  ui.on('power', uiPower);
+  ui.on('avoid', uiAvoid);
 }
-
-function failure(err) {
-  console.warn('failure', err);
-}
-
-/*
-  UI -> State
-*/
-ui.on('volume', utils.debounce(uiVolumeChange, 250));
-ui.on('service', uiServiceChange);
-ui.on('power', uiPower);
-ui.on('avoid', uiAvoid);
 
 function uiVolumeChange(evt) {
   var value = evt.context.volume;
@@ -61,7 +74,7 @@ function uiServiceChange(evt) {
   evt.original.preventDefault();
 
   var id = evt.context.id,
-      newService = findService(id);
+      newService = services.findById(id);
 
   console.log('ui: service selected', id, newService);
   this.set('current', newService);
@@ -84,19 +97,6 @@ function uiAvoid(evt) {
   xhr(method, '/avoider');
 }
 
-function findService(id) {
-  return findFirst(data.services, 'id', id);
-}
-
-function findFirst(array, element, value) {
-  var results = array.filter(function (item) {
-    return item[element] === value;
-  });
-  if (results) {
-    return results[0];
-  }
-}
-
 /*
   State -> UI
 */
@@ -110,7 +110,8 @@ eventSource.addEventListener('message', function (evt) {
       ui.set(content.topic, content.data.volume);
       break;
     case 'service.changed':
-      ui.set('current', findService(content.data.id));
+      services.update(content.data);
+      ui.set('current', content.data);
       break;
     case 'power':
       ui.set('power', content.data);
@@ -122,3 +123,14 @@ eventSource.addEventListener('message', function (evt) {
       // console.log('Unhandled topic', content.topic, content);
   }
 });
+
+/*
+  Generic promise success or failure options
+*/
+function success(content) {
+  console.log('success', content);
+}
+
+function failure(err) {
+  console.warn('failure', err);
+}

@@ -13,6 +13,11 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
       );
 
   /*
+    A big ball of state
+  */
+  app.get('/state.json', getState);
+
+  /*
     /volume/value/60
     /volume/diff/-10
   */
@@ -46,6 +51,30 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
   app.put('/power', start); // tee hee
   app.post('/power', start);
   app.delete('/power', standby);
+
+  function getState(req, res) {
+    var current = bbcServices.get(services.current());
+    utils.promise.spread(
+      [
+        audio.status(),
+        bbcServices.stations()
+      ],
+      function (status, stations) {
+        res.json(
+          {
+            power   : { isOn: power.isOn() },
+            services: stations,
+            current : {
+              id: current.id,
+              title: current.title,
+              nowAndNext: current.nowAndNext
+            },
+            audio   : { volume  : status.volume },
+            avoider : { isAvoiding: false }
+          }
+        );
+      });
+  }
 
   function start(req, res) {
     power.turnOn();
