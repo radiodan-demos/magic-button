@@ -13,10 +13,11 @@ var Settings = require("../../lib/settings");
 chai.use(chaiAsPromised);
 
 beforeEach(function() {
-  var options  = { inMemoryOnly: true };
-  this.subject = Settings.create(options).build(
+  this.options  = { inMemoryOnly: true };
+  this.defaults = { station: false, avoidType: "programme" };
+  this.subject = Settings.create(null, this.options).build(
     "avoider",
-    { station: false, avoidType: "programme" }
+    this.defaults
   );
 });
 
@@ -43,6 +44,23 @@ describe("settings", function(){
     assert.isFulfilled(get).then(function(settings){
       assert.deepEqual(settings, data);
     }).then(done,done);
+  });
+
+  it("Emits when data changes", function(done){
+    var mockEmitter = {emit: sinon.spy()},
+        subject = Settings.create(mockEmitter, this.options).build(
+          "avoider",
+          this.defaults
+        ),
+        data = { station: "radio2", avoidType: "track" },
+        get;
+
+    get = subject.set(data).then(subject.get);
+
+    assert.isFulfilled(get).then(function(){
+      assert.ok(mockEmitter.emit.calledWith("settings.avoider", data));
+    }).then(done,done);
+
   });
 
   it("rejects objects without required keys", function(done){

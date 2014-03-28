@@ -8,14 +8,13 @@ var chai     = require("chai"),
     request  = require("supertest"),
     express  = require("express"),
     routes   = require("../../app/avoider/routes"),
-    settings = require("../../lib/settings").create({ inMemoryOnly: true }),
-    mockRD   = { player: {get: function(){}} },
+    settings = require("../../lib/settings").create(null, { inMemoryOnly: true }),
     app      = express();
 
 app.engine("html", swig.renderFile);
 app.set("view engine", "html");
 
-app.use("/", routes(express.Router(), mockRD, {}, {}, settings));
+app.use("/", routes(express.Router(), {}, {}, settings));
 
 var utils = require("radiodan-client").utils;
 
