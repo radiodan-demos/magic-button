@@ -45,6 +45,16 @@ describe("settings", function(){
     }).then(done,done);
   });
 
+  it("rejects objects without required keys", function(done){
+    var subject = this.subject,
+        data    = { wrongKey: "yes" },
+        set;
+
+    set = subject.set(data);
+
+    assert.isRejected(set, Error).then(done,done);
+  });
+
   it("returns a default object if nothing is found", function(done){
     var subject = this.subject,
         settingsPromise = subject.get();

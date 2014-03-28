@@ -37,7 +37,8 @@
     "request": "~2.34.0",
     "express-eventsource": "0.0.3",
     "ractive": "~0.4.0-pre2",
-    "ractive-events-tap": "https://github.com/ractivejs/ractive-events-tap/archive/master.tar.gz"
+    "ractive-events-tap": "https://github.com/ractivejs/ractive-events-tap/archive/master.tar.gz",
+    "deepequal": "0.0.1"
   },
   "devDependencies": {
     "nodemon": "^1.0.15",
