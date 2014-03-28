@@ -32,7 +32,7 @@
           {{#current}}
           <p class="lo-left">
             <a  on-tap="stations">
-              {{current}}
+              {{current.title}}
             </a>
           </p>
           {{/current}}
@@ -55,7 +55,7 @@
           <ul class="service-list">
           {{#services}}
             <li on-tap="service"
-                class="service-item {{ current === id ? 'is-playing' : '' }}">
+                class="service-item {{ current.id === id ? 'is-playing' : '' }}">
               <a  href="/radio/service/{{ id }}">
                 <img src="{{ logos.svg }}" alt="{{ title }}" />
               </a>

@@ -12,21 +12,23 @@ require('ractive-events-tap');
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
     defaults  = {
+      power   : { isOn: false },
       services: [],
       audio   : {}
     },
+    state = data || defaults,
     ui;
 
 window.ui = ui = new Ractive({
   el        : container,
   template  : template,
-  data      : data || defaults
+  data      : state
 });
 
 /*
   Logging
 */
-ui.on('set', function (keypath, value) {
+ui.on('change', function (keypath, value) {
   console.log('set', keypath, value);
 });
 
@@ -56,10 +58,13 @@ function uiVolumeChange(evt) {
 }
 
 function uiServiceChange(evt) {
-  var id = evt.context.id;
   evt.original.preventDefault();
-  console.log('ui: service selected', evt.context);
-  this.set('current', id);
+
+  var id = evt.context.id,
+      newService = findService(id);
+
+  console.log('ui: service selected', id, newService);
+  this.set('current', newService);
   xhr.post('/radio/service/' + id ).then(success, failure);
 }
 
@@ -79,6 +84,19 @@ function uiAvoid(evt) {
   xhr(method, '/avoider');
 }
 
+function findService(id) {
+  return findFirst(data.services, 'id', id);
+}
+
+function findFirst(array, element, value) {
+  var results = array.filter(function (item) {
+    return item[element] === value;
+  });
+  if (results) {
+    return results[0];
+  }
+}
+
 /*
   State -> UI
 */
@@ -92,7 +110,7 @@ eventSource.addEventListener('message', function (evt) {
       ui.set(content.topic, content.data.volume);
       break;
     case 'service.changed':
-      ui.set('current', content.data.id);
+      ui.set('current', findService(content.data.id));
       break;
     case 'power':
       ui.set('power', content.data);
@@ -101,6 +119,6 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('avoider', content.data);
       break;
     default:
-      console.log('Unhandled topic', content.topic, content);
+      // console.log('Unhandled topic', content.topic, content);
   }
 });

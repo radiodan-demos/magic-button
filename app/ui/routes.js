@@ -11,6 +11,7 @@ function routes(app, radiodan, bbcServices, services, power) {
 
   // Route implementations
   function showIndex(req, res) {
+    var current = bbcServices.get(services.current());
     utils.promise.spread(
       [
         audio.status(),
@@ -26,7 +27,11 @@ function routes(app, radiodan, bbcServices, services, power) {
             json: JSON.stringify({
               power   : { isOn: power.isOn() },
               services: stations,
-              current : services.current(),
+              current : {
+                id: current.id,
+                title: current.title,
+                nowAndNext: current.nowAndNext
+              },
               audio   : { volume  : status.volume },
               avoider : { isAvoiding: false }
             })
