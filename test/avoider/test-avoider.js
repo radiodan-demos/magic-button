@@ -57,6 +57,6 @@ describe("on avoid", function(){
     subject.startAvoiding({}, this.players, this.services, emitSpy);
 
     assert.ok(emitSpy.called);
-    assert.ok(emitSpy.calledWith('avoider.start'))
+    assert.ok(emitSpy.calledWith('avoider', { isAvoiding: true, from: "radio1", to: "avoidStation" }))
   });
 });
