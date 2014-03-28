@@ -3,12 +3,9 @@ var Promise = Promise || require('es6-promise').Promise;
 module.exports = xhr;
 
 ['get', 'delete', 'post', 'put'].forEach(function (method) {
-  console.log('binding ', method)
   module.exports[method] = function() {
     var args = Array.prototype.slice.call(arguments),
         newArgs = [method].concat(args);
-
-    console.log('args %o - newArgs %o', args, newArgs);
 
     return xhr.apply(null, newArgs);
   }
