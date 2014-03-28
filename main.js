@@ -45,13 +45,19 @@ app.use("/avoider",
   )
 );
 app.use("/radio",
-  require("./app/radio/routes")(express.Router(), eventBus, radiodan, states, services, bbcServices, power)
+  require("./app/radio/routes")(
+    express.Router(), eventBus, radiodan, states, services, bbcServices, power
+  )
 );
 app.use("/events",
-  require("./app/events/routes")(express.Router(), eventBus, bbcServices)
+  require("./app/events/routes")(
+    express.Router(), eventBus, bbcServices
+  )
 );
 app.use("/",
-  require("./app/ui/routes")(express.Router(), radiodan, bbcServices, services, power)
+  require("./app/ui/routes")(
+    express.Router(), radiodan, bbcServices, services, power
+  )
 );
 
 http.createServer(app).listen(port);
