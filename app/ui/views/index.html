@@ -4,6 +4,7 @@
     <title>Radiodan Remote Control</title>
     <link rel="stylesheet" href="assets/css/lib/pure-min.css">
     <link rel="stylesheet" href="assets/css/modules/layout.css">
+    <link rel="stylesheet" href="assets/css/modules/panel.css">
     <link rel="stylesheet" href="assets/css/app.css">
   </head>
 
@@ -28,17 +29,17 @@
         <section id="playout" class="layout">
           {{#current}}
           <p class="lo-left">
-            <a  on-tap="stations">
+            <a on-tap="stations-button">
               {{current.title}}
             </a>
           </p>
           {{/current}}
           <p class="lo-right">
-            <a>Volume</a>
+            <a on-tap="volume-button">Volume</a>
           </p>
         </section>
 
-        <section id="volume" class="layout">
+        <section id="volume" class="layout panel {{ panels.volume.isOpen ? '' : 'is-closed' }}">
           {{#audio}}
           <p class="lo-center">
             <input type="range"
@@ -48,7 +49,8 @@
           {{/audio}}
         </section>
 
-        <section id="services" class="layout services">
+        <section  id="services"
+                  class="layout panel services {{ panels.services.isOpen ? '' : 'is-closed' }}">
           <ul class="service-list">
           {{#services}}
             <li on-tap="service"

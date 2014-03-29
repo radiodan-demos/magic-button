@@ -13,11 +13,6 @@
   height: 50px;
 }
 
-#stations {
-  overflow: hidden;
-  height: 0;
-}
-
 /*
   Spot colour: rgba(37, 182, 224, 1);
 

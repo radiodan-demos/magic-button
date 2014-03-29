@@ -1,0 +1,11 @@
+.panel {
+  overflow: hidden;
+}
+
+.panel.is-open {
+
+}
+
+.panel.is-closed {
+  height: 0 !important;
+}

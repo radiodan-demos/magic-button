@@ -45,7 +45,8 @@ function initWithData(data) {
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,
-    data      : state
+    data      : state,
+    complete  : uiDefaults
   });
 
   /*
@@ -56,12 +57,36 @@ function initWithData(data) {
   });
 
   /*
-    UI -> State
+    UI -> Radio State
   */
   ui.on('volume', utils.debounce(uiVolumeChange, 250));
   ui.on('service', uiServiceChange);
   ui.on('power', uiPower);
   ui.on('avoid', uiAvoid);
+
+  /*
+    UI -> UI
+  */
+  ui.on('stations-button', createPanelToggleHandler('services'));
+  ui.on('volume-button', createPanelToggleHandler('volume'));
+}
+
+function createPanelToggleHandler(panelId) {
+  var keypath = 'panels.' + panelId + '.isOpen';
+  return function (evt) {
+    var isOpen = this.get(keypath);
+        this.set(keypath, !isOpen);
+  }
+}
+
+function uiDefaults() {
+//   this.nodes.services
+//             .classList.add('is-closed');
+
+// console.log(this.nodes);
+
+  this.nodes.volume
+            .classList.add('is-closed');
 }
 
 function uiVolumeChange(evt) {
