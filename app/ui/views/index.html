@@ -12,12 +12,12 @@
     <script data-ui-template type="text/ractive">
       {% raw %}
         <section id="masthead" class="layout">
-          {{#power}}
+          {{#radio.power}}
           <p class="lo-left {{ isOn ? 'is-on' : 'is-off' }}">
             <a  on-tap="power"
                 href="/power">Turn {{ isOn ? 'Off' : 'On' }}</a>
           </p>
-          {{/power}}
+          {{/radio.power}}
           <p class="lo-center">
             <span>Radiodan icon</span>
           </p>
@@ -27,36 +27,40 @@
         </section>
 
         <section id="playout" class="layout">
-          {{#current}}
           <p class="lo-left">
             <a on-tap="stations-button">
-              {{ panels.services.isOpen ? '⬇' : '⬆' }}
-              {{current.title}}
+              {{ ui.panels.services.isOpen ? '⬇' : '⬆' }}
+              {{^radio.current}}
+                No current station
+              {{/radio.current}}
+              {{#radio.current}}
+                  {{title}}
+              {{/radio.current}}
             </a>
           </p>
-          {{/current}}
+
           <p class="lo-right">
-            {{ panels.volume.isOpen ? '⬇' : '⬆' }}
+            {{ ui.panels.volume.isOpen ? '⬇' : '⬆' }}
             <a on-tap="volume-button">Volume</a>
           </p>
         </section>
 
-        <section id="volume" class="layout panel {{ panels.volume.isOpen ? '' : 'is-closed' }}">
-          {{#audio}}
+        <section id="volume" class="layout panel {{ ui.panels.volume.isOpen ? '' : 'is-closed' }}">
+          {{#radio.audio}}
           <p class="lo-center">
             <input type="range"
                    on-change="volume"
                    min="0" max="100" value="{{volume}}" />
           </p>
-          {{/audio}}
+          {{/radio.audio}}
         </section>
 
         <section  id="services"
-                  class="layout panel services {{ panels.services.isOpen ? '' : 'is-closed' }}">
+                  class="layout panel services {{ ui.panels.services.isOpen ? '' : 'is-closed' }}">
           <ul class="service-list">
           {{#services}}
             <li on-tap="service"
-                class="service-item {{ current.id === id ? 'is-playing' : '' }}">
+                class="service-item {{ radio.current.id === id ? 'is-playing' : '' }}">
               <a  href="/radio/service/{{ id }}">
                 <img src="{{ logos.svg }}" alt="{{ title }}" />
               </a>
@@ -66,7 +70,7 @@
         </section>
 
         <section id="metadata" class="layout">
-          {{#current}}
+          {{#radio.current}}
             {{#first(nowAndNext)}}
             <div class="current-programme">
               <p>{{ brand }}</p>
@@ -79,7 +83,7 @@
               <p>{{ artist }}</p>
             </div>
             {{/nowPlaying}}
-          {{/current}}
+          {{/radio.current}}
         </section>
 
         <section id="behaviours">

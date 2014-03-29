@@ -2,7 +2,6 @@ console.log('Core app started');
 
 var Ractive = require('ractive'),
     xhr     = require('./xhr'),
-    Services= require('./services'),
     utils   = require('./utils');
 
 /*
@@ -13,28 +12,35 @@ require('ractive-events-tap');
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
     defaults  = {
-      power   : { isOn: false },
-      services: [],
-      audio   : {}
+      radio: {
+        power : { isOn: false },
+        audio : { volume: 0   }
+      },
+      ui: { panels: {} },
+      services: []
     },
-    // Reference to services to be
-    // kept up to date with new data
-    services,
-    state = defaults,
+    state = {},
     ui;
 
 xhr.get('/radio/state.json')
-   .then(initWithData, failure);
+   .then(initWithData)
+   .then(null, failure);
 
 function initWithData(data) {
   console.log('initWithData');
+  var data = JSON.parse(data);
 
-  state = JSON.parse(data);
-  services = Services.create(state.services)
-  state.services = services.list();
+  // Services available
+  state.services = data.services || defaults.services;
 
-  console.log('state', state);
-  console.log('services', services.list());
+  // State of the radio
+  state.radio = {
+    power: data.power || defaults.radio.power,
+    audio: data.audio || defaults.radio.audio
+  };
+
+  // State of this UI
+  state.ui = defaults.ui;
 
   // Helper functions for templates
   state.first = function (array) {
@@ -70,10 +76,12 @@ function initWithData(data) {
   */
   ui.on('stations-button', createPanelToggleHandler('services'));
   ui.on('volume-button', createPanelToggleHandler('volume'));
+
+  console.log('initialised with data', state);
 }
 
 function createPanelToggleHandler(panelId) {
-  var keypath = 'panels.' + panelId + '.isOpen';
+  var keypath = 'ui.panels.' + panelId + '.isOpen';
   return function (evt) {
     var isOpen = this.get(keypath);
         this.set(keypath, !isOpen);
@@ -81,6 +89,7 @@ function createPanelToggleHandler(panelId) {
 }
 
 function uiVolumeChange(evt) {
+  console.log('vol', evt.context);
   var value = evt.context.volume;
   console.log('ui: volume changed', value);
   xhr.post('/radio/volume/value/' + value ).then(success, failure);
@@ -89,11 +98,9 @@ function uiVolumeChange(evt) {
 function uiServiceChange(evt) {
   evt.original.preventDefault();
 
-  var id = evt.context.id,
-      newService = services.findById(id);
+  var id = evt.context.id
 
-  console.log('ui: service selected', id, newService);
-  this.set('current', newService);
+  console.log('ui: service selected', id);
   xhr.post('/radio/service/' + id ).then(success, failure);
 }
 
@@ -123,21 +130,29 @@ eventSource.addEventListener('message', function (evt) {
 
   switch(content.topic) {
     case 'audio.volume':
-      ui.set(content.topic, content.data.volume);
+      ui.set('radio.audio', content.data);
       break;
     case 'service.changed':
-      services.update(content.data);
-      ui.set('current', content.data);
+      ui.set(keypathForServiceId(content.id, state.services), content.data);
+      ui.set('radio.current', content.data);
       break;
     case 'power':
-      ui.set('power', content.data);
+      ui.set('radio.power', content.data);
       break;
     case 'avoider':
       ui.set('avoider', content.data);
       break;
+    case 'nowPlaying':
+      ui.set(keypathForServiceId(content.service, state.services) + '.nowPlaying', content.data);
+    case 'nowAndNext':
+      ui.set(keypathForServiceId(content.service, state.services) + '.nowAndNext', content.data);
     default:
       // console.log('Unhandled topic', content.topic, content);
   }
+});
+
+eventSource.addEventListener('error', function (evt) {
+  console.warn(evt);
 });
 
 /*
@@ -149,4 +164,19 @@ function success(content) {
 
 function failure(err) {
   console.warn('failure', err);
+}
+
+/*
+  Helpers
+*/
+function findIndexById(id, services) {
+  var index = null;
+  services.forEach(function (item, idx) {
+    if (item.id === id) { index = idx; }
+  });
+  return index;
+}
+
+function keypathForServiceId(id, services) {
+  return 'services.' + findIndexById(id, services);
 }

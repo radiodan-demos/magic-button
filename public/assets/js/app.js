@@ -3,7 +3,6 @@ console.log('Core app started');
 
 var Ractive = require('ractive'),
     xhr     = require('./xhr'),
-    Services= require('./services'),
     utils   = require('./utils');
 
 /*
@@ -14,28 +13,35 @@ require('ractive-events-tap');
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
     defaults  = {
-      power   : { isOn: false },
-      services: [],
-      audio   : {}
+      radio: {
+        power : { isOn: false },
+        audio : { volume: 0   }
+      },
+      ui: { panels: {} },
+      services: []
     },
-    // Reference to services to be
-    // kept up to date with new data
-    services,
-    state = defaults,
+    state = {},
     ui;
 
 xhr.get('/radio/state.json')
-   .then(initWithData, failure);
+   .then(initWithData)
+   .then(null, failure);
 
 function initWithData(data) {
   console.log('initWithData');
+  var data = JSON.parse(data);
 
-  state = JSON.parse(data);
-  services = Services.create(state.services)
-  state.services = services.list();
+  // Services available
+  state.services = data.services || defaults.services;
 
-  console.log('state', state);
-  console.log('services', services.list());
+  // State of the radio
+  state.radio = {
+    power: data.power || defaults.radio.power,
+    audio: data.audio || defaults.radio.audio
+  };
+
+  // State of this UI
+  state.ui = defaults.ui;
 
   // Helper functions for templates
   state.first = function (array) {
@@ -71,10 +77,12 @@ function initWithData(data) {
   */
   ui.on('stations-button', createPanelToggleHandler('services'));
   ui.on('volume-button', createPanelToggleHandler('volume'));
+
+  console.log('initialised with data', state);
 }
 
 function createPanelToggleHandler(panelId) {
-  var keypath = 'panels.' + panelId + '.isOpen';
+  var keypath = 'ui.panels.' + panelId + '.isOpen';
   return function (evt) {
     var isOpen = this.get(keypath);
         this.set(keypath, !isOpen);
@@ -82,6 +90,7 @@ function createPanelToggleHandler(panelId) {
 }
 
 function uiVolumeChange(evt) {
+  console.log('vol', evt.context);
   var value = evt.context.volume;
   console.log('ui: volume changed', value);
   xhr.post('/radio/volume/value/' + value ).then(success, failure);
@@ -90,11 +99,9 @@ function uiVolumeChange(evt) {
 function uiServiceChange(evt) {
   evt.original.preventDefault();
 
-  var id = evt.context.id,
-      newService = services.findById(id);
+  var id = evt.context.id
 
-  console.log('ui: service selected', id, newService);
-  this.set('current', newService);
+  console.log('ui: service selected', id);
   xhr.post('/radio/service/' + id ).then(success, failure);
 }
 
@@ -124,21 +131,29 @@ eventSource.addEventListener('message', function (evt) {
 
   switch(content.topic) {
     case 'audio.volume':
-      ui.set(content.topic, content.data.volume);
+      ui.set('radio.audio', content.data);
       break;
     case 'service.changed':
-      services.update(content.data);
-      ui.set('current', content.data);
+      ui.set(keypathForServiceId(content.id, state.services), content.data);
+      ui.set('radio.current', content.data);
       break;
     case 'power':
-      ui.set('power', content.data);
+      ui.set('radio.power', content.data);
       break;
     case 'avoider':
       ui.set('avoider', content.data);
       break;
+    case 'nowPlaying':
+      ui.set(keypathForServiceId(content.service, state.services) + '.nowPlaying', content.data);
+    case 'nowAndNext':
+      ui.set(keypathForServiceId(content.service, state.services) + '.nowAndNext', content.data);
     default:
       // console.log('Unhandled topic', content.topic, content);
   }
+});
+
+eventSource.addEventListener('error', function (evt) {
+  console.warn(evt);
 });
 
 /*
@@ -152,55 +167,22 @@ function failure(err) {
   console.warn('failure', err);
 }
 
-},{"./services":2,"./utils":3,"./xhr":4,"ractive":18,"ractive-events-tap":17}],2:[function(require,module,exports){
-module.exports = { create: create };
-
-
-function create(array) {
-  var instance = {},
-      services = array;
-
-  // Find a single service by ID
-  instance.findById = findService;
-
-  // Return all services
-  instance.list = function () { return services };
-
-  // Update data about a service
-  instance.update = updateService;
-
-  function updateService(data) {
-    var index = findServiceIndexById(data.id);
-    services.splice(index, 1, data);
-  }
-
-  function findServiceIndexById(id) {
-    var index = null;
-    services.forEach(function (item, idx) {
-      if (item.id === id) {
-        index = idx;
-      }
-    });
-    return index;
-  }
-
-  function findService(id) {
-    return findFirst(services, 'id', id);
-  }
-
-  function findFirst(array, element, value) {
-    var results = array.filter(function (item) {
-      return item[element] === value;
-    });
-    if (results) {
-      return results[0];
-    }
-  }
-
-  return instance;
+/*
+  Helpers
+*/
+function findIndexById(id, services) {
+  var index = null;
+  services.forEach(function (item, idx) {
+    if (item.id === id) { index = idx; }
+  });
+  return index;
 }
 
-},{}],3:[function(require,module,exports){
+function keypathForServiceId(id, services) {
+  return 'services.' + findIndexById(id, services);
+}
+
+},{"./utils":2,"./xhr":3,"ractive":17,"ractive-events-tap":16}],2:[function(require,module,exports){
 module.exports = {
   debounce: function debounce(fn, delay) {
     var timer = null;
@@ -236,7 +218,7 @@ module.exports = {
   }
 };
 
-},{}],4:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 var Promise = Promise || require('es6-promise').Promise;
 
 module.exports = xhr;
@@ -282,7 +264,7 @@ function xhr(method, url) {
   });
 }
 
-},{"es6-promise":6}],5:[function(require,module,exports){
+},{"es6-promise":5}],4:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -337,13 +319,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],6:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":11,"./promise/promise":12}],7:[function(require,module,exports){
+},{"./promise/polyfill":10,"./promise/promise":11}],6:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -437,7 +419,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":16}],8:[function(require,module,exports){
+},{"./utils":15}],7:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -501,7 +483,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5}],9:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":4}],8:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -569,7 +551,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -585,7 +567,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],11:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -614,7 +596,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":12,"./utils":16}],12:[function(require,module,exports){
+},{"./promise":11,"./utils":15}],11:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -828,7 +810,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":7,"./asap":8,"./cast":9,"./config":10,"./race":13,"./reject":14,"./resolve":15,"./utils":16}],13:[function(require,module,exports){
+},{"./all":6,"./asap":7,"./cast":8,"./config":9,"./race":12,"./reject":13,"./resolve":14,"./utils":15}],12:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -918,7 +900,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":16}],14:[function(require,module,exports){
+},{"./utils":15}],13:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -966,7 +948,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],15:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -1009,7 +991,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -1032,7 +1014,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -1297,7 +1279,7 @@ exports.now = now;
 
 }));
 
-},{"ractive":18}],18:[function(require,module,exports){
+},{"ractive":17}],17:[function(require,module,exports){
 /*
 
 	Ractive - v0.3.9-317-d23e408 - 2014-03-21
