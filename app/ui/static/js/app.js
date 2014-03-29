@@ -51,8 +51,10 @@ function initWithData(data) {
   /*
     Logging
   */
-  ui.on('change', function (keypath, value) {
-    console.log('set', keypath, value);
+  ui.on('change', function (changes) {
+    Object.keys(changes).forEach(function (keypath) {
+      console.log('changed: ', keypath, changes[keypath]);
+    });
   });
 
   /*
