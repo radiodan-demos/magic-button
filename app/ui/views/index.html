@@ -30,11 +30,13 @@
           {{#current}}
           <p class="lo-left">
             <a on-tap="stations-button">
+              {{ panels.services.isOpen ? '⬇' : '⬆' }}
               {{current.title}}
             </a>
           </p>
           {{/current}}
           <p class="lo-right">
+            {{ panels.volume.isOpen ? '⬇' : '⬆' }}
             <a on-tap="volume-button">Volume</a>
           </p>
         </section>
