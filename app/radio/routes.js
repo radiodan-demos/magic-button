@@ -60,6 +60,7 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
         bbcServices.stations()
       ],
       function (status, stations) {
+        logger.info('Stations', stations.length);
         res.json(
           {
             power   : { isOn: power.isOn() },
