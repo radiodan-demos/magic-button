@@ -46,8 +46,7 @@ function initWithData(data) {
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,
-    data      : state,
-    complete  : uiDefaults
+    data      : state
   });
 
   /*
@@ -80,14 +79,7 @@ function createPanelToggleHandler(panelId) {
   }
 }
 
-function uiDefaults() {
-//   this.nodes.services
-//             .classList.add('is-closed');
-
-// console.log(this.nodes);
-
-  this.nodes.volume
-            .classList.add('is-closed');
+function ractiveRendered() {
 }
 
 function uiVolumeChange(evt) {
