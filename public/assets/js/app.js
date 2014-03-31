@@ -45,7 +45,6 @@ function initWithData(data) {
 
   // Helper functions for templates
   state.first = function (array) {
-    console.log('first');
     return array[0];
   };
 
