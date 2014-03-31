@@ -49,6 +49,12 @@ function initWithData(data) {
     return array[0];
   };
 
+  // Parse an image URL template to a specific
+  // size
+  state.imageUrl = function (template, size) {
+    return template.replace('$recipe', size);
+  };
+
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,

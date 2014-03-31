@@ -75,6 +75,9 @@
             <div class="current-programme">
               <p>{{ brand }}</p>
               <p>{{ episode }}</p>
+              {{#image}}
+                <img src="{{ imageUrl(templateUrl, '464x261') }}" />
+              {{/image}}
             </div>
             {{/nowAndNext}}
             {{#nowPlaying}}
