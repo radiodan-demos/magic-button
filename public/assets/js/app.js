@@ -7,7 +7,8 @@ console.log('Core app started');
 
 var Ractive = require('ractive'),
     xhr     = require('./xhr'),
-    utils   = require('./utils');
+    utils   = require('./utils'),
+    Promise = require('es6-promise').Promise;
 
 /*
   Ractive plugins
@@ -29,12 +30,17 @@ defaults = {
   services: []
 };
 
-xhr.get('/radio/state.json')
-   .then(initWithData)
-   .then(null, failure);
+var initialStateData = Promise.all([
+  xhr.get('/radio/state.json') /*,
+  xhr.get('/avoider') */
+]);
 
-function initWithData(json) {
-  var data = JSON.parse(json);
+initialStateData
+  .then(initWithData)
+  .then(null, failure('state'));
+
+function initWithData(radioState, avoiderStatus) {
+  var data = JSON.parse(radioState);
 
   // Services available
   state.services = data.services || defaults.services;
@@ -103,7 +109,7 @@ function uiVolumeChange(evt) {
   console.log('vol', evt.context);
   var value = evt.context.volume;
   console.log('ui: volume changed', value);
-  xhr.post('/radio/volume/value/' + value ).then(success, failure);
+  xhr.post('/radio/volume/value/' + value ).then(success('volume'), failure('volume'));
 }
 
 function uiServiceChange(evt) {
@@ -112,7 +118,7 @@ function uiServiceChange(evt) {
   var id = evt.context.id;
 
   console.log('ui: service selected', id);
-  xhr.post('/radio/service/' + id ).then(success, failure);
+  xhr.post('/radio/service/' + id ).then(success('service'), failure('service'));
 }
 
 function uiPower(evt) {
@@ -169,12 +175,16 @@ eventSource.addEventListener('error', function (evt) {
 /*
   Generic promise success or failure options
 */
-function success(content) {
-  console.log('success', content);
+function success(msg) {
+  return function (content) {
+    console.log(msg, 'success', content);
+  };
 }
 
-function failure(err) {
-  console.warn('failure', err);
+function failure(msg) {
+  return function (err) {
+    console.warn(msg, 'failure', err.stack);
+  };
 }
 
 /*
@@ -192,7 +202,7 @@ function keypathForServiceId(id, services) {
   return 'services.' + findIndexById(id, services);
 }
 
-},{"./utils":2,"./xhr":3,"ractive":17,"ractive-events-tap":16}],2:[function(require,module,exports){
+},{"./utils":2,"./xhr":3,"es6-promise":5,"ractive":17,"ractive-events-tap":16}],2:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
