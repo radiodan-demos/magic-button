@@ -1,3 +1,6 @@
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+'use strict';
+
 var Promise = Promise || require('es6-promise').Promise;
 
 module.exports = xhr;
@@ -8,9 +11,13 @@ module.exports = xhr;
         newArgs = [method].concat(args);
 
     return xhr.apply(null, newArgs);
-  }
-})
+  };
+});
 
+/*
+  XHR implementation from:
+    http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest
+*/
 function xhr(method, url) {
   method = method ? method.toUpperCase() : 'GET';
   // Return a new promise.
@@ -22,20 +29,20 @@ function xhr(method, url) {
     req.onload = function() {
       // This is called even on 404 etc
       // so check the status
-      if (req.status == 200) {
+      if (req.status === 200) {
         // Resolve the promise with the response text
         resolve(req.response);
       }
       else {
         // Otherwise reject with the status text
         // which will hopefully be a meaningful error
-        reject(Error(req.statusText));
+        reject(new Error(req.statusText));
       }
     };
 
     // Handle network errors
     req.onerror = function() {
-      reject(Error("Network Error"));
+      reject(new Error('Network Error'));
     };
 
     // Make the request

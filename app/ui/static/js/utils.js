@@ -1,3 +1,6 @@
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+'use strict';
+
 module.exports = {
   debounce: function debounce(fn, delay) {
     var timer = null;
@@ -10,13 +13,13 @@ module.exports = {
     };
   },
   throttle: function throttle(fn, threshhold, scope) {
-    threshhold || (threshhold = 250);
+    threshhold = threshhold || (threshhold = 250);
     var last,
         deferTimer;
     return function () {
       var context = scope || this;
 
-      var now = +new Date,
+      var now = +new Date(),
           args = arguments;
       if (last && now < last + threshhold) {
         // hold on to it

@@ -1,4 +1,8 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+/* global EventSource */
+'use strict';
+
 console.log('Core app started');
 
 var Ractive = require('ractive'),
@@ -12,24 +16,25 @@ require('ractive-events-tap');
 
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
-    defaults  = {
-      radio: {
-        power : { isOn: false },
-        audio : { volume: 0   }
-      },
-      ui: { panels: {} },
-      services: []
-    },
     state = {},
+    defaults,
     ui;
+
+defaults = {
+  radio: {
+    power : { isOn: false },
+    audio : { volume: 0   }
+  },
+  ui: { panels: {} },
+  services: []
+};
 
 xhr.get('/radio/state.json')
    .then(initWithData)
    .then(null, failure);
 
-function initWithData(data) {
-  console.log('initWithData');
-  var data = JSON.parse(data);
+function initWithData(json) {
+  var data = JSON.parse(json);
 
   // Services available
   state.services = data.services || defaults.services;
@@ -88,10 +93,10 @@ function initWithData(data) {
 
 function createPanelToggleHandler(panelId) {
   var keypath = 'ui.panels.' + panelId + '.isOpen';
-  return function (evt) {
+  return function (/* evt */) {
     var isOpen = this.get(keypath);
-        this.set(keypath, !isOpen);
-  }
+    this.set(keypath, !isOpen);
+  };
 }
 
 function uiVolumeChange(evt) {
@@ -104,7 +109,7 @@ function uiVolumeChange(evt) {
 function uiServiceChange(evt) {
   evt.original.preventDefault();
 
-  var id = evt.context.id
+  var id = evt.context.id;
 
   console.log('ui: service selected', id);
   xhr.post('/radio/service/' + id ).then(success, failure);
@@ -120,9 +125,7 @@ function uiPower(evt) {
 
 function uiAvoid(evt) {
   evt.original.preventDefault();
-  var method = evt.context.isAvoiding
-                ? 'DELETE'
-                : 'POST';
+  var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
   xhr(method, '/avoider');
 }
 
@@ -150,8 +153,10 @@ eventSource.addEventListener('message', function (evt) {
       break;
     case 'nowPlaying':
       ui.set(keypathForServiceId(content.service, state.services) + '.nowPlaying', content.data);
+      break;
     case 'nowAndNext':
       ui.set(keypathForServiceId(content.service, state.services) + '.nowAndNext', content.data);
+      break;
     default:
       // console.log('Unhandled topic', content.topic, content);
   }
@@ -188,6 +193,9 @@ function keypathForServiceId(id, services) {
 }
 
 },{"./utils":2,"./xhr":3,"ractive":17,"ractive-events-tap":16}],2:[function(require,module,exports){
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+'use strict';
+
 module.exports = {
   debounce: function debounce(fn, delay) {
     var timer = null;
@@ -200,13 +208,13 @@ module.exports = {
     };
   },
   throttle: function throttle(fn, threshhold, scope) {
-    threshhold || (threshhold = 250);
+    threshhold = threshhold || (threshhold = 250);
     var last,
         deferTimer;
     return function () {
       var context = scope || this;
 
-      var now = +new Date,
+      var now = +new Date(),
           args = arguments;
       if (last && now < last + threshhold) {
         // hold on to it
@@ -224,6 +232,9 @@ module.exports = {
 };
 
 },{}],3:[function(require,module,exports){
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+'use strict';
+
 var Promise = Promise || require('es6-promise').Promise;
 
 module.exports = xhr;
@@ -234,9 +245,13 @@ module.exports = xhr;
         newArgs = [method].concat(args);
 
     return xhr.apply(null, newArgs);
-  }
-})
+  };
+});
 
+/*
+  XHR implementation from:
+    http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest
+*/
 function xhr(method, url) {
   method = method ? method.toUpperCase() : 'GET';
   // Return a new promise.
@@ -248,20 +263,20 @@ function xhr(method, url) {
     req.onload = function() {
       // This is called even on 404 etc
       // so check the status
-      if (req.status == 200) {
+      if (req.status === 200) {
         // Resolve the promise with the response text
         resolve(req.response);
       }
       else {
         // Otherwise reject with the status text
         // which will hopefully be a meaningful error
-        reject(Error(req.statusText));
+        reject(new Error(req.statusText));
       }
     };
 
     // Handle network errors
     req.onerror = function() {
-      reject(Error("Network Error"));
+      reject(new Error('Network Error'));
     };
 
     // Make the request

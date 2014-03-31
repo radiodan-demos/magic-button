@@ -1,3 +1,7 @@
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+/* global EventSource */
+'use strict';
+
 console.log('Core app started');
 
 var Ractive = require('ractive'),
@@ -11,24 +15,25 @@ require('ractive-events-tap');
 
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]').innerText,
-    defaults  = {
-      radio: {
-        power : { isOn: false },
-        audio : { volume: 0   }
-      },
-      ui: { panels: {} },
-      services: []
-    },
     state = {},
+    defaults,
     ui;
+
+defaults = {
+  radio: {
+    power : { isOn: false },
+    audio : { volume: 0   }
+  },
+  ui: { panels: {} },
+  services: []
+};
 
 xhr.get('/radio/state.json')
    .then(initWithData)
    .then(null, failure);
 
-function initWithData(data) {
-  console.log('initWithData');
-  var data = JSON.parse(data);
+function initWithData(json) {
+  var data = JSON.parse(json);
 
   // Services available
   state.services = data.services || defaults.services;
@@ -87,10 +92,10 @@ function initWithData(data) {
 
 function createPanelToggleHandler(panelId) {
   var keypath = 'ui.panels.' + panelId + '.isOpen';
-  return function (evt) {
+  return function (/* evt */) {
     var isOpen = this.get(keypath);
-        this.set(keypath, !isOpen);
-  }
+    this.set(keypath, !isOpen);
+  };
 }
 
 function uiVolumeChange(evt) {
@@ -103,7 +108,7 @@ function uiVolumeChange(evt) {
 function uiServiceChange(evt) {
   evt.original.preventDefault();
 
-  var id = evt.context.id
+  var id = evt.context.id;
 
   console.log('ui: service selected', id);
   xhr.post('/radio/service/' + id ).then(success, failure);
@@ -119,9 +124,7 @@ function uiPower(evt) {
 
 function uiAvoid(evt) {
   evt.original.preventDefault();
-  var method = evt.context.isAvoiding
-                ? 'DELETE'
-                : 'POST';
+  var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
   xhr(method, '/avoider');
 }
 
@@ -149,8 +152,10 @@ eventSource.addEventListener('message', function (evt) {
       break;
     case 'nowPlaying':
       ui.set(keypathForServiceId(content.service, state.services) + '.nowPlaying', content.data);
+      break;
     case 'nowAndNext':
       ui.set(keypathForServiceId(content.service, state.services) + '.nowAndNext', content.data);
+      break;
     default:
       // console.log('Unhandled topic', content.topic, content);
   }
