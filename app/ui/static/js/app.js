@@ -26,7 +26,8 @@ defaults = {
   radio: {
     power : { isOn: false },
     audio : { volume: 0   },
-    magic : {}
+    magic : {},
+    settings: {}
   },
   ui: { panels: {} },
   services: []
@@ -34,7 +35,8 @@ defaults = {
 
 var initialStateData = Promise.all([
   xhr.get('/radio/state.json'),
-  xhr.get('/avoider/state.json')
+  xhr.get('/avoider/state.json'),
+  xhr.get('/avoider/settings.json')
 ]);
 
 initialStateData
@@ -42,8 +44,10 @@ initialStateData
   .then(null, failure('state'));
 
 function initWithData(states) {
-  var radio   = JSON.parse(states[0]),
-      avoider = JSON.parse(states[1]);
+  console.log('initWithData', states);
+  var radio    = JSON.parse(states[0]),
+      avoider  = JSON.parse(states[1]),
+      avoiderSettings = JSON.parse(states[2]);
 
   // Services available
   state.services = radio.services || defaults.services;
@@ -57,6 +61,7 @@ function initWithData(states) {
 
   // Magic features
   state.radio.magic.avoider = avoider;
+  state.radio.magic.avoider.settings = avoiderSettings;
 
   // State of this UI
   state.ui = defaults.ui;
@@ -100,6 +105,7 @@ function initWithData(states) {
   */
   ui.on('stations-button', createPanelToggleHandler('services'));
   ui.on('volume-button', createPanelToggleHandler('volume'));
+  ui.on('settings-button', createPanelToggleHandler('settings'));
 
   console.log('initialised with data', state);
 }

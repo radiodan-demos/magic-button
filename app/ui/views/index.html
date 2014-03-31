@@ -22,10 +22,11 @@
             <span>Radiodan icon</span>
           </p>
           <p class="lo-right {{ isOn ? 'is-on' : 'is-off' }}">
-            <a>setup</a>
+            <a on-tap="settings-button">setup</a>
           </p>
         </section>
 
+        {{^ui.panels.settings.isOpen}}
         <section id="playout" class="layout">
           <p class="lo-left">
             <a on-tap="stations-button">
@@ -106,6 +107,24 @@
             {{/radio.magic}}
           </ul>
         </section>
+        {{/ui.panels.settings.isOpen}}
+
+        {{#ui.panels.settings.isOpen}}
+        <section id="settings">
+          <h2>Settings</h2>
+          {{#radio.magic.avoider.settings}}
+          <div>
+            <h2>Avoider</h2>
+            <label>Avoid:
+              <span>{{ avoidType }}</span>
+            </label>
+            <label>with:
+              <span>{{ serviceId }}</span>
+            </label>
+          </div>
+          {{/radio.magic.avoider.settings}}
+        </section>
+        {{/ui.panels.settings.isOpen}}
       {% endraw %}
     </script>
 
