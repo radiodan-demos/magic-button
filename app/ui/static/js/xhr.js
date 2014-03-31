@@ -18,13 +18,22 @@ module.exports = xhr;
   XHR implementation from:
     http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest
 */
-function xhr(method, url) {
+function xhr(method, url, opts) {
+  opts = opts || {};
+
   method = method ? method.toUpperCase() : 'GET';
   // Return a new promise.
   return new Promise(function(resolve, reject) {
     // Do the usual XHR stuff
     var req = new XMLHttpRequest();
     req.open(method, url);
+
+    // Send headers
+    if (opts.headers) {
+      Object.keys(opts.headers).forEach(function (header) {
+        req.setRequestHeader(header, opts.headers[header]);
+      });
+    }
 
     req.onload = function() {
       // This is called even on 404 etc
@@ -46,6 +55,6 @@ function xhr(method, url) {
     };
 
     // Make the request
-    req.send();
+    req.send(opts.data);
   });
 }

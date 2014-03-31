@@ -100,6 +100,7 @@ function initWithData(states) {
   ui.on('service', uiServiceChange);
   ui.on('power', uiPower);
   ui.on('avoid', uiAvoid);
+  ui.observe('radio.magic.avoider.settings', uiAvoidSettings);
 
   /*
     UI -> UI
@@ -147,6 +148,16 @@ function uiAvoid(evt) {
   evt.original.preventDefault();
   var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
   xhr(method, '/avoider');
+}
+
+function uiAvoidSettings(data) {
+  var payload = JSON.stringify(data),
+      opts = {
+        headers: { 'Content-type': 'application/json' },
+        data: payload
+      };
+  console.log('Avoid settings changed', opts);
+  xhr.post('/avoider/settings.json', opts);
 }
 
 /*
@@ -276,13 +287,22 @@ module.exports = xhr;
   XHR implementation from:
     http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest
 */
-function xhr(method, url) {
+function xhr(method, url, opts) {
+  opts = opts || {};
+
   method = method ? method.toUpperCase() : 'GET';
   // Return a new promise.
   return new Promise(function(resolve, reject) {
     // Do the usual XHR stuff
     var req = new XMLHttpRequest();
     req.open(method, url);
+
+    // Send headers
+    if (opts.headers) {
+      Object.keys(opts.headers).forEach(function (header) {
+        req.setRequestHeader(header, opts.headers[header]);
+      });
+    }
 
     req.onload = function() {
       // This is called even on 404 etc
@@ -304,7 +324,7 @@ function xhr(method, url) {
     };
 
     // Make the request
-    req.send();
+    req.send(opts.data);
   });
 }
 

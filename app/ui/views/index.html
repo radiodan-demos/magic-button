@@ -115,12 +115,13 @@
           {{#radio.magic.avoider.settings}}
           <div>
             <h2>Avoider</h2>
-            <label>Avoid:
-              <span>{{ avoidType }}</span>
-            </label>
-            <label>with:
-              <span>{{ serviceId }}</span>
-            </label>
+            Avoid:
+              <label><input type='radio' name='{{avoidType}}' value='tracks'> tracks</label>
+              <label><input type='radio' name='{{avoidType}}' value='programmes'> programmes</label>
+            with:
+              <label><input type='radio' name='{{serviceId}}' value='radio1'> Radio 1</label>
+              <label><input type='radio' name='{{serviceId}}' value='radio4'> Radio 4</label>
+              <label><input type='radio' name='{{serviceId}}' value='6music'> Radio 6 Music</label>
           </div>
           {{/radio.magic.avoider.settings}}
         </section>

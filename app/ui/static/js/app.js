@@ -99,6 +99,7 @@ function initWithData(states) {
   ui.on('service', uiServiceChange);
   ui.on('power', uiPower);
   ui.on('avoid', uiAvoid);
+  ui.observe('radio.magic.avoider.settings', uiAvoidSettings);
 
   /*
     UI -> UI
@@ -146,6 +147,16 @@ function uiAvoid(evt) {
   evt.original.preventDefault();
   var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
   xhr(method, '/avoider');
+}
+
+function uiAvoidSettings(data) {
+  var payload = JSON.stringify(data),
+      opts = {
+        headers: { 'Content-type': 'application/json' },
+        data: payload
+      };
+  console.log('Avoid settings changed', opts);
+  xhr.post('/avoider/settings.json', opts);
 }
 
 /*
