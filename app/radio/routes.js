@@ -70,8 +70,7 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
               title: current.title,
               nowAndNext: current.nowAndNext
             },
-            audio   : { volume  : status.volume },
-            avoider : { isAvoiding: false }
+            audio   : { volume  : status.volume }
           }
         );
       });

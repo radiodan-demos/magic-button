@@ -16,6 +16,7 @@ module.exports = function(states, bbcServices) {
     instance.stopAvoiding = stopAvoiding;
     instance.avoid = avoid;
     instance.cancel = cancel;
+    instance.isAvoiding = isAvoiding;
     instance.avoidTopic = avoidTopic;
 
     return instance;
@@ -71,6 +72,10 @@ module.exports = function(states, bbcServices) {
         state.exit();
         state = null;
       }
+    }
+
+    function isAvoiding() {
+      return !!instance.avoidTopic;
     }
   }
 };

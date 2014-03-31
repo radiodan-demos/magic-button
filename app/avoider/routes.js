@@ -15,6 +15,7 @@ function routes(app, bbcServices, states, Settings) {
       avoider;
 
   app.get("/", index);
+  app.get("/state.json", state);
   app.post("/", avoid);
   app.delete("/", cancel);
 
@@ -26,6 +27,12 @@ function routes(app, bbcServices, states, Settings) {
     res.render(
       __dirname+"/views/index"
     );
+  }
+
+  function state(req, res) {
+    res.json({
+      isAvoiding: avoider ? avoider.isAvoiding() : false
+    });
   }
 
   function avoid(req, res) {
