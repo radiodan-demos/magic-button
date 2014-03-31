@@ -53,26 +53,34 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
   app.delete('/power', standby);
 
   function getState(req, res) {
-    var current = bbcServices.get(services.current());
+    var current = bbcServices.get(services.current()),
+        state = {
+          power : { isOn: power.isOn() },
+          current : {
+            id: current.id,
+            title: current.title,
+            nowAndNext: current.nowAndNext
+          },
+          audio : null,
+          services: []
+        };
     utils.promise.spread(
       [
         audio.status(),
         bbcServices.stations()
       ],
       function (status, stations) {
-        logger.info('Stations', stations.length);
-        res.json(
-          {
-            power   : { isOn: power.isOn() },
-            services: stations,
-            current : {
-              id: current.id,
-              title: current.title,
-              nowAndNext: current.nowAndNext
-            },
-            audio   : { volume  : status.volume }
-          }
-        );
+        logger.info('Stations %s, status:', stations.length, status);
+        try {
+          logger.info('Responding with state', state);
+
+          state.audio = status;
+          state.services = stations;
+
+          res.json(state);
+        } catch (e) {
+          res.json(500, e.stack);
+        }
       });
   }
 
