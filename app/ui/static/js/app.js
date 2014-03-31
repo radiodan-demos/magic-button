@@ -20,35 +20,43 @@ var container = document.querySelector('[data-ui-container]'),
     defaults,
     ui;
 
+window.state = state;
+
 defaults = {
   radio: {
     power : { isOn: false },
-    audio : { volume: 0   }
+    audio : { volume: 0   },
+    magic : {}
   },
   ui: { panels: {} },
   services: []
 };
 
 var initialStateData = Promise.all([
-  xhr.get('/radio/state.json') /*,
-  xhr.get('/avoider') */
+  xhr.get('/radio/state.json'),
+  xhr.get('/avoider/state.json')
 ]);
 
 initialStateData
   .then(initWithData)
   .then(null, failure('state'));
 
-function initWithData(radioState, avoiderStatus) {
-  var data = JSON.parse(radioState);
+function initWithData(states) {
+  var radio   = JSON.parse(states[0]),
+      avoider = JSON.parse(states[1]);
 
   // Services available
-  state.services = data.services || defaults.services;
+  state.services = radio.services || defaults.services;
 
   // State of the radio
   state.radio = {
-    power: data.power || defaults.radio.power,
-    audio: data.audio || defaults.radio.audio
+    power: radio.power || defaults.radio.power,
+    audio: radio.audio || defaults.radio.audio,
+    magic: defaults.radio.magic
   };
+
+  // Magic features
+  state.radio.magic.avoider = avoider;
 
   // State of this UI
   state.ui = defaults.ui;
@@ -154,7 +162,7 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('radio.power', content.data);
       break;
     case 'avoider':
-      ui.set('avoider', content.data);
+      ui.set('radio.magic.avoider', content.data);
       break;
     case 'nowPlaying':
       ui.set(keypathForServiceId(content.service, state.services) + '.nowPlaying', content.data);
