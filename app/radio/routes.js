@@ -94,8 +94,10 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
   }
 
   function start(req, res) {
-    states.handle('startPlaying', '6music');
-    res.send(200);
+    settings.get().then(function(settings){
+      states.handle('startPlaying', settings.serviceId);
+      res.send(200);
+    });
   }
 
   function standby(req, res) {
@@ -133,8 +135,10 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
   function changeService(req, res) {
     var id = req.params.id;
 
-    states.handle('startPlaying', id);
-    res.send(200);
+    settings.update({serviceId: id}).then(function() {
+      states.handle('startPlaying', id);
+      res.send(200);
+    });
   }
 
   function respondWithSuccess(req, res) {
