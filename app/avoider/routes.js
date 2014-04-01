@@ -5,10 +5,7 @@ var utils    = require('radiodan-client').utils,
 module.exports = routes;
 
 function routes(app, states, Settings) {
-  var settings = Settings.build(
-        'avoider',
-        { serviceId: 'radio1', avoidType: 'programme' }
-      );
+  var settings = Settings.build('avoider');
 
   app.get('/', index);
   app.get('/state.json', state);

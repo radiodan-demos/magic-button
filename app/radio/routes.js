@@ -7,10 +7,7 @@ module.exports = routes;
 function routes(app, eventBus, radiodan, states, services, Settings) {
 
   var audio  = radiodan.audio.get('default'),
-      settings = Settings.build(
-        "radio",
-        { serviceId: "radio4", playing: true }
-      );
+      settings = Settings.build("radio");
 
   /*
     A big ball of state

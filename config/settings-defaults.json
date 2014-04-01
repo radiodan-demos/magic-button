@@ -1,0 +1,14 @@
+{
+  "announcer": {
+    "speak": false,
+    "announcer": "marvin"
+  },
+  "avoider": {
+    "serviceId": "radio1",
+    "avoidType": "programme"
+  },
+  "radio": {
+    "serviceId": "radio4",
+    "playing":   true
+  }
+}

@@ -5,10 +5,7 @@ var utils    = require('radiodan-client').utils,
 module.exports = routes;
 
 function routes(app, states, Settings) {
-  var settings = Settings.build(
-        'announcer',
-        { speak: false, announcer: 'marvin' }
-      );
+  var settings = Settings.build('announcer');
 
   app.get('/', index);
   app.get('/state.json', state);
