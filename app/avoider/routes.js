@@ -11,7 +11,7 @@ function routes(app, states, Settings) {
       );
 
   app.get('/', index);
-  app.get("/state.json", state);
+  app.get('/state.json', state);
   app.post('/', avoid);
   app.delete('/', cancel);
 
