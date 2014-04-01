@@ -182,6 +182,9 @@ eventSource.addEventListener('message', function (evt) {
     case 'avoider':
       ui.set('radio.magic.avoider', content.data);
       break;
+    case 'settings.avoider':
+      ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
+      break;
     case 'nowPlaying':
       ui.set(keypathForServiceId(content.service, state.services) + '.nowPlaying', content.data);
       break;
@@ -225,6 +228,27 @@ function findIndexById(id, services) {
 
 function keypathForServiceId(id, services) {
   return 'services.' + findIndexById(id, services);
+}
+
+/*
+  Object comparison helpers
+*/
+function hasDifferentProperties(first, second) {
+  return Object.keys(first).some(
+    function (key) {
+      var firstProp  = first[key],
+          secondProp = second[key];
+      return firstProp !== secondProp;
+    }
+  );
+}
+
+function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
+  var current = ractive.get(keypath);
+
+  if ( hasDifferentProperties(obj, current) ) {
+    ractive.set(keypath, obj);
+  }
 }
 
 },{"./utils":2,"./xhr":3,"es6-promise":5,"ractive":17,"ractive-events-tap":16}],2:[function(require,module,exports){
