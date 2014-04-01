@@ -15,7 +15,7 @@ var Ractive = require('ractive'),
 require('ractive-events-tap');
 
 var container = document.querySelector('[data-ui-container]'),
-    template  = document.querySelector('[data-ui-template]').innerText,
+    template  = document.querySelector('[data-ui-template]#mainTmpl').innerText,
     state = {},
     defaults,
     ui;

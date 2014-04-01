@@ -9,7 +9,22 @@
   </head>
 
   <body>
-    <script data-ui-template type="text/ractive">
+    <script id="servicesTmpl" data-ui-template type="text/ractive">
+    {% raw %}
+    <ul class="service-list">
+    {{#services}}
+      <li on-tap="service"
+          class="service-item {{ radio.current.id === id ? 'is-playing' : '' }}">
+        <a  href="/radio/service/{{ id }}">
+          <img src="{{ logos.svg }}" alt="{{ title }}" />
+        </a>
+      </li>
+    {{/services}}
+    </ul>
+    {% endraw %}
+    </script>
+
+    <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
         <section id="masthead" class="layout">
           {{#radio.power}}
@@ -58,16 +73,7 @@
 
         <section  id="services"
                   class="layout panel services {{ ui.panels.services.isOpen ? '' : 'is-closed' }}">
-          <ul class="service-list">
-          {{#services}}
-            <li on-tap="service"
-                class="service-item {{ radio.current.id === id ? 'is-playing' : '' }}">
-              <a  href="/radio/service/{{ id }}">
-                <img src="{{ logos.svg }}" alt="{{ title }}" />
-              </a>
-            </li>
-          {{/services}}
-          </ul>
+          {{>servicesTmpl}}
         </section>
 
         <section id="metadata" class="layout">
