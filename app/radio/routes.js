@@ -4,7 +4,7 @@ var utils = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, eventBus, radiodan, states, services, bbcServices, Settings, power) {
+function routes(app, eventBus, radiodan, states, services, Settings) {
 
   var audio  = radiodan.audio.get('default'),
       settings = Settings.build(
@@ -32,17 +32,18 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
     var current = services.current(),
         data = {};
     if (current) {
-      data = bbcServices.get(current);
+      data = services.bbc.get(current);
     }
     res.json(200, data);
   });
+
   app.get('/services', listServices);
 
   function listServices(req, res) {
-    bbcServices.ready
-               .then(function () {
-                  res.json(bbcServices.get());
-               });
+    services.bbc.ready
+      .then(function () {
+        res.json(services.bbc.get());
+      });
   }
 
   /*
@@ -53,44 +54,52 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
   app.delete('/power', standby);
 
   function getState(req, res) {
-    var current = bbcServices.get(services.current()),
-        state = {
-          power : { isOn: power.isOn() },
-          current : {
-            id: current.id,
-            title: current.title,
-            nowAndNext: current.nowAndNext
-          },
-          audio : null,
-          services: []
-        };
+    var current, state;
+
+    if(services.current()) {
+      var programme = services.bbc.get(services.current());
+      current = {
+        id: programme.id,
+        title: programme.title,
+        nowAndNext: programme.nowAndNext
+      };
+    } else {
+      current = null;
+    }
+
     utils.promise.spread(
       [
         audio.status(),
-        bbcServices.stations()
+        services.bbc.stations()
       ],
       function (status, stations) {
         logger.info('Stations %s, status:', stations.length, status);
         try {
           logger.info('Responding with state', state);
 
-          state.audio = status;
-          state.services = stations;
-
-          res.json(state);
-        } catch (e) {
-          res.json(500, e.stack);
+          state = {
+            power   : { isOn: (states.state != 'standby') },
+            services: stations,
+            current : current,
+            audio   : { volume  : status.volume },
+            avoider : { isAvoiding: false }
+          };
+        } catch (err) {
+          logger.warn(err);
+          state = {};
         }
+
+        res.json(state);
       });
   }
 
   function start(req, res) {
-    power.turnOn();
+    states.handle('startPlaying', '6music');
     res.send(200);
   }
 
   function standby(req, res) {
-    power.turnOff();
+    states.handle('standby');
     res.send(200);
   }
 
@@ -121,25 +130,10 @@ function routes(app, eventBus, radiodan, states, services, bbcServices, Settings
          .then(null, utils.failedPromiseHandler(logger));
   }
 
-  function createStateForServiceId(id) {
-    var state = states.create({
-      name: 'changeService',
-      enter: function (state, players, services, emit) {
-        players.main.add({ clear: true, playlist: services.get(id) })
-              .then(players.main.play);
-        services.change(id);
-      },
-      exit: function (state, players, services, emit) {
-        players.main.stop();
-      }
-    });
-    return state;
-  }
-
   function changeService(req, res) {
     var id = req.params.id;
-    var state = createStateForServiceId(id);
-    state.enter();
+
+    states.handle('startPlaying', id);
     res.send(200);
   }
 

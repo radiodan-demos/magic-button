@@ -1,23 +1,19 @@
-var utils    = require("radiodan-client").utils,
-    settingsRoutes = require("../settings/routes"),
+var utils    = require('radiodan-client').utils,
+    settingsRoutes = require('../settings/routes'),
     logger   = utils.logger(__filename);
 
 module.exports = routes;
 
-function routes(app, bbcServices, states, Settings) {
-  var Avoider  = require("./avoider")(
-          states, bbcServices
-      ),
-      settings = Settings.build(
-        "avoider",
-        { serviceId: null, avoidType: "programme" }
-      ),
-      avoider;
+function routes(app, states, Settings) {
+  var settings = Settings.build(
+        'avoider',
+        { serviceId: 'radio1', avoidType: 'programme' }
+      );
 
-  app.get("/", index);
+  app.get('/', index);
   app.get("/state.json", state);
-  app.post("/", avoid);
-  app.delete("/", cancel);
+  app.post('/', avoid);
+  app.delete('/', cancel);
 
   app.use(settingsRoutes(settings));
 
@@ -25,30 +21,25 @@ function routes(app, bbcServices, states, Settings) {
 
   function index(req, res) {
     res.render(
-      __dirname+"/views/index"
+      __dirname+'/views/index'
     );
   }
 
   function state(req, res) {
     res.json({
-      isAvoiding: avoider ? avoider.isAvoiding() : false
+      isAvoiding: (states.state === 'avoiding')
     });
   }
 
   function avoid(req, res) {
-    if (avoider) {
-      avoider.cancel();
-    }
-    avoider = Avoider.create("radio4");
-    avoider.avoid();
-    res.redirect("./");
+    settings.get().then(function(avoidSettings) {
+      states.handle('startAvoiding', avoidSettings);
+      res.redirect('./');
+    }).then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
-    logger.info('/avoid', avoider);
-    if (avoider) {
-      avoider.cancel();
-    }
-    res.redirect("./");
+    states.handle('stopAvoiding');
+    res.redirect('./');
   }
 }

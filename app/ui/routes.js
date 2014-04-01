@@ -3,7 +3,7 @@ var utils  = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, radiodan, bbcServices, services, power) {
+function routes(app, radiodan, services) {
   var audio = radiodan.audio.get('default');
 
   app.use("/assets", require("serve-static")(__dirname + "/static/"));
@@ -15,8 +15,6 @@ function routes(app, radiodan, bbcServices, services, power) {
       __dirname+"/views/index",
       {
         isDebug : (process.env.NODE_ENV === 'development')
-                  ? true
-                  : false
       }
     );
   }

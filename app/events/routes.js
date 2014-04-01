@@ -1,13 +1,13 @@
 var eventSource = require("express-eventsource");
 
-module.exports = function (app, eventBus, bbcServices) {
+module.exports = function (app, eventBus, services) {
   var eventStream = eventSource();
 
   // Shared eventsource
   // To send data call: eventStream.send(dataObj, 'eventName');
   app.use("/", eventStream.middleware());
 
-  bbcServices.on('*', function (data) {
+  services.bbc.on('*', function (data) {
     eventStream.send(data);
   });
 
