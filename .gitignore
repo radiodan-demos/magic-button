@@ -18,3 +18,4 @@ node_modules
 radiodan-config.json
 db/*db*
 *.debug.js
+.DS_Store
