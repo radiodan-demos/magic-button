@@ -25,6 +25,11 @@ body {
   line-height: 40px;
 }
 
+#metadata {
+  /*height: 130px;*/
+  border-bottom: 1px dotted red;
+}
+
 /*
   Spot colour: rgba(37, 182, 224, 1);
 
