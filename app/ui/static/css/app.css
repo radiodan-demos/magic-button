@@ -1,16 +1,21 @@
+/* apply a natural box layout model to all elements */
+*, *:before, *:after {
+  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+ }
+
 /*
   Layout of panels
 */
 #masthead {
-  height: 50px;
+  height: 72px;
 }
 
 #playout {
-  height: 50px;
+  height: 48px;
 }
 
 #volume {
-  height: 50px;
+  height: 40px;
 }
 
 /*

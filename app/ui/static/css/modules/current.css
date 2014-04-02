@@ -1,0 +1,11 @@
+.current-panel,
+.ct-btn,
+.ct-logo {
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+
+.current-panel {
+  padding: 8px;
+}

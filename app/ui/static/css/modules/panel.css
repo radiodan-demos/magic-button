@@ -1,5 +1,6 @@
 .panel {
   overflow: hidden;
+  border-bottom: 1px solid red;
 }
 
 .panel.is-open {
@@ -8,4 +9,5 @@
 
 .panel.is-closed {
   height: 0 !important;
+  border-bottom: 1px solid transparent;
 }
