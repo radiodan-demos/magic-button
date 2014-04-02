@@ -3,6 +3,10 @@
   -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
  }
 
+body {
+  color: #666;
+}
+
 /*
   Layout of panels
 */

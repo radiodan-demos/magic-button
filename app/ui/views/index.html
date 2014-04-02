@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="assets/css/modules/panel.css">
     <link rel="stylesheet" href="assets/css/modules/current.css">
     <link rel="stylesheet" href="assets/css/modules/masthead.css">
+    <link rel="stylesheet" href="assets/css/modules/metadata.css">
     <link rel="stylesheet" href="assets/css/app.css">
   </head>
 
@@ -79,18 +80,19 @@
     {% raw %}
     {{#radio.current}}
       {{#first(nowAndNext)}}
-      <div class="current-programme">
-        <p>{{ brand }}</p>
-        <p>{{ episode }}</p>
+      <div class="metadata">
         {{#image}}
-          <img src="{{ imageUrl(templateUrl, '464x261') }}" />
+          <img class="md-img"
+               src="{{ imageUrl(templateUrl, '272x153') }}" />
         {{/image}}
+        <p class="md-primary">{{ brand }}</p>
+        <p class="md-secondary">{{ episode }}</p>
       </div>
       {{/nowAndNext}}
       {{#nowPlaying}}
-      <div class="current-programme">
-        <p>{{ title }}</p>
-        <p>{{ artist }}</p>
+      <div class="metadata">
+        <p class="md-primary">{{ title }}</p>
+        <p class="md-secondary">{{ artist }}</p>
       </div>
       {{/nowPlaying}}
     {{/radio.current}}
@@ -133,7 +135,9 @@
         </section>
 
         <section id="metadata" class="layout">
-          {{>metadataTmpl}}
+          <div class="lo-single metadata-panel">
+            {{>metadataTmpl}}
+          </div>
         </section>
 
         <section id="behaviours">

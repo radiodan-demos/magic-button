@@ -1,5 +1,6 @@
 .layout {
   position: relative;
+  text-align: center;
 }
 
 .lo-left,
@@ -10,6 +11,7 @@
   padding: 0;
   margin: 0;
   vertical-align: middle;
+  text-align: left;
 }
 
 .lo-left {
@@ -24,4 +26,10 @@
 
 .lo-right {
   right: 16px;
+}
+
+.lo-single {
+  margin-left: 16px;
+  margin-right: 16px;
+  text-align: left;
 }

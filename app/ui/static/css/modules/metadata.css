@@ -1,0 +1,32 @@
+.metadata-panel {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
+.metadata {
+  position: relative;
+}
+
+.md-primary,
+.md-secondary {
+  margin: 0;
+  padding: 0;
+}
+
+.md-primary {
+  font-size: 18px;
+  line-height: 19px;
+  padding-bottom: 6px;
+  color: #16a0e8;
+}
+
+.md-secondary {
+  font-size: 14px;
+  padding-bottom: 11px;
+}
+
+.md-img {
+  float: right;
+  width: 50%;
+  max-width: 272px;
+}
