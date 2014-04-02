@@ -27,7 +27,8 @@ defaults = {
     power : { isOn: false },
     audio : { volume: 0   },
     magic : {},
-    settings: {}
+    settings: {},
+    current: null
   },
   ui: { panels: {} },
   services: []
@@ -56,7 +57,8 @@ function initWithData(states) {
   state.radio = {
     power: radio.power || defaults.radio.power,
     audio: radio.audio || defaults.radio.audio,
-    magic: defaults.radio.magic
+    magic: defaults.radio.magic,
+    current: radio.current || defaults.radio.current
   };
 
   // Magic features
