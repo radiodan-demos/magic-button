@@ -94,7 +94,12 @@
         <p class="md-primary">{{ title }}</p>
         <p class="md-secondary">{{ artist }}</p>
       </div>
+      <a class="track" on-tap="track-display">
+        <i></i>
+        <span>Track</span>
+      </a>
       {{/nowPlaying}}
+
     {{/radio.current}}
     {% endraw %}
     </script>
