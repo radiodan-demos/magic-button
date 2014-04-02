@@ -16,7 +16,7 @@
       <li on-tap="service"
           class="service-item {{ radio.current.id === id ? 'is-playing' : '' }}">
         <a  href="/radio/service/{{ id }}">
-          <img src="{{ logos.svg }}" alt="{{ title }}" />
+          <img src="{{ radio.current.id === id ? logos.active : logos.inactive }}" alt="{{ title }}" />
         </a>
       </li>
     {{/services}}
