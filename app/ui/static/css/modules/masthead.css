@@ -1,0 +1,13 @@
+.setup-btn {
+  display: inline-block;
+  height: 100%;
+  padding-left: 10px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.sb-inner {
+  display: inline-block;
+  height: 100%;
+  border-left: 1px solid red;
+}

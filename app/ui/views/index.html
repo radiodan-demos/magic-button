@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="assets/css/modules/layout.css">
     <link rel="stylesheet" href="assets/css/modules/panel.css">
     <link rel="stylesheet" href="assets/css/modules/current.css">
+    <link rel="stylesheet" href="assets/css/modules/masthead.css">
     <link rel="stylesheet" href="assets/css/app.css">
   </head>
 
@@ -22,7 +23,12 @@
       <span>Radiodan icon</span>
     </p>
     <p class="lo-right {{ isOn ? 'is-on' : 'is-off' }}">
-      <a on-tap="settings-button">setup</a>
+      <a on-tap="settings-button"
+         class="setup-btn">
+         <span class="sb-inner">
+          setup
+        </span>
+      </a>
     </p>
     {% endraw %}
     </script>
