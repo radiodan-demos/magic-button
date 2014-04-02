@@ -9,6 +9,85 @@
   </head>
 
   <body>
+    <script id="mastheadTmpl" data-ui-template type="text/ractive">
+    {% raw %}
+    {{#radio.power}}
+    <p class="lo-left {{ isOn ? 'is-on' : 'is-off' }}">
+      <a  on-tap="power"
+          href="/power">Turn {{ isOn ? 'Off' : 'On' }}</a>
+    </p>
+    {{/radio.power}}
+    <p class="lo-center">
+      <span>Radiodan icon</span>
+    </p>
+    <p class="lo-right {{ isOn ? 'is-on' : 'is-off' }}">
+      <a on-tap="settings-button">setup</a>
+    </p>
+    {% endraw %}
+    </script>
+
+    <script id="playoutTmpl" data-ui-template type="text/ractive">
+    {% raw %}
+    <div class="lo-left current-panel">
+      <a on-tap="stations-button"
+         class="ct-btn">
+        <span class="ct-indicator">
+          {{ ui.panels.services.isOpen ? '⬇' : '⬆' }}
+        </span>
+        {{#radio.current.logos.active}}
+          <img class="ct-logo"
+               src="{{radio.current.logos.active}}" />
+        {{/radio.current.logos.active}}
+        {{^radio.current}}
+          <span class="ct-title">No current station</span>
+        {{/radio.current}}
+        {{#radio.current}}
+          <span class="ct-title">{{title}}</span>
+        {{/radio.current}}
+      </a>
+    </div>
+
+    <div class="lo-right">
+      {{ ui.panels.volume.isOpen ? '⬇' : '⬆' }}
+      <a on-tap="volume-button">Volume</a>
+    </div>
+    {% endraw %}
+    </script>
+
+    <script id="volumeTmpl" data-ui-template type="text/ractive">
+    {% raw %}
+    {{#radio.audio}}
+    <div class="lo-center">
+      <input type="range"
+             on-change="volume"
+             min="0" max="100" value="{{volume}}" />
+    </div>
+    {{/radio.audio}}
+    {% endraw %}
+    </script>
+
+    <script id="metadataTmpl" data-ui-template type="text/ractive">
+    {% raw %}
+    {{#radio.current}}
+      {{#first(nowAndNext)}}
+      <div class="current-programme">
+        <p>{{ brand }}</p>
+        <p>{{ episode }}</p>
+        {{#image}}
+          <img src="{{ imageUrl(templateUrl, '464x261') }}" />
+        {{/image}}
+      </div>
+      {{/nowAndNext}}
+      {{#nowPlaying}}
+      <div class="current-programme">
+        <p>{{ title }}</p>
+        <p>{{ artist }}</p>
+      </div>
+      {{/nowPlaying}}
+    {{/radio.current}}
+    {% endraw %}
+    </script>
+
     <script id="servicesTmpl" data-ui-template type="text/ractive">
     {% raw %}
     <ul class="service-list">
@@ -26,49 +105,17 @@
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
-        <section id="masthead" class="layout">
-          {{#radio.power}}
-          <p class="lo-left {{ isOn ? 'is-on' : 'is-off' }}">
-            <a  on-tap="power"
-                href="/power">Turn {{ isOn ? 'Off' : 'On' }}</a>
-          </p>
-          {{/radio.power}}
-          <p class="lo-center">
-            <span>Radiodan icon</span>
-          </p>
-          <p class="lo-right {{ isOn ? 'is-on' : 'is-off' }}">
-            <a on-tap="settings-button">setup</a>
-          </p>
+        <section id="masthead" class="layout panel">
+          {{>mastheadTmpl}}
         </section>
 
         {{^ui.panels.settings.isOpen}}
-        <section id="playout" class="layout">
-          <p class="lo-left">
-            <a on-tap="stations-button">
-              {{ ui.panels.services.isOpen ? '⬇' : '⬆' }}
-              {{^radio.current}}
-                No current station
-              {{/radio.current}}
-              {{#radio.current}}
-                  {{title}}
-              {{/radio.current}}
-            </a>
-          </p>
-
-          <p class="lo-right">
-            {{ ui.panels.volume.isOpen ? '⬇' : '⬆' }}
-            <a on-tap="volume-button">Volume</a>
-          </p>
+        <section id="playout" class="layout panel">
+          {{>playoutTmpl}}
         </section>
 
         <section id="volume" class="layout panel {{ ui.panels.volume.isOpen ? '' : 'is-closed' }}">
-          {{#radio.audio}}
-          <p class="lo-center">
-            <input type="range"
-                   on-change="volume"
-                   min="0" max="100" value="{{volume}}" />
-          </p>
-          {{/radio.audio}}
+          {{>volumeTmpl}}
         </section>
 
         <section  id="services"
@@ -77,23 +124,7 @@
         </section>
 
         <section id="metadata" class="layout">
-          {{#radio.current}}
-            {{#first(nowAndNext)}}
-            <div class="current-programme">
-              <p>{{ brand }}</p>
-              <p>{{ episode }}</p>
-              {{#image}}
-                <img src="{{ imageUrl(templateUrl, '464x261') }}" />
-              {{/image}}
-            </div>
-            {{/nowAndNext}}
-            {{#nowPlaying}}
-            <div class="current-programme">
-              <p>{{ title }}</p>
-              <p>{{ artist }}</p>
-            </div>
-            {{/nowPlaying}}
-          {{/radio.current}}
+          {{>metadataTmpl}}
         </section>
 
         <section id="behaviours">
