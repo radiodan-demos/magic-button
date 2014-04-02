@@ -3,9 +3,17 @@
 .ct-logo {
   display: inline-block;
   height: 100%;
-  vertical-align: middle;
+}
+
+.ct-btn,
+.ct-logo {
+  vertical-align: top;
 }
 
 .current-panel {
-  padding: 8px;
+
+}
+
+.ct-logo {
+  padding: 8px 0;
 }

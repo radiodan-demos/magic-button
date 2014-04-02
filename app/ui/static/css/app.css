@@ -8,14 +8,17 @@
 */
 #masthead {
   height: 72px;
+  line-height: 72px;
 }
 
 #playout {
   height: 48px;
+  line-height: 48px;
 }
 
 #volume {
   height: 40px;
+  line-height: 40px;
 }
 
 /*

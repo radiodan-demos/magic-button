@@ -32,13 +32,15 @@
     <div class="lo-left current-panel">
       <a on-tap="stations-button"
          class="ct-btn">
-        <span class="ct-indicator">
-          {{ ui.panels.services.isOpen ? '⬇' : '⬆' }}
-        </span>
         {{#radio.current.logos.active}}
           <img class="ct-logo"
                src="{{radio.current.logos.active}}" />
         {{/radio.current.logos.active}}
+
+        <span class="ct-indicator">
+          {{ ui.panels.services.isOpen ? '⬇' : '⬆' }}
+        </span>
+
         {{^radio.current}}
           <span class="ct-title">No current station</span>
         {{/radio.current}}
