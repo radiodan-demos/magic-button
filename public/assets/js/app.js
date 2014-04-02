@@ -175,7 +175,7 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('radio.audio', content.data);
       break;
     case 'service.changed':
-      ui.set(keypathForServiceId(content.id, state.services), content.data);
+      ui.set(keypathForServiceId(content.data.id, state.services), content.data);
       ui.set('radio.current', content.data);
       break;
     case 'power':
@@ -188,10 +188,10 @@ eventSource.addEventListener('message', function (evt) {
       ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
       break;
     case 'nowPlaying':
-      ui.set(keypathForServiceId(content.service, state.services) + '.nowPlaying', content.data);
+      ui.set(keypathForServiceId(content.service, ui.get('services')) + '.nowPlaying', content.data);
       break;
     case 'nowAndNext':
-      ui.set(keypathForServiceId(content.service, state.services) + '.nowAndNext', content.data);
+      ui.set(keypathForServiceId(content.service, ui.get('services')) + '.nowAndNext', content.data);
       break;
     default:
       // console.log('Unhandled topic', content.topic, content);
