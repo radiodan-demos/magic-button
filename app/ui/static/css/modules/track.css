@@ -1,0 +1,22 @@
+.track {
+  display: inline-block;
+  height: 25px;
+  line-height: 25px;
+}
+
+.track > * {
+  display: inline-block;
+  height: 25px;
+  line-height: 25px;
+  vertical-align: middle;
+}
+
+.track > i {
+  width: 25px;
+  height: 25px;
+  background: transparent url('../../img/track.svg');
+}
+
+.track > span {
+  padding-top: 3px;
+}
