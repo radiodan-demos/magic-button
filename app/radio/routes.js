@@ -58,7 +58,8 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
       current = {
         id: programme.id,
         title: programme.title,
-        nowAndNext: programme.nowAndNext
+        nowAndNext: programme.nowAndNext,
+        nowPlaying: programme.nowPlaying
       };
     } else {
       current = null;
