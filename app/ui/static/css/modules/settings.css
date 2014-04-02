@@ -1,0 +1,22 @@
+.settings {
+  display: inline-block;
+  height: 25px;
+  line-height: 25px;
+}
+
+.settings > * {
+  display: inline-block;
+  height: 25px;
+  line-height: 25px;
+  vertical-align: middle;
+}
+
+.settings > i {
+  width: 17px;
+  height: 17px;
+  background: transparent url('../../img/settings.svg');
+}
+
+.settings > span {
+  padding-top: 3px;
+}

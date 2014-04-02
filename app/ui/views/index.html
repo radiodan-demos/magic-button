@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="assets/css/modules/current.css">
     <link rel="stylesheet" href="assets/css/modules/masthead.css">
     <link rel="stylesheet" href="assets/css/modules/metadata.css">
+    <link rel="stylesheet" href="assets/css/modules/magic.css">
+    <link rel="stylesheet" href="assets/css/modules/track.css">
+    <link rel="stylesheet" href="assets/css/modules/settings.css">
     <link rel="stylesheet" href="assets/css/app.css">
   </head>
 
@@ -145,18 +148,32 @@
           </div>
         </section>
 
-        <section id="behaviours">
-          <h2>Magic Button</h2>
+        <section id="magic">
           <ul>
             {{#radio.magic}}
               {{#avoider}}
-              <li on-tap="avoid">
-                {{^isAvoiding}}
-                  <a href="/avoider/">Avoider</a>
-                {{/isAvoiding}}
-                {{#isAvoiding}}
-                  <a href="/avoider/">Cancel avoiding</a>
-                {{/isAvoiding}}
+              <li class="mg-item">
+                <div on-tap="avoid">
+                  {{^isAvoiding}}
+                  <h2 class="mg-name">Avoider</h2>
+                  {{/isAvoiding}}
+
+                  {{^isAvoiding}}
+                  <i class="mg-icon">Avoider icon</i>
+                  {{/isAvoiding}}
+                  {{#isAvoiding}}
+                  <i class="mg-icon">Avoiding</i>
+                  {{/isAvoiding}}
+                </div>
+
+                <div on-tap="avoid-settings">
+                  {{^isAvoiding}}
+                  <div class="settings">
+                    <i></i>
+                    <span>Avoid settings</span>
+                  </div>
+                  {{/isAvoiding}}
+                </div>
               </li>
               {{/avoider}}
             {{/radio.magic}}

@@ -1,0 +1,16 @@
+.mg-item {
+  list-style: none;
+  text-align: center;
+}
+
+.mg-name {
+  font-size: 22px;
+  text-transform: lowercase;
+}
+
+.mg-icon {
+  display: inline-block;
+  width: 118px;
+  height: 118px;
+  background-color: rgba(0, 255, 0, 0.3);
+}
