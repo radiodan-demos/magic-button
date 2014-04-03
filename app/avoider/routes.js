@@ -23,9 +23,19 @@ function routes(app, states, Settings) {
   }
 
   function state(req, res) {
-    res.json({
-      isAvoiding: (states.state === 'avoiding')
-    });
+    var isAvoiding = (states.state === 'avoiding'),
+        json = {
+          isAvoiding: isAvoiding
+        };
+
+    if (isAvoiding) {
+      var start = new Date();
+      var end = new Date(start.valueOf() + (60 * 5 * 1000));
+      json.startTime = start.toISOString();
+      json.endTime   = end.toISOString();
+    }
+
+    res.json(json);
   }
 
   function avoid(req, res) {
