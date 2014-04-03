@@ -153,17 +153,16 @@
             {{#radio.magic}}
               {{#avoider}}
               <li class="mg-item">
-                <div on-tap="avoid">
-                  {{^isAvoiding}}
-                  <h2 class="mg-name">Avoider</h2>
-                  {{/isAvoiding}}
+                <div>
+                  <h2 class="mg-name">
+                  {{^isAvoiding}}Avoider{{/isAvoiding}}
+                  {{#isAvoiding}}Resume in:{{/isAvoiding}}
+                  </h2>
 
-                  {{^isAvoiding}}
-                  <i class="mg-icon">Avoider icon</i>
-                  {{/isAvoiding}}
-                  {{#isAvoiding}}
-                  <i class="mg-icon">Avoiding</i>
-                  {{/isAvoiding}}
+                  <i class="mg-icon" on-tap="avoid">
+                  {{^isAvoiding}}Avoider icon{{/isAvoiding}}
+                  {{#isAvoiding}}{{ avoidTimeLeft }}{{/isAvoiding}}
+                  </i>
                 </div>
 
                 <div on-tap="avoid-settings">
