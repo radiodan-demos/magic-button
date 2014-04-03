@@ -1,0 +1,22 @@
+/*
+  Layout of panels
+*/
+#masthead {
+  height: 72px;
+  line-height: 72px;
+}
+
+#playout {
+  height: 48px;
+  line-height: 48px;
+}
+
+#volume {
+  height: 40px;
+  line-height: 40px;
+}
+
+#metadata {
+  /*height: 130px;*/
+  border-bottom: 1px dotted red;
+}

@@ -1,60 +1,11 @@
-/* apply a natural box layout model to all elements */
-*, *:before, *:after {
-  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
- }
-
-body {
-  color: #666;
-}
-
-/*
-  Layout of panels
-*/
-#masthead {
-  height: 72px;
-  line-height: 72px;
-}
-
-#playout {
-  height: 48px;
-  line-height: 48px;
-}
-
-#volume {
-  height: 40px;
-  line-height: 40px;
-}
-
-#metadata {
-  /*height: 130px;*/
-  border-bottom: 1px dotted red;
-}
-
-/*
-  Spot colour: rgba(37, 182, 224, 1);
-
-*/
-.service-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.service-item {
-  display: inline-block;
-  height: 3em;
-  padding: 0.5em;
-}
-
-.service-item:hover {
-  background-color: #eee;
-}
-
-.service-item.is-playing {
-  background-color: rgba(37, 182, 224, 0.3);
-}
-
-.service-item img {
-  display: inline-block;
-  height: 3em;
-}
+@import url('base.css');
+@import url('lib/pure-min.css');
+@import url('modules/layout.css');
+@import url('modules/panel.css');
+@import url('modules/current.css');
+@import url('modules/masthead.css');
+@import url('modules/metadata.css');
+@import url('modules/magic.css');
+@import url('modules/track.css');
+@import url('modules/settings.css');
+@import url('layout.css');
