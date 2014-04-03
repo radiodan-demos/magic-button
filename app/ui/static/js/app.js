@@ -187,6 +187,7 @@ function uiAvoidSettings(data) {
 }
 
 function uiAvoidState(state) {
+
   updateAvoidState();
 }
 
@@ -194,15 +195,21 @@ function updateAvoidState() {
   var state = ui.get('radio.magic.avoider.state');
 
   if (state.isAvoiding) {
-    var now   = new Date().valueOf();
-    var start = new Date(state.startTime).valueOf();
-    var end   = new Date(state.endTime).valueOf();
-    var timeLeft = end - now;
-    var timeLeftInSec = timeLeft/1000;
+    var now = Date.now();
+    var end = Date.parse(state.endTime);
 
-    ui.set('radio.magic.avoider.state.timeLeft', timeLeftInSec);
+    var diff = end - now;
+    var formattedDiff = formatTimeDiff(diff);
+    ui.set('radio.magic.avoider.state.timeLeft', formattedDiff);
     window.setTimeout(updateAvoidState, 1000);
   }
+}
+
+function formatTimeDiff(diffInMs) {
+  var diffSecs = diffInMs / 1000;
+  var mins = diffSecs / 60;
+  var secsLeft = Math.abs(Math.floor(mins) - mins);
+  return Math.floor(mins) + 'm ' + Math.floor(secsLeft * 60);
 }
 
 /*
