@@ -6,23 +6,27 @@
   list-style: none;
   margin: 0;
   padding: 0;
+  text-align: left;
 }
 
 .service-item {
   display: inline-block;
-  height: 3em;
-  padding: 0.5em;
+  width: 76px;
+  height: 54px;
+  padding: 12px 0;
+  border: 1px solid transparent;
+  background-color: #f9f9f9;
 }
 
-.service-item:hover {
-  background-color: #eee;
+.service-item * {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-.service-item.is-playing {
-  background-color: rgba(37, 182, 224, 0.3);
-}
-
-.service-item img {
-  display: inline-block;
-  height: 3em;
+.service-item:focus,
+.service-item:hover,
+.service-item.is-active {
+  background-color: #fff;
+  border: 1px solid red;
 }

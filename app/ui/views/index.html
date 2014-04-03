@@ -103,7 +103,7 @@
     <ul class="service-list">
     {{#services}}
       <li on-tap="service"
-          class="service-item {{ radio.current.id === id ? 'is-playing' : '' }}">
+          class="service-item {{ radio.current.id === id ? 'is-active' : '' }}">
         <a  href="/radio/service/{{ id }}">
           <img src="{{ radio.current.id === id ? logos.active : logos.inactive }}" alt="{{ title }}" />
         </a>
