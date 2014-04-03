@@ -106,7 +106,8 @@ function initWithData(states) {
   ui.on('service', uiServiceChange);
   ui.on('power', uiPower);
   ui.on('avoid', uiAvoid);
-  ui.observe('radio.magic.avoider.settings', uiAvoidSettings);
+  ui.observe('radio.magic.avoider.settings', uiAvoidSettings, { init: false });
+  ui.observe('radio.magic.avoider.state', uiAvoidState, { init: false });
 
   /*
     UI -> UI
@@ -151,7 +152,6 @@ function uiPower(evt) {
 }
 
 function uiAvoid(evt) {
-  console.log('uiAvoid');
   evt.original.preventDefault();
   var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
   xhr(method, '/avoider');
@@ -168,6 +168,12 @@ function uiAvoidSettings(data) {
   xhr.post('/avoider/settings.json', opts);
 }
 
+function uiAvoidState(state) {
+  if (state.isAvoiding) {
+    console.log('is avoiding');
+  }
+}
+
 /*
   State -> UI
 */
@@ -176,7 +182,7 @@ var eventSource = new EventSource('/events');
 eventSource.addEventListener('message', function (evt) {
   var content = JSON.parse(evt.data);
 
-  console.group('New message:', content.topic);
+  console.group('New message:', content.topic, content);
 
   switch(content.topic) {
     case 'audio.volume':
