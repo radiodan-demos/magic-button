@@ -26,7 +26,9 @@ defaults = {
   radio: {
     power : { isOn: false },
     audio : { volume: 0   },
-    magic : {},
+    magic : {
+      avoider: { state: null, settings: null }
+    },
     settings: {},
     current: null
   },
@@ -62,8 +64,10 @@ function initWithData(states) {
   };
 
   // Magic features
-  state.radio.magic.avoider = avoider;
-  state.radio.magic.avoider.settings = avoiderSettings;
+  state.radio.magic.avoider = {
+    state   : avoider, // current state of the feature
+    settings: avoiderSettings // settings for the feature
+  };
 
   // State of this UI
   state.ui = defaults.ui;
@@ -146,12 +150,14 @@ function uiPower(evt) {
 }
 
 function uiAvoid(evt) {
+  console.log('uiAvoid');
   evt.original.preventDefault();
   var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
   xhr(method, '/avoider');
 }
 
 function uiAvoidSettings(data) {
+  console.log('uiAvoidSettings');
   var payload = JSON.stringify(data),
       opts = {
         headers: { 'Content-type': 'application/json' },
@@ -169,6 +175,8 @@ var eventSource = new EventSource('/events');
 eventSource.addEventListener('message', function (evt) {
   var content = JSON.parse(evt.data);
 
+  console.group('New message:', content.topic);
+
   switch(content.topic) {
     case 'audio.volume':
       ui.set('radio.audio', content.data);
@@ -181,7 +189,7 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('radio.power', content.data);
       break;
     case 'avoider':
-      ui.set('radio.magic.avoider', content.data);
+      ui.set('radio.magic.avoider.state', content.data);
       break;
     case 'settings.avoider':
       ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
@@ -195,6 +203,8 @@ eventSource.addEventListener('message', function (evt) {
     default:
       // console.log('Unhandled topic', content.topic, content);
   }
+
+  console.groupEnd();
 });
 
 eventSource.addEventListener('error', function (evt) {
@@ -244,6 +254,9 @@ function hasDifferentProperties(first, second) {
   );
 }
 
+/*
+  Ractive-specific helpers
+*/
 function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
   var current = ractive.get(keypath);
 
