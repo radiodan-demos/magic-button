@@ -102,10 +102,11 @@
     {% raw %}
     <ul class="service-list">
     {{#services}}
-      <li on-tap="service"
-          class="service-item {{ radio.current.id === id ? 'is-active' : '' }}">
+      <li on-tap="services-partial:{{action}}"
+          class="service-item {{ isActive(id) ? 'is-active' : '' }}"
+          data-action="{{action}}">
         <a  href="/radio/service/{{ id }}">
-          <img src="{{ radio.current.id === id ? logos.active : logos.inactive }}" alt="{{ title }}" />
+          <img src="{{ isActive(id) ? logos.active : logos.inactive }}" alt="{{ title }}" />
         </a>
       </li>
     {{/services}}
@@ -142,8 +143,8 @@
         <section id="magic">
           <ul>
             {{#radio.magic}}
-              {{#avoider.state}}
               <li class="mg-item">
+              {{#avoider.state}}
                 <div>
                   <h2 class="mg-name">
                   {{^isAvoiding}}Avoider{{/isAvoiding}}
@@ -164,8 +165,27 @@
                   </div>
                   {{/isAvoiding}}
                 </div>
-              </li>
               {{/avoider.state}}
+              {{#avoider}}
+              <div class="mg-settings">
+                <h2>What would you like to avoid?</h2>
+                <p>
+                  <label>
+                    <input type='radio' name='{{settings.avoidType}}' value='tracks'>
+                    The current track
+                  </label>
+                </p>
+                <p>
+                  <label>
+                    <input type='radio' name='{{settings.avoidType}}' value='programmes'>
+                    The entire programme
+                  </label>
+                </p>
+                <h3>Avoid with</h3>
+                {{>servicesTmpl}}
+              </div>
+              </li>
+              {{/avoider}}
             {{/radio.magic}}
           </ul>
         </section>
@@ -174,18 +194,6 @@
         {{#ui.panels.settings.isOpen}}
         <section id="settings">
           <h2>Settings</h2>
-          {{#radio.magic.avoider.settings}}
-          <div>
-            <h2>Avoider</h2>
-            Avoid:
-              <label><input type='radio' name='{{avoidType}}' value='tracks'> tracks</label>
-              <label><input type='radio' name='{{avoidType}}' value='programmes'> programmes</label>
-            with:
-              <label><input type='radio' name='{{serviceId}}' value='radio1'> Radio 1</label>
-              <label><input type='radio' name='{{serviceId}}' value='radio4'> Radio 4</label>
-              <label><input type='radio' name='{{serviceId}}' value='6music'> Radio 6 Music</label>
-          </div>
-          {{/radio.magic.avoider.settings}}
         </section>
         {{/ui.panels.settings.isOpen}}
       {% endraw %}

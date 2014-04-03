@@ -55,6 +55,12 @@ function initWithData(states) {
 
   // Services available
   state.services = radio.services || defaults.services;
+  state.action = 'service';
+  state.isActive = function (id) {
+    var current = this.get('radio.current.id');
+    console.log('services.isActive', id, current);
+    return current === id;
+  };
 
   // State of the radio
   state.radio = {
@@ -67,7 +73,12 @@ function initWithData(states) {
   // Magic features
   state.radio.magic.avoider = {
     state   : avoider, // current state of the feature
-    settings: avoiderSettings // settings for the feature
+    settings: avoiderSettings, // settings for the feature
+    action  : 'avoidSettingService',
+    isActive: function (id) {
+      console.log('avoider.isActive', id);
+      return this.get('radio.magic.avoider.settings.serviceId') === id;
+    }
   };
 
   // State of this UI
@@ -103,9 +114,17 @@ function initWithData(states) {
     UI -> Radio State
   */
   ui.on('volume', utils.debounce(uiVolumeChange, 250));
+  ui.on('services-partial', function (event, action) {
+    event.original.preventDefault();
+    console.log('firing', action, event);
+    ui.fire(action, event);
+  });
   ui.on('service', uiServiceChange);
   ui.on('power', uiPower);
   ui.on('avoid', uiAvoid);
+  ui.on('avoidSettingService', function (event) {
+    ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
+  });
   ui.observe('radio.magic.avoider.settings', uiAvoidSettings, { init: false });
   ui.observe('radio.magic.avoider.state', uiAvoidState, { init: false });
 
