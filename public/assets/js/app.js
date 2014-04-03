@@ -126,7 +126,7 @@ function initWithData(states) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
   ui.observe('radio.magic.avoider.settings', uiAvoidSettings, { init: false });
-  ui.observe('radio.magic.avoider.state', uiAvoidState, { init: false });
+  ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
 
   /*
     UI -> UI
@@ -188,8 +188,21 @@ function uiAvoidSettings(data) {
 }
 
 function uiAvoidState(state) {
+  updateAvoidState();
+}
+
+function updateAvoidState() {
+  var state = ui.get('radio.magic.avoider.state');
+
   if (state.isAvoiding) {
-    console.log('is avoiding');
+    var now   = new Date().valueOf();
+    var start = new Date(state.startTime).valueOf();
+    var end   = new Date(state.endTime).valueOf();
+    var timeLeft = end - now;
+    var timeLeftInSec = timeLeft/1000;
+
+    ui.set('radio.magic.avoider.state.timeLeft', timeLeftInSec);
+    window.setTimeout(updateAvoidState, 1000);
   }
 }
 
