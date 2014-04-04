@@ -196,7 +196,7 @@ function updateAvoidState() {
 
   if (state.isAvoiding) {
     var now = Date.now();
-    var end = Date.parse(state.endTime);
+    var end = Date.parse(state.end);
 
     var diff = end - now;
     var formattedDiff = formatTimeDiff(diff);
