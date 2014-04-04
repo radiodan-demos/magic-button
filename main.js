@@ -46,7 +46,7 @@ app.use("/announcer",
 
 app.use("/avoider",
   require("./app/avoider/routes")(
-    express.Router(), states, Settings
+    express.Router(), states, Settings, eventBus
   )
 );
 
