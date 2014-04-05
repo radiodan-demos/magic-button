@@ -156,8 +156,8 @@
         <section id="magic">
           <ul>
             {{#radio.magic}}
-              <li class="mg-item">
               {{#avoider.state}}
+              <li class="mg-item avoider {{#isAvoiding}}is-active{{/isAvoiding}}">
                 <div>
                   <h2 class="mg-name">
                   {{^isAvoiding}}Avoider{{/isAvoiding}}
@@ -168,9 +168,11 @@
                     {{#ui.magic.avoider}}
                       {{>progressTempl}}
                     {{/ui.magic.avoider}}
-                    <i class="mg-icon">
-                    {{^isAvoiding}}Avoider icon{{/isAvoiding}}
-                    {{#isAvoiding}}{{ timeLeft }}{{/isAvoiding}}
+
+                    <div class="mg-label">
+                      {{^isAvoiding}}<i class="mg-icon">{{/isAvoiding}}
+                      {{#isAvoiding}}<span>{{ timeLeft }}</span>{{/isAvoiding}}
+                    </div>
                     </i>
                   </div>
                 </div>

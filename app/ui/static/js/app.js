@@ -22,14 +22,18 @@ var container = document.querySelector('[data-ui-container]'),
     state = {},
     defaults,
     ui,
-    arc;
+    activeArc,
+    inactiveArc;
 
-arc = d3.svg.arc()
-        .innerRadius(44.4827586)
-        .outerRadius(50)
-        .startAngle(0);
+activeArc = d3.svg.arc()
+              .innerRadius(44.4827586)
+              .outerRadius(50)
+              .startAngle(0);
 
-window.arc = arc;
+inactiveArc = d3.svg.arc()
+                .innerRadius(49.5)
+                .outerRadius(50)
+                .startAngle(0);
 
 window.state = state;
 
@@ -148,8 +152,8 @@ function initWithData(states) {
     Create magic buttons
   */
   ui.set('ui.magic.avoider', {
-    outerArcPath: arc({ endAngle: Math.PI * 2 }),
-    progressArcPath: arc({ endAngle: 0 })
+    outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
+    progressArcPath: activeArc({ endAngle: 0 })
   });
 
   console.log('initialised with data', state);
@@ -228,11 +232,17 @@ function updateAvoidState() {
 
     var angle = angleForTimePeriod(start, end, now);
 
-    ui.set('ui.magic.avoider.progressArcPath', arc({ endAngle: angle }));
+    ui.set('ui.magic.avoider', {
+      outerArcPath: activeArc({ endAngle: Math.PI * 2 }),
+      progressArcPath: activeArc({ endAngle: angle })
+    });
 
     window.setTimeout(updateAvoidState, 1000);
   } else {
-    ui.set('ui.magic.avoider.progressArcPath', arc({ endAngle: 0 }));
+    ui.set('ui.magic.avoider', {
+      outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
+      progressArcPath: activeArc({ endAngle: 0 })
+    });
   }
 }
 
