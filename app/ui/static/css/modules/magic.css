@@ -8,9 +8,20 @@
   text-transform: lowercase;
 }
 
+.mg-button {
+  display: inline-block;
+  width: 145px;
+  height: 145px;
+}
+
 .mg-icon {
   display: inline-block;
-  width: 118px;
-  height: 118px;
-  background-color: rgba(0, 255, 0, 0.3);
+}
+
+.button-circle {
+  fill: #bcbbbb;
+}
+
+.button-progress {
+  fill: #e68724;
 }

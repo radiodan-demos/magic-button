@@ -7,7 +7,10 @@ console.log('Core app started');
 var Ractive = require('ractive'),
     xhr     = require('./xhr'),
     utils   = require('./utils'),
-    Promise = require('es6-promise').Promise;
+    Promise = require('es6-promise').Promise,
+    d3      = require('d3');
+
+window.d3 = d3;
 
 /*
   Ractive plugins
@@ -18,7 +21,15 @@ var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]#mainTmpl').innerText,
     state = {},
     defaults,
-    ui;
+    ui,
+    arc;
+
+arc = d3.svg.arc()
+        .innerRadius(44.4827586)
+        .outerRadius(50)
+        .startAngle(0);
+
+window.arc = arc;
 
 window.state = state;
 
@@ -133,6 +144,14 @@ function initWithData(states) {
   ui.on('settings-button', createPanelToggleHandler('settings'));
   ui.on('avoid-settings', createPanelToggleHandler('avoiderSettings'));
 
+  /*
+    Create magic buttons
+  */
+  ui.set('ui.magic.avoider', {
+    outerArcPath: arc({ endAngle: Math.PI * 2 }),
+    progressArcPath: arc({ endAngle: 0 })
+  });
+
   console.log('initialised with data', state);
 }
 
@@ -186,7 +205,6 @@ function uiAvoidSettings(data) {
 }
 
 function uiAvoidState(state) {
-
   updateAvoidState();
 }
 
@@ -195,6 +213,7 @@ function updateAvoidState() {
 
   if (state.isAvoiding) {
     var now = Date.now();
+    var start = Date.parse(state.start);
     var end = Date.parse(state.end);
 
     if (isNaN(end.valueOf())) {
@@ -206,8 +225,27 @@ function updateAvoidState() {
     var formattedDiff = formatTimeDiff(diff);
 
     ui.set('radio.magic.avoider.state.timeLeft', formattedDiff);
+
+    var angle = angleForTimePeriod(start, end, now);
+
+    ui.set('ui.magic.avoider.progressArcPath', arc({ endAngle: angle }));
+
     window.setTimeout(updateAvoidState, 1000);
+  } else {
+    ui.set('ui.magic.avoider.progressArcPath', arc({ endAngle: 0 }));
   }
+}
+
+function angleForTimePeriod(start, end, now) {
+  var startTime = start.valueOf(),
+      endTime   = end.valueOf(),
+      nowTime   = now.valueOf();
+
+  var scale = d3.scale.linear()
+          .domain([startTime, endTime])
+          .range([0, Math.PI * 2]);
+
+  return scale(nowTime);
 }
 
 function formatTimeDiff(diffInMs) {
