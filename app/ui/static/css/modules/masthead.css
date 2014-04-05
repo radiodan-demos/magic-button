@@ -8,6 +8,23 @@
 
 .sb-inner {
   display: inline-block;
+  width: 30px;
   height: 100%;
+  line-height: 1em;
   border-left: 1px solid red;
+  font-size: 12px;
+  text-align: center;
+}
+
+.sb-inner > i {
+  display: inline-block;
+  width: 30px;
+  height: 20px;
+  background: transparent url('../../img/radio.svg') no-repeat;
+}
+
+.radiodan-logo img {
+  display: inline-block;
+  height: 100%;
+  padding: 16px;
 }
