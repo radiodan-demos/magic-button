@@ -199,8 +199,14 @@ function updateAvoidState() {
     var now = Date.now();
     var end = Date.parse(state.end);
 
+    if (isNaN(end.valueOf())) {
+      console.warn('No avoid end time');
+      return;
+    }
+
     var diff = end - now;
     var formattedDiff = formatTimeDiff(diff);
+
     ui.set('radio.magic.avoider.state.timeLeft', formattedDiff);
     window.setTimeout(updateAvoidState, 1000);
   }
