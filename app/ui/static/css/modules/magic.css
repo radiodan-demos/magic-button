@@ -43,11 +43,11 @@
 }
 
 .button-circle {
-  fill: #bcbbbb;
+  fill: #e68724;
 }
 
 .avoider.is-active .button-circle {
-  fill: #e68724;
+  fill: #bcbbbb;
 }
 
 .button-progress {

@@ -160,7 +160,7 @@
           <ul>
             {{#radio.magic}}
               {{#avoider.state}}
-              <li class="mg-item avoider {{#isAvoiding}}is-active{{/isAvoiding}}">
+              <li class="mg-item avoider {{ isAvoiding ? 'is-active' : 'is-inactive' }}">
                 <div>
                   <h2 class="mg-name">
                   {{^isAvoiding}}Avoider{{/isAvoiding}}
