@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta name="viewport" content="initial-scale=1.0,maximum-scale=1.0" />
+    <script src="/assets/js/lib/viewporter.js"></script>
+
     <title>Radiodan Remote Control</title>
     <link rel="stylesheet" href="assets/css/app.css">
   </head>
 
   <body>
+    <div id="viewporter">
     <script id="mastheadTmpl" data-ui-template type="text/ractive">
     {% raw %}
     {{#radio.power}}
@@ -31,7 +35,7 @@
     <script id="playoutTmpl" data-ui-template type="text/ractive">
     {% raw %}
     <div class="lo-left current-panel">
-      <a on-tap="stations-button"
+      <a on-click="stations-button"
          class="ct-btn">
         {{#radio.current.logos.active}}
           <img class="ct-logo"
@@ -52,7 +56,7 @@
     </div>
 
     <div class="lo-right">
-      <a class="volume-button" on-tap="volume-button">Radio Vol <i></i></a>
+      <a class="volume-button" on-click="volume-button">Radio Vol <i></i></a>
     </div>
     {% endraw %}
     </script>
@@ -223,6 +227,7 @@
     <div data-ui-container>
     </div>
 
+    </div><!-- #viewporter -->
     <script src="assets/js/app.{% if isDebug %}debug.{% endif %}js"></script>
   </body>
 </html>
