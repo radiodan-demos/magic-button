@@ -166,26 +166,28 @@
                   {{/isAvoiding}}
                 </div>
               {{/avoider.state}}
-              {{#avoider}}
-              <div class="mg-settings">
-                <h2>What would you like to avoid?</h2>
-                <p>
-                  <label>
-                    <input type='radio' name='{{settings.avoidType}}' value='tracks'>
-                    The current track
-                  </label>
-                </p>
-                <p>
-                  <label>
-                    <input type='radio' name='{{settings.avoidType}}' value='programmes'>
-                    The entire programme
-                  </label>
-                </p>
-                <h3>Avoid with</h3>
-                {{>servicesTmpl}}
-              </div>
-              </li>
-              {{/avoider}}
+              {{#ui.panels.avoiderSettings.isOpen}}
+                {{#avoider}}
+                <div class="mg-settings">
+                  <h2>What would you like to avoid?</h2>
+                  <p>
+                    <label>
+                      <input type='radio' name='{{settings.avoidType}}' value='tracks'>
+                      The current track
+                    </label>
+                  </p>
+                  <p>
+                    <label>
+                      <input type='radio' name='{{settings.avoidType}}' value='programmes'>
+                      The entire programme
+                    </label>
+                  </p>
+                  <h3>Avoid with</h3>
+                  {{>servicesTmpl}}
+                </div>
+                </li>
+                {{/avoider}}
+              {{/ui.panels.avoiderSettings.isOpen}}
             {{/radio.magic}}
           </ul>
         </section>

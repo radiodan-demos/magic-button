@@ -58,7 +58,6 @@ function initWithData(states) {
   state.action = 'service';
   state.isActive = function (id) {
     var current = this.get('radio.current.id');
-    console.log('services.isActive', id, current);
     return current === id;
   };
 
@@ -76,7 +75,6 @@ function initWithData(states) {
     settings: avoiderSettings, // settings for the feature
     action  : 'avoidSettingService',
     isActive: function (id) {
-      console.log('avoider.isActive', id);
       return this.get('radio.magic.avoider.settings.serviceId') === id;
     }
   };
@@ -134,6 +132,7 @@ function initWithData(states) {
   ui.on('stations-button', createPanelToggleHandler('services'));
   ui.on('volume-button', createPanelToggleHandler('volume'));
   ui.on('settings-button', createPanelToggleHandler('settings'));
+  ui.on('avoid-settings', createPanelToggleHandler('avoiderSettings'));
 
   console.log('initialised with data', state);
 }
