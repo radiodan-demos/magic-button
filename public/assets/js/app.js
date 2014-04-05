@@ -228,8 +228,12 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('radio.audio', content.data);
       break;
     case 'service.changed':
-      ui.set(keypathForServiceId(content.data.id, state.services), content.data);
-      ui.set('radio.current', content.data);
+      if (content.data) {
+        ui.set(keypathForServiceId(content.data.id, state.services), content.data);
+        ui.set('radio.current', content.data);
+      } else {
+        ui.set('radio.current', null);
+      }
       break;
     case 'power':
       ui.set('radio.power', content.data);
