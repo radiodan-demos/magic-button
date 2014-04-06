@@ -1,0 +1,11 @@
+<script id="volumeTmpl" data-ui-template type="text/ractive">
+{% raw %}
+{{#radio.audio}}
+<div class="lo-center">
+  <input type="range"
+         on-change="volume"
+         min="0" max="100" value="{{volume}}" />
+</div>
+{{/radio.audio}}
+{% endraw %}
+</script>

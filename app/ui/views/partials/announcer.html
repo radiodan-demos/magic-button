@@ -1,0 +1,22 @@
+<script id="announcerTempl" data-ui-template type="text/ractive">
+{% raw %}
+{{#announcer.state}}
+<li class="mg-item announcer {{ isAnnouncing ? 'is-active' : 'is-inactive' }}">
+  <div>
+    <h2 class="mg-name">
+    {{^isAnnouncing}}Announce{{/isAnnouncing}}
+    </h2>
+
+    <div class="mg-button" on-tap="announce">
+      {{#ui.magic.announcer}}
+        {{>progressTempl}}
+      {{/ui.magic.announcer}}
+
+      <div class="mg-label">
+        <i class="mg-icon"></i>
+      </div>
+    </div>
+  </div>
+{{/announcer.state}}
+{% endraw %}
+</script>

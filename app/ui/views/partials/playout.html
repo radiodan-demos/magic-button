@@ -1,0 +1,28 @@
+<script id="playoutTmpl" data-ui-template type="text/ractive">
+{% raw %}
+<div class="lo-left current-panel">
+  <a on-click="stations-button"
+     class="ct-btn">
+    {{#radio.current.logos.active}}
+      <img class="ct-logo"
+           src="{{radio.current.logos.active}}" />
+    {{/radio.current.logos.active}}
+
+    <span class="ct-indicator">
+      {{ ui.panels.services.isOpen ? '⬇' : '⬆' }}
+    </span>
+
+    {{^radio.current}}
+      <span class="ct-title">No current station</span>
+    {{/radio.current}}
+    {{#radio.current}}
+      <span class="ct-title">{{title}}</span>
+    {{/radio.current}}
+  </a>
+</div>
+
+<div class="lo-right">
+  <a class="volume-button" on-click="volume-button">Radio Vol <i></i></a>
+</div>
+{% endraw %}
+</script>

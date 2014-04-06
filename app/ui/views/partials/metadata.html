@@ -1,0 +1,27 @@
+<script id="metadataTmpl" data-ui-template type="text/ractive">
+{% raw %}
+{{#radio.current}}
+  {{#first(nowAndNext)}}
+  <div class="metadata">
+    {{#image}}
+      <img class="md-img"
+           src="{{ imageUrl(templateUrl, '272x153') }}" />
+    {{/image}}
+    <p class="md-primary">{{ brand }}</p>
+    <p class="md-secondary">{{ episode }}</p>
+  </div>
+  {{/nowAndNext}}
+  {{#nowPlaying}}
+  <div class="metadata">
+    <p class="md-primary">{{ title }}</p>
+    <p class="md-secondary">{{ artist }}</p>
+  </div>
+  <a class="track" on-tap="track-display">
+    <i></i>
+    <span>Track</span>
+  </a>
+  {{/nowPlaying}}
+
+{{/radio.current}}
+{% endraw %}
+</script>

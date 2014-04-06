@@ -1,0 +1,55 @@
+<script id="avoiderTempl" data-ui-template type="text/ractive">
+{% raw %}
+{{#avoider.state}}
+<li class="mg-item avoider {{ isAvoiding ? 'is-active' : 'is-inactive' }}">
+  <div>
+    <h2 class="mg-name">
+    {{^isAvoiding}}Avoider{{/isAvoiding}}
+    {{#timeLeft}}Resume in:{{/timeLeft}}
+    </h2>
+
+    <div class="mg-button" on-tap="avoid">
+      {{#ui.magic.avoider}}
+        {{>progressTempl}}
+      {{/ui.magic.avoider}}
+
+      <div class="mg-label">
+        {{^timeLeft}}<i class="mg-icon"></i>{{/timeLeft}}
+        {{#isAvoiding}}<span>{{ timeLeft }}</span>{{/isAvoiding}}
+      </div>
+    </div>
+  </div>
+
+  <div on-tap="avoid-settings">
+    {{^isAvoiding}}
+    <div class="settings">
+      <i></i>
+      <span>Avoid settings</span>
+    </div>
+    {{/isAvoiding}}
+  </div>
+{{/avoider.state}}
+{{#ui.panels.avoiderSettings.isOpen}}
+  {{#avoider}}
+  <div class="mg-settings">
+    <h2>What would you like to avoid?</h2>
+    <p>
+      <label>
+        <input type='radio' name='{{settings.avoidType}}' value='tracks'>
+        The current track
+      </label>
+    </p>
+    <p>
+      <label>
+        <input type='radio' name='{{settings.avoidType}}' value='programmes'>
+        The entire programme
+      </label>
+    </p>
+    <h3>Avoid with</h3>
+    {{>servicesTmpl}}
+  </div>
+  </li>
+  {{/avoider}}
+{{/ui.panels.avoiderSettings.isOpen}}
+{% endraw %}
+</script>

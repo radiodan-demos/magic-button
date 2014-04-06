@@ -1,0 +1,12 @@
+<script id="progressTempl" data-ui-template type="text/ractive">
+{% raw %}
+<svg width='100%' height='100%' viewBox='0 0 100 100'>
+    <!-- Now in here, a coordinate (25,50) corresponds to
+         (25%,50%) of the outer viewport. -->
+    <g transform="translate(50, 50)">
+      <path class="button-circle" d="{{ outerArcPath }}"/>
+      <path class="button-progress" fill="red" d="{{ progressArcPath }}"/>
+    </g>
+  </svg>
+{% endraw %}
+</script>

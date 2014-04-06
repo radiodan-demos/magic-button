@@ -1,0 +1,15 @@
+<script id="servicesTmpl" data-ui-template type="text/ractive">
+{% raw %}
+<ul class="service-list">
+{{#services}}
+  <li on-tap="services-partial:{{action}}"
+      class="service-item {{ isActive(id) ? 'is-active' : '' }}"
+      data-action="{{action}}">
+    <a  href="/radio/service/{{ id }}">
+      <img src="{{ isActive(id) ? logos.active : logos.inactive }}" alt="{{ title }}" />
+    </a>
+  </li>
+{{/services}}
+</ul>
+{% endraw %}
+</script>
