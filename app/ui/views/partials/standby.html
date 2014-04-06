@@ -1,0 +1,20 @@
+<script id="standbyTmpl" data-ui-template type="text/ractive">
+{% raw %}
+{{^radio.power.isOn}}
+  <div class="standby-panel">
+    <div class="sb-hd">
+      <h2>Radiodan in standby</h2>
+      <p>Press the power button to turn on</p>
+    </div>
+    <div class="sb-bd">
+      <div class="sb-cnt">
+        <div>
+        <i></i>
+        <p>or press the radio power button</p>
+        </div>
+      </div>
+    </div>
+  </div>
+{{/radio.power.isOn}}
+{% endraw %}
+</script>

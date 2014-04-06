@@ -32,6 +32,7 @@
     {% include "partials/avoider.html"   %}
     {% include "partials/announcer.html" %}
     {% include "partials/error.html" %}
+    {% include "partials/standby.html" %}
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
@@ -39,47 +40,53 @@
           {{>mastheadTmpl}}
         </section>
 
+        {{^radio.power.isOn}}
+          {{>standbyTmpl}}
+        {{/radio.power.isOn}}
+
         {{#ui.error}}
         <section id="error" class="panel">
           {{>errorTmpl}}
         </section>
         {{/ui.error}}
 
-        {{^ui.panels.settings.isOpen}}
-        <section id="playout" class="layout panel">
-          {{>playoutTmpl}}
-        </section>
+        {{#radio.power.isOn}}
+          {{^ui.panels.settings.isOpen}}
+          <section id="playout" class="layout panel">
+            {{>playoutTmpl}}
+          </section>
 
-        <section id="volume" class="layout panel {{ ui.panels.volume.isOpen ? '' : 'is-closed' }}">
-          {{>volumeTmpl}}
-        </section>
+          <section id="volume" class="layout panel {{ ui.panels.volume.isOpen ? '' : 'is-closed' }}">
+            {{>volumeTmpl}}
+          </section>
 
-        <section  id="services"
-                  class="layout panel services {{ ui.panels.services.isOpen ? '' : 'is-closed' }}">
-          {{>servicesTmpl}}
-        </section>
+          <section  id="services"
+                    class="layout panel services {{ ui.panels.services.isOpen ? '' : 'is-closed' }}">
+            {{>servicesTmpl}}
+          </section>
 
-        <section id="metadata" class="layout">
-          <div class="lo-single metadata-panel">
-            {{>metadataTmpl}}
-          </div>
-        </section>
+          <section id="metadata" class="layout">
+            <div class="lo-single metadata-panel">
+              {{>metadataTmpl}}
+            </div>
+          </section>
 
-        <section id="magic">
-          <ul class="magic">
-            {{#radio.magic}}
-              {{>avoiderTempl}}
-              {{>announcerTempl}}
-            {{/radio.magic}}
-          </ul>
-        </section>
-        {{/ui.panels.settings.isOpen}}
+          <section id="magic">
+            <ul class="magic">
+              {{#radio.magic}}
+                {{>avoiderTempl}}
+                {{>announcerTempl}}
+              {{/radio.magic}}
+            </ul>
+          </section>
+          {{/ui.panels.settings.isOpen}}
 
-        {{#ui.panels.settings.isOpen}}
-        <section id="settings">
-          <h2>Settings</h2>
-        </section>
-        {{/ui.panels.settings.isOpen}}
+          {{#ui.panels.settings.isOpen}}
+          <section id="settings">
+            <h2>Settings</h2>
+          </section>
+          {{/ui.panels.settings.isOpen}}
+        {{/radio.power.isOn}}
       {% endraw %}
     </script>
     </div><!-- #viewporter -->

@@ -1,0 +1,47 @@
+.standby-panel {
+  background: #f7f7f7;
+}
+
+.sb-hd {
+  /*height: 76px;*/
+  padding: 16px;
+
+  color: #fff;
+  background-color: #718692;
+}
+
+.sb-hd h2,
+.sb-hd p {
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+}
+
+.sb-hd h2 {
+  font-size: 22px;
+}
+
+.sb-hd p {
+  font-size: 13px;
+}
+
+.sb-bd {
+  padding-top: 48px;
+  padding-bottom: 111px;
+
+  text-align: center;
+
+  background: #f7f7f7;
+}
+
+.sb-cnt {
+}
+
+.sb-bd i {
+  display: inline-block;
+  width: 60%;
+  height: 31%;
+  min-height: 128px;
+  background: transparent url('../../img/radio-power-highlight.svg') no-repeat;
+  background-position: 50% 50%;
+}
