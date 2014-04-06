@@ -151,7 +151,7 @@
       <div>
         <h2 class="mg-name">
         {{^isAvoiding}}Avoider{{/isAvoiding}}
-        {{#isAvoiding}}Resume in:{{/isAvoiding}}
+        {{#timeLeft}}Resume in:{{/timeLeft}}
         </h2>
 
         <div class="mg-button" on-tap="avoid">
@@ -160,7 +160,7 @@
           {{/ui.magic.avoider}}
 
           <div class="mg-label">
-            {{^isAvoiding}}<i class="mg-icon">{{/isAvoiding}}
+            {{^timeLeft}}<i class="mg-icon">{{/timeLeft}}
             {{#isAvoiding}}<span>{{ timeLeft }}</span>{{/isAvoiding}}
           </div>
           </i>

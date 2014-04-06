@@ -232,11 +232,17 @@ function updateAvoidState() {
     }
 
     var diff = end - now;
-    var formattedDiff = formatTimeDiff(diff);
 
-    ui.set('radio.magic.avoider.state.timeLeft', formattedDiff);
+    var angle = Math.PI * 2;
 
-    var angle = angleForTimePeriod(start, end, now);
+    // Handle negative time
+    if (diff >= 0) {
+      var formattedDiff = formatTimeDiff(diff);
+
+      ui.set('radio.magic.avoider.state.timeLeft', formattedDiff);
+
+      angle = angleForTimePeriod(start, end, now);
+    }
 
     ui.set('ui.magic.avoider', {
       outerArcPath: activeArc({ endAngle: Math.PI * 2 }),
