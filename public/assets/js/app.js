@@ -46,7 +46,8 @@ defaults = {
     power : { isOn: false },
     audio : { volume: 0   },
     magic : {
-      avoider: { state: null, settings: null }
+      avoider  : { state: null, settings: null },
+      announcer: { state: null, settings: null }
     },
     settings: {},
     current: null
@@ -58,7 +59,9 @@ defaults = {
 var initialStateData = Promise.all([
   xhr.get('/radio/state.json'),
   xhr.get('/avoider/state.json'),
-  xhr.get('/avoider/settings.json')
+  xhr.get('/avoider/settings.json'),
+  xhr.get('/announcer/state.json'),
+  xhr.get('/announcer/settings.json')
 ]);
 
 initialStateData
@@ -69,7 +72,9 @@ function initWithData(states) {
   console.log('initWithData', states);
   var radio    = JSON.parse(states[0]),
       avoider  = JSON.parse(states[1]),
-      avoiderSettings = JSON.parse(states[2]);
+      avoiderSettings = JSON.parse(states[2]),
+      announcer = JSON.parse(states[3]),
+      announcerSettings = JSON.parse(states[4]);
 
   // Services available
   state.services = radio.services || defaults.services;
@@ -95,6 +100,11 @@ function initWithData(states) {
     isActive: function (id) {
       return this.get('radio.magic.avoider.settings.serviceId') === id;
     }
+  };
+
+  state.radio.magic.announcer = {
+    state   : announcer,
+    settings: announcerSettings
   };
 
   // State of this UI
@@ -141,11 +151,13 @@ function initWithData(states) {
   ui.on('service', uiServiceChange);
   ui.on('power', uiPower);
   ui.on('avoid', uiAvoid);
+  ui.on('announce', uiAnnounce);
   ui.on('avoidSettingService', function (event) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
   ui.observe('radio.magic.avoider.settings', uiAvoidSettings, { init: false });
   ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
+  ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
   /*
     UI -> UI
@@ -159,6 +171,11 @@ function initWithData(states) {
     Create magic buttons
   */
   ui.set('ui.magic.avoider', {
+    outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
+    progressArcPath: activeArc({ endAngle: 0 })
+  });
+
+  ui.set('ui.magic.announcer', {
     outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
     progressArcPath: activeArc({ endAngle: 0 })
   });
@@ -257,6 +274,20 @@ function updateAvoidState() {
       progressArcPath: activeArc({ endAngle: 0 })
     });
   }
+}
+
+function uiAnnounce(evt) {
+  evt.original.preventDefault();
+  var method = evt.context.isAnnouncing ? 'DELETE' : 'POST';
+  xhr(method, '/announcer');
+}
+
+function uiAnnounceState(state) {
+  var path = activeArc({ endAngle: Math.PI * 2 });
+  ui.set('ui.magic.announcer', {
+        outerArcPath: path,
+        progressArcPath: path
+      });
 }
 
 function angleForTimePeriod(start, end, now) {

@@ -1,4 +1,12 @@
+.magic {
+  text-align: center;
+}
+
 .mg-item {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 1em;
+
   list-style: none;
   text-align: center;
 }
@@ -42,14 +50,40 @@
   background: transparent url('../../img/avoid.svg') no-repeat;
 }
 
-.button-circle {
-  fill: #e68724;
+.announcer .mg-icon {
+  background: transparent url('../../img/announcer.svg') no-repeat;
 }
 
-.avoider.is-active .button-circle {
+/*
+  Defaults for buttons with no specific type
+*/
+/* Default inactive circle */
+.button-circle {
+  fill: #333333;
+}
+
+/* Default active circle background */
+.is-active .button-circle {
   fill: #bcbbbb;
 }
 
+/* Default progress bar overlay */
 .button-progress {
+  fill: #222222;
+}
+
+/*
+  Avoider-specific
+*/
+.avoider.is-inactive .button-circle,
+.avoider .button-progress {
   fill: #e68724;
+}
+
+/*
+
+*/
+.announcer.is-inactive .button-circle,
+.announcer .button-progress {
+  fill: #6dbe45;
 }
