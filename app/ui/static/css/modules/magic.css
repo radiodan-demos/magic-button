@@ -12,6 +12,7 @@
 }
 
 .mg-name {
+  height: 25px;
   font-size: 22px;
   text-transform: lowercase;
 }
