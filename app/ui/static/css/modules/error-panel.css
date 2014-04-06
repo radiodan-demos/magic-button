@@ -1,0 +1,28 @@
+.error-panel {
+  background-color: #f3f3f3;
+}
+
+.er-hd,
+.er-bd {
+  padding: 0 16px 16px 16px;
+}
+
+.er-hd {
+  height: 46px;
+  line-height: 46px;
+  margin: 0;
+
+  text-align: left;
+
+  font-weight: normal;
+  border-bottom: 1px solid #b9b9b9;
+  color: #f1681e;
+}
+
+.er-btn {
+  text-transform: lowercase;
+  border: 1px solid #8f8f8f;
+  color: #4d4d4d;
+  background-color: #fff;
+  border-radius: 5em;
+}

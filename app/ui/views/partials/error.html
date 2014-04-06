@@ -1,0 +1,13 @@
+<script id="errorTmpl" data-ui-template type="text/ractive">
+{% raw %}
+{{#ui.error}}
+<div class="error-panel">
+  <h2 class="er-hd">Error</h2>
+  <div class="er-bd">
+    <p class="er-msg">{{ ui.error.message }}</p>
+    <button class="er-btn">OK</button>
+  </div>
+</div>
+{{/ui.error}}
+{% endraw %}
+</script>

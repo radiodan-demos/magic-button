@@ -31,12 +31,19 @@
     {% include "partials/progress.html"  %}
     {% include "partials/avoider.html"   %}
     {% include "partials/announcer.html" %}
+    {% include "partials/error.html" %}
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
         <section id="masthead" class="layout panel">
           {{>mastheadTmpl}}
         </section>
+
+        {{#ui.error}}
+        <section id="error" class="panel">
+          {{>errorTmpl}}
+        </section>
+        {{/ui.error}}
 
         {{^ui.panels.settings.isOpen}}
         <section id="playout" class="layout panel">
