@@ -1,0 +1,18 @@
+.power-button {
+
+}
+
+.power-button > i {
+  display: inline-block;
+  width: 29px;
+  height: 29px;
+  background: #000 url('../../img/power-mask.svg') no-repeat;
+}
+
+.power-button.is-on > i {
+  background-color: rgba(59, 200, 29, 1);
+}
+
+.power-button.is-off > i {
+  background-color: rgba(200, 45, 29, 1);
+}

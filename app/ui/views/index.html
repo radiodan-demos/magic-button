@@ -26,9 +26,10 @@
     <script id="mastheadTmpl" data-ui-template type="text/ractive">
     {% raw %}
     {{#radio.power}}
-    <p class="lo-left {{ isOn ? 'is-on' : 'is-off' }}">
-      <a  on-tap="power"
-          href="/power">Turn {{ isOn ? 'Off' : 'On' }}</a>
+    <p class="lo-left">
+      <a  class="power-button {{ isOn ? 'is-on' : 'is-off' }}"
+          on-tap="power"
+          href="/power"><i></i></a>
     </p>
     {{/radio.power}}
     <p class="lo-center radiodan-logo">
