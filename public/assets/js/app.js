@@ -269,7 +269,11 @@ function formatTimeDiff(diffInMs) {
   var diffSecs = diffInMs / 1000;
   var mins = diffSecs / 60;
   var secsLeft = Math.abs(Math.floor(mins) - mins);
-  return Math.floor(mins) + 'm ' + Math.floor(secsLeft * 60);
+  secsLeft = Math.floor(secsLeft * 60);
+  if (secsLeft < 10) {
+    secsLeft = '0' + secsLeft;
+  }
+  return Math.floor(mins) + 'm ' + secsLeft;
 }
 
 /*
