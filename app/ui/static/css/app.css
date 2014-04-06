@@ -1,5 +1,6 @@
 @import url('base.css');
 @import url('lib/pure-min.css');
+@import url('modules/splash.css');
 @import url('modules/layout.css');
 @import url('modules/panel.css');
 @import url('modules/current.css');

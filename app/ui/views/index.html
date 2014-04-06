@@ -10,6 +10,14 @@
 
   <body>
     <div id="viewporter">
+
+    <div data-ui-container>
+      <div class="splash">
+        <i></i>
+        <span>Loading&hellip;</span>
+      </div>
+    </div>
+
     <script id="mastheadTmpl" data-ui-template type="text/ractive">
     {% raw %}
     {{#radio.power}}
@@ -223,10 +231,6 @@
         {{/ui.panels.settings.isOpen}}
       {% endraw %}
     </script>
-
-    <div data-ui-container>
-    </div>
-
     </div><!-- #viewporter -->
     <script src="assets/js/app.{% if isDebug %}debug.{% endif %}js"></script>
   </body>

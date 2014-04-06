@@ -1,0 +1,24 @@
+.splash {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  margin: auto;
+  width: 50%;
+  height: 28%;
+}
+
+.splash > i {
+  display: inline-block;
+  width: 100%;
+  height: 100%;
+  background: transparent url('../../img/radiodan-text.svg') no-repeat;
+  background-position: 50% 50%;
+}
+
+.splash > span {
+  display: inline-block;
+  text-indent: -9999px;
+}
