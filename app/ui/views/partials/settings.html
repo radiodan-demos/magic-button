@@ -1,0 +1,42 @@
+<script id="settingsTmpl" data-ui-template type="text/ractive">
+{% raw %}
+  <div class="settings-panel">
+    <div class="st-hd">
+      <h2>Radiodan settings</h2>
+    </div>
+    <div class="st-bd">
+      <div class="st-item panel">
+        <h3 class="st-item-hd">Stations</h3>
+        <p class="st-hlp">Pressing the <em>next button</em> moves to the next station</p>
+        <div class="st-st">
+          <h4 class="st-st-hd">Choose stations</h4>
+          {{#radio.settings}}
+            {{>servicesTmpl}}
+          {{/radio.settings}}
+        </div>
+      </div>
+      <div class="st-item panel">
+        <h3 class="st-item-hd">Magic button</h3>
+        <p class="st-hlp">Pressing the <em>magic button</em> makes Radiodan perform a function</p>
+        <div class="st-st">
+          <h4 class="st-st-hd">Choose function</h4>
+          <ul>
+            <li class="st-st-item st-btn-announcer">
+              <div class="st-btn">
+                <i></i>
+              </div>
+              Speak
+            </li>
+            <li class="st-st-item st-btn-avoider is-active">
+              <div class="st-btn">
+                <i></i>
+              </div>
+              Avoid
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endraw %}
+</script>

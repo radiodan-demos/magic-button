@@ -1,0 +1,104 @@
+.settings-panel {
+  font-size: 13px;
+}
+
+.st-hd {
+  border-bottom: 1px solid red;
+}
+
+.st-hd > h2{
+  margin: 0;
+  font-weight: normal;
+}
+
+.st-item-hd,
+.st-st-hd {
+  margin-top: 0;
+}
+
+.st-item-hd,
+.st-st-hd,
+.st-item em {
+  font-weight: normal;
+  font-style: normal;
+}
+
+.st-item-hd,
+.st-item em {
+  color: #16a0e8;
+}
+
+.st-item-hd {
+  font-size: 18px;
+  margin-bottom: 0;
+}
+
+.st-st-hd {
+  font-size: 15px;
+}
+
+.st-hd,
+.st-item {
+  padding: 16px;
+}
+
+.st-st ul {
+  margin: 0;
+  padding: 0;
+}
+
+.st-st-item {
+  display: inline-block;
+  width: 49%;
+  height: 94px;
+
+  list-style: none;
+  text-align: center;
+
+  text-transform: lowercase;
+  font-size: 18px;
+
+  color: red;
+}
+
+.st-btn {
+  padding: 16px;
+  margin-bottom: 8px;
+  border: 1px solid red;
+  background: #e3e6e8;
+}
+
+.is-active .st-btn {
+  background: #f4f8fa;
+}
+
+.st-st i {
+  display: inline-block;
+  width: 62px;
+  height: 62px;
+}
+
+.st-btn-avoider i {
+  background: transparent url('../../img/avoid-circle-inactive.svg') no-repeat;
+}
+
+.is-active.st-btn-avoider i {
+  background: transparent url('../../img/avoid-circle-active.svg') no-repeat;
+}
+
+.is-active.st-btn-avoider {
+  color: #e68724;
+}
+
+.st-btn-announcer i {
+  background: transparent url('../../img/announcer-circle-inactive.svg') no-repeat;
+}
+
+.is-active.st-btn-announcer {
+  color: #6dbe45;
+}
+
+.is-active.st-btn-announcer i {
+  background: transparent url('../../img/announcer-circle-active.svg') no-repeat;
+}
+

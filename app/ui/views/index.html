@@ -33,6 +33,7 @@
     {% include "partials/announcer.html" %}
     {% include "partials/error.html" %}
     {% include "partials/standby.html" %}
+    {% include "partials/settings.html" %}
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
@@ -83,7 +84,7 @@
 
           {{#ui.panels.settings.isOpen}}
           <section id="settings">
-            <h2>Settings</h2>
+            {{>settingsTmpl}}
           </section>
           {{/ui.panels.settings.isOpen}}
         {{/radio.power.isOn}}

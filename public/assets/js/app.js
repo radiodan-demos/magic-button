@@ -107,6 +107,15 @@ function initWithData(states) {
     settings: announcerSettings
   };
 
+  // Radio settings
+  state.radio.settings = {
+    action  : 'radioNextSettingService',
+    isActive: function (id) {
+      return false;
+      // return this.get('radio.magic.avoider.settings.serviceId') === id;
+    }
+  };
+
   // State of this UI
   state.ui = defaults.ui;
 
