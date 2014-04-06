@@ -11,7 +11,7 @@ var Ractive = require('ractive'),
     xhr     = require('./xhr'),
     utils   = require('./utils'),
     Promise = require('es6-promise').Promise,
-    d3      = require('d3');
+    d3      = require('./lib/d3');
 
 window.d3 = d3;
 

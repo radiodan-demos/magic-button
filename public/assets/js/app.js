@@ -12,7 +12,7 @@ var Ractive = require('ractive'),
     xhr     = require('./xhr'),
     utils   = require('./utils'),
     Promise = require('es6-promise').Promise,
-    d3      = require('d3');
+    d3      = require('./lib/d3');
 
 window.d3 = d3;
 
@@ -424,163 +424,7 @@ function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
   }
 }
 
-},{"./utils":2,"./xhr":3,"d3":5,"es6-promise":6,"ractive":18,"ractive-events-tap":17}],2:[function(require,module,exports){
-/* jshint white: false, latedef: nofunc, browser: true, devel: true */
-'use strict';
-
-module.exports = {
-  debounce: function debounce(fn, delay) {
-    var timer = null;
-    return function () {
-      var context = this, args = arguments;
-      clearTimeout(timer);
-      timer = setTimeout(function () {
-        fn.apply(context, args);
-      }, delay);
-    };
-  },
-  throttle: function throttle(fn, threshhold, scope) {
-    threshhold = threshhold || (threshhold = 250);
-    var last,
-        deferTimer;
-    return function () {
-      var context = scope || this;
-
-      var now = +new Date(),
-          args = arguments;
-      if (last && now < last + threshhold) {
-        // hold on to it
-        clearTimeout(deferTimer);
-        deferTimer = setTimeout(function () {
-          last = now;
-          fn.apply(context, args);
-        }, threshhold);
-      } else {
-        last = now;
-        fn.apply(context, args);
-      }
-    };
-  }
-};
-
-},{}],3:[function(require,module,exports){
-/* jshint white: false, latedef: nofunc, browser: true, devel: true */
-'use strict';
-
-var Promise = Promise || require('es6-promise').Promise;
-
-module.exports = xhr;
-
-['get', 'delete', 'post', 'put'].forEach(function (method) {
-  module.exports[method] = function() {
-    var args = Array.prototype.slice.call(arguments),
-        newArgs = [method].concat(args);
-
-    return xhr.apply(null, newArgs);
-  };
-});
-
-/*
-  XHR implementation from:
-    http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest
-*/
-function xhr(method, url, opts) {
-  opts = opts || {};
-
-  method = method ? method.toUpperCase() : 'GET';
-  // Return a new promise.
-  return new Promise(function(resolve, reject) {
-    // Do the usual XHR stuff
-    var req = new XMLHttpRequest();
-    req.open(method, url);
-
-    // Send headers
-    if (opts.headers) {
-      Object.keys(opts.headers).forEach(function (header) {
-        req.setRequestHeader(header, opts.headers[header]);
-      });
-    }
-
-    req.onload = function() {
-      // This is called even on 404 etc
-      // so check the status
-      if (req.status === 200) {
-        // Resolve the promise with the response text
-        resolve(req.response);
-      }
-      else {
-        // Otherwise reject with the status text
-        // which will hopefully be a meaningful error
-        reject(new Error(req.statusText));
-      }
-    };
-
-    // Handle network errors
-    req.onerror = function() {
-      reject(new Error('Network Error'));
-    };
-
-    // Make the request
-    req.send(opts.data);
-  });
-}
-
-},{"es6-promise":6}],4:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-
-process.nextTick = (function () {
-    var canSetImmediate = typeof window !== 'undefined'
-    && window.setImmediate;
-    var canPost = typeof window !== 'undefined'
-    && window.postMessage && window.addEventListener
-    ;
-
-    if (canSetImmediate) {
-        return function (f) { return window.setImmediate(f) };
-    }
-
-    if (canPost) {
-        var queue = [];
-        window.addEventListener('message', function (ev) {
-            var source = ev.source;
-            if ((source === window || source === null) && ev.data === 'process-tick') {
-                ev.stopPropagation();
-                if (queue.length > 0) {
-                    var fn = queue.shift();
-                    fn();
-                }
-            }
-        }, true);
-
-        return function nextTick(fn) {
-            queue.push(fn);
-            window.postMessage('process-tick', '*');
-        };
-    }
-
-    return function nextTick(fn) {
-        setTimeout(fn, 0);
-    };
-})();
-
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-}
-
-// TODO(shtylman)
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-
-},{}],5:[function(require,module,exports){
+},{"./lib/d3":2,"./utils":3,"./xhr":4,"es6-promise":6,"ractive":18,"ractive-events-tap":17}],2:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9875,6 +9719,162 @@ process.chdir = function (dir) {
     this.d3 = d3;
   }
 }();
+},{}],3:[function(require,module,exports){
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+'use strict';
+
+module.exports = {
+  debounce: function debounce(fn, delay) {
+    var timer = null;
+    return function () {
+      var context = this, args = arguments;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        fn.apply(context, args);
+      }, delay);
+    };
+  },
+  throttle: function throttle(fn, threshhold, scope) {
+    threshhold = threshhold || (threshhold = 250);
+    var last,
+        deferTimer;
+    return function () {
+      var context = scope || this;
+
+      var now = +new Date(),
+          args = arguments;
+      if (last && now < last + threshhold) {
+        // hold on to it
+        clearTimeout(deferTimer);
+        deferTimer = setTimeout(function () {
+          last = now;
+          fn.apply(context, args);
+        }, threshhold);
+      } else {
+        last = now;
+        fn.apply(context, args);
+      }
+    };
+  }
+};
+
+},{}],4:[function(require,module,exports){
+/* jshint white: false, latedef: nofunc, browser: true, devel: true */
+'use strict';
+
+var Promise = Promise || require('es6-promise').Promise;
+
+module.exports = xhr;
+
+['get', 'delete', 'post', 'put'].forEach(function (method) {
+  module.exports[method] = function() {
+    var args = Array.prototype.slice.call(arguments),
+        newArgs = [method].concat(args);
+
+    return xhr.apply(null, newArgs);
+  };
+});
+
+/*
+  XHR implementation from:
+    http://www.html5rocks.com/en/tutorials/es6/promises/#toc-promisifying-xmlhttprequest
+*/
+function xhr(method, url, opts) {
+  opts = opts || {};
+
+  method = method ? method.toUpperCase() : 'GET';
+  // Return a new promise.
+  return new Promise(function(resolve, reject) {
+    // Do the usual XHR stuff
+    var req = new XMLHttpRequest();
+    req.open(method, url);
+
+    // Send headers
+    if (opts.headers) {
+      Object.keys(opts.headers).forEach(function (header) {
+        req.setRequestHeader(header, opts.headers[header]);
+      });
+    }
+
+    req.onload = function() {
+      // This is called even on 404 etc
+      // so check the status
+      if (req.status === 200) {
+        // Resolve the promise with the response text
+        resolve(req.response);
+      }
+      else {
+        // Otherwise reject with the status text
+        // which will hopefully be a meaningful error
+        reject(new Error(req.statusText));
+      }
+    };
+
+    // Handle network errors
+    req.onerror = function() {
+      reject(new Error('Network Error'));
+    };
+
+    // Make the request
+    req.send(opts.data);
+  });
+}
+
+},{"es6-promise":6}],5:[function(require,module,exports){
+// shim for using process in browser
+
+var process = module.exports = {};
+
+process.nextTick = (function () {
+    var canSetImmediate = typeof window !== 'undefined'
+    && window.setImmediate;
+    var canPost = typeof window !== 'undefined'
+    && window.postMessage && window.addEventListener
+    ;
+
+    if (canSetImmediate) {
+        return function (f) { return window.setImmediate(f) };
+    }
+
+    if (canPost) {
+        var queue = [];
+        window.addEventListener('message', function (ev) {
+            var source = ev.source;
+            if ((source === window || source === null) && ev.data === 'process-tick') {
+                ev.stopPropagation();
+                if (queue.length > 0) {
+                    var fn = queue.shift();
+                    fn();
+                }
+            }
+        }, true);
+
+        return function nextTick(fn) {
+            queue.push(fn);
+            window.postMessage('process-tick', '*');
+        };
+    }
+
+    return function nextTick(fn) {
+        setTimeout(fn, 0);
+    };
+})();
+
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+}
+
+// TODO(shtylman)
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+
 },{}],6:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
@@ -10039,7 +10039,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":4}],9:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":5}],9:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
