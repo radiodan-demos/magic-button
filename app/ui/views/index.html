@@ -18,6 +18,11 @@
       </div>
     </div>
 
+    <script>
+      window.splashStartTime = Date.now();
+      console.log('Rendering splash', splashStartTime);
+    </script>
+
     <script id="mastheadTmpl" data-ui-template type="text/ractive">
     {% raw %}
     {{#radio.power}}

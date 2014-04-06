@@ -4,6 +4,9 @@
 
 console.log('Core app started');
 
+/* Measuring rendering time */
+window.loadStartTime = Date.now();
+
 var Ractive = require('ractive'),
     xhr     = require('./xhr'),
     utils   = require('./utils'),
@@ -110,7 +113,10 @@ function initWithData(states) {
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,
-    data      : state
+    data      : state,
+    complete  : function () {
+      console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
+    }
   });
 
   /*
