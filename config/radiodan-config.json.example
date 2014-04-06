@@ -14,7 +14,8 @@
     },
     {
       "name": "Announcer",
-      "id": "announcer"
+      "id": "announcer",
+      "music": "./audio"
     }
   ]
 }
