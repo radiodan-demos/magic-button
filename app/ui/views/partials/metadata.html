@@ -1,6 +1,7 @@
 <script id="metadataTmpl" data-ui-template type="text/ractive">
 {% raw %}
 {{#radio.current}}
+<div class="lo-single metadata-panel cf is-{{ ui.panels.metadata.view }}">
   {{#first(nowAndNext)}}
   <div class="metadata">
     {{#image}}
@@ -21,7 +22,7 @@
     <span>Track</span>
   </a>
   {{/nowPlaying}}
-
+</div><!-- .metadata-panel -->
 {{/radio.current}}
 {% endraw %}
 </script>

@@ -42,13 +42,12 @@
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
+        <div class="{{radio.power.isOn ? 'is-on' : 'is-off' }} {{ ui.panels.settings.isOpen ? 'is-settings' : 'is-controls' }}">
         <section id="masthead" class="layout panel">
           {{>mastheadTmpl}}
         </section>
 
-        {{^radio.power.isOn}}
-          {{>standbyTmpl}}
-        {{/radio.power.isOn}}
+        {{>standbyTmpl}}
 
         {{#ui.error}}
         <section id="error" class="panel">
@@ -56,8 +55,7 @@
         </section>
         {{/ui.error}}
 
-        {{#radio.power.isOn}}
-          {{^ui.panels.settings.isOpen}}
+        <div id="controls">
           <section id="playout" class="layout panel">
             {{>playoutTmpl}}
           </section>
@@ -72,9 +70,7 @@
           </section>
 
           <section id="metadata" class="layout">
-            <div class="lo-single metadata-panel cf">
-              {{>metadataTmpl}}
-            </div>
+            {{>metadataTmpl}}
           </section>
 
           <section id="magic">
@@ -85,14 +81,11 @@
               {{/radio.magic}}
             </ul>
           </section>
-          {{/ui.panels.settings.isOpen}}
+        </div><!-- #controls -->
 
-          {{#ui.panels.settings.isOpen}}
-          <section id="settings">
-            {{>settingsTmpl}}
-          </section>
-          {{/ui.panels.settings.isOpen}}
-        {{/radio.power.isOn}}
+        <section id="settings">
+          {{>settingsTmpl}}
+        </section>
       {% endraw %}
     </script>
     </div><!-- #viewporter -->

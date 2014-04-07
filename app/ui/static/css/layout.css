@@ -17,6 +17,19 @@
 }
 
 #metadata {
-  /*height: 130px;*/
+  height: 130px;
   border-bottom: 1px dotted red;
+}
+
+.is-off #controls {
+  display: none;
+}
+
+.is-settings #controls,
+.is-settings .standby-panel {
+  display: none;
+}
+
+.is-controls #settings {
+  display: none;
 }
