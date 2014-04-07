@@ -1,11 +1,16 @@
-var utils    = require('radiodan-client').utils,
+var fs             = require('fs'),
+    utils          = require('radiodan-client').utils,
     settingsRoutes = require('../settings/routes'),
-    logger   = utils.logger(__filename);
+    logger         = utils.logger(__filename),
+    announcersPath = __dirname + '/../../audio/';
 
 module.exports = routes;
 
 function routes(app, states, Settings) {
-  var settings = Settings.build('announcer');
+  var settings = Settings.build('announcer'),
+      availableAnnouncers = findAvailableAnnouncers(announcersPath);
+
+  settings.update({available: availableAnnouncers});
 
   app.get('/', index);
   app.get('/state.json', state);
@@ -29,12 +34,38 @@ function routes(app, states, Settings) {
   function announce(req, res) {
     settings.get().then(function(settings) {
       states.handle('startAnnouncing', settings);
-      res.redirect('./');
+      res.send(200);
     }).then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
     states.handle('stopAnnouncing');
-    res.redirect('./');
+    res.send(200);
+  }
+
+  function findAvailableAnnouncers(announcersPath) {
+    var files = fs.readdirSync(announcersPath),
+        announcers = [];
+
+    files.forEach(function(file){
+      var path = announcersPath + file,
+          stat = fs.statSync(path);
+
+      if (stat && stat.isDirectory()) {
+        var package = path + '/package.json',
+            announcer;
+
+        try {
+          announcer = require(package);
+          announcer.path = file;
+
+          announcers.push(announcer);
+        } catch(err) {
+          logger.warn(err);
+        }
+      }
+    });
+
+    return announcers;
   }
 }

@@ -1,7 +1,8 @@
 {
   "announcer": {
     "speak": false,
-    "announcer": "Serena"
+    "announcer": "Serena",
+    "available": []
   },
   "avoider": {
     "serviceId": "radio1",
