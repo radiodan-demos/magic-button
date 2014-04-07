@@ -25,20 +25,46 @@ module.exports = function(grunt) {
         }
       }
     },
+    less: {
+      all: {
+        src: ["app/ui/static/css/app.less"],
+        dest: "public/assets/css/app.css"
+      },
+    },
+    autoprefixer: {
+      dist: {
+        files: {
+          "public/assets/css/app.css": ["public/assets/css/app.css"]
+        }
+      }
+    },
     watch: {
       js: {
-        files: [ "**/static/**/*.js*"],
+        files: [ "**/static/**/*.js*" ],
         tasks: [ 'default' ]
       },
-      files: [ "**/*.html*", "**/*.css" ],
+      css: {
+        files: [ "**/static/**/*.css" ],
+        tasks: [ 'css' ]
+      },
+      files: [ "**/*.html*" ],
       options: {
         livereload: true,
       }
     }
   });
 
+  // JS
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+
+  // CSS
+  grunt.loadNpmTasks('grunt-autoprefixer');
+  grunt.loadNpmTasks('grunt-contrib-less');
+
+  // Dev
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.registerTask('default', [ 'browserify', 'uglify:js' ]);
+
+  grunt.registerTask('css', [ 'less', 'autoprefixer' ]);
+  grunt.registerTask('default', [ 'browserify', 'uglify:js', 'css' ]);
 }
