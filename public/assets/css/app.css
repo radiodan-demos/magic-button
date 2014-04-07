@@ -1437,8 +1437,8 @@ a.pure-button-selected {
   width: 200%;
   overflow: hidden;
   min-height: 90px;
-  -webkit-transition: all 1s;
-  transition: all 1s;
+  -webkit-transition: all 0.4s ease-in-out;
+  transition: all 0.4s ease-in-out;
 }
 .metadata {
   float: left;
@@ -1491,8 +1491,8 @@ a.pure-button-selected {
   position: absolute;
   left: 16px;
   bottom: 16px;
-  -webkit-transition: all 0.4s;
-  transition: all 0.4s;
+  -webkit-transition: all 0.4s ease-in-out;
+  transition: all 0.4s ease-in-out;
 }
 .track.is-unavailable {
   visibility: hidden;
@@ -1511,8 +1511,8 @@ a.pure-button-selected {
 }
 .track > span {
   padding-top: 3px;
-  -webkit-transition: opacity 1s;
-  transition: opacity 1s;
+  -webkit-transition: opacity 0.4s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
 }
 .magic {
   text-align: center;
