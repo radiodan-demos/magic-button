@@ -11,7 +11,12 @@ var Ractive = require('ractive'),
     xhr     = require('./xhr'),
     utils   = require('./utils'),
     Promise = require('es6-promise').Promise,
-    d3      = require('./lib/d3');
+    d3      = require('./lib/d3'),
+    jQuery  = require('jquery');
+
+window.jQuery = jQuery;
+// owl.carousel requires global jQuery - boo!
+require('../lib/owl-carousel/owl.carousel');
 
 window.d3 = d3;
 
@@ -187,6 +192,8 @@ function initWithData(states) {
     outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
     progressArcPath: activeArc({ endAngle: 0 })
   });
+
+  var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
 }
