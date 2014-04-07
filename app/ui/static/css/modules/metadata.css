@@ -8,6 +8,7 @@
   width: 200%;
   overflow: hidden;
   min-height: 90px;
+  transition: all 1s;
 }
 
 .metadata {
@@ -90,4 +91,5 @@
 
 .track > span {
   padding-top: 3px;
+  transition: opacity 1s;
 }

@@ -1437,6 +1437,8 @@ a.pure-button-selected {
   width: 200%;
   overflow: hidden;
   min-height: 90px;
+  -webkit-transition: all 1s;
+  transition: all 1s;
 }
 .metadata {
   float: left;
@@ -1509,6 +1511,8 @@ a.pure-button-selected {
 }
 .track > span {
   padding-top: 3px;
+  -webkit-transition: opacity 1s;
+  transition: opacity 1s;
 }
 .magic {
   text-align: center;
