@@ -2,32 +2,36 @@
 {% raw %}
 {{#radio.current}}
 <div class="lo-single metadata-panel cf is-{{ ui.panels.metadata.view }}">
-  {{#first(nowAndNext)}}
-  <div class="cf metadata md-prog">
-    {{#image}}
-      <img class="md-img"
-           src="{{ imageUrl(templateUrl, '272x153') }}" />
-    {{/image}}
-    <p class="md-primary">{{ brand }}</p>
-    <p class="md-secondary">{{ episode }}</p>
-  </div>
-  {{/nowAndNext}}
-  {{#nowPlaying}}
-  <div class="cf metadata md-track">
-    {{#contributions.0}}
-      {{#image_pid}}
-      <img class="md-img"
-           src="http://ichef.bbci.co.uk/images/ic/272x153/{{image_pid}}" />
-      {{/image_pid}}
-    {{/contributions.0}}
-    <p class="md-primary">{{ title }}</p>
-    <p class="md-secondary">{{ artist }}</p>
-  </div>
+  <div class="md-items">
+    {{#first(nowAndNext)}}
+    <div class="cf metadata md-prog">
+      {{#image}}
+        <img class="md-img"
+             src="{{ imageUrl(templateUrl, '272x153') }}" />
+      {{/image}}
+      <p class="md-primary">{{ brand }}</p>
+      <p class="md-secondary">{{ episode }}</p>
+    </div>
+    {{/nowAndNext}}
+    {{#nowPlaying}}
+    <div class="cf metadata md-track">
+      {{#contributions.0}}
+        {{#image_pid}}
+        <img class="md-img"
+             src="http://ichef.bbci.co.uk/images/ic/272x153/{{image_pid}}" />
+        {{/image_pid}}
+      {{/contributions.0}}
+      <p class="md-primary">{{ title }}</p>
+      <p class="md-secondary">{{ artist }}</p>
+    </div>
+    {{/nowPlaying}}
+  </div><!-- .md-items -->
+
   <a class="track" on-tap="track-display">
     <i></i>
     <span>Track</span>
   </a>
-  {{/nowPlaying}}
+
 </div><!-- .metadata-panel -->
 {{/radio.current}}
 {% endraw %}
