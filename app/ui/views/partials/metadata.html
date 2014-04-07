@@ -27,9 +27,9 @@
     {{/nowPlaying}}
   </div><!-- .md-items -->
 
-  <a class="track" on-tap="track-display">
+  <a class="track {{ nowPlaying ? 'is-available' : 'is-unavailable' }}" on-tap="track-display">
     <i></i>
-    <span>Track</span>
+    <span>Now playing</span>
   </a>
 
 </div><!-- .metadata-panel -->

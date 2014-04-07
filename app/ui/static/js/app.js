@@ -179,6 +179,11 @@ function initWithData(states) {
   ui.on('volume-button', createPanelToggleHandler('volume'));
   ui.on('settings-button', createPanelToggleHandler('settings'));
   ui.on('avoid-settings', createPanelToggleHandler('avoiderSettings'));
+  ui.on('track-display', function () {
+    var current = ui.get('ui.panels.metadata.view');
+    ui.set('ui.panels.metadata.view', current === 'track' ? 'prog' : 'track');
+  });
+  ui.set('ui.panels.metadata.view', 'prog');
 
   /*
     Create magic buttons
