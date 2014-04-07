@@ -37,13 +37,13 @@ function routes(app, states, Settings, eventBus) {
 
   function avoid(req, res) {
     settings.get().then(function(avoidSettings) {
+      res.send(200);
       states.handle('startAvoiding', avoidSettings);
-      res.redirect('./');
     }).then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
     states.handle('stopAvoiding');
-    res.redirect('./');
+    res.send(200);
   }
 }
