@@ -14,7 +14,7 @@
 .settings > i {
   width: 17px;
   height: 17px;
-  background: transparent url('../../img/settings.svg');
+  background: transparent url('../img/settings.svg');
 }
 
 .settings > span {

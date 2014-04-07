@@ -42,6 +42,6 @@
   width: 60%;
   height: 31%;
   min-height: 128px;
-  background: transparent url('../../img/radio-power-highlight.svg') no-repeat;
+  background: transparent url('../img/radio-power-highlight.svg') no-repeat;
   background-position: 50% 50%;
 }

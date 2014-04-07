@@ -48,11 +48,11 @@
 }
 
 .avoider .mg-icon {
-  background: transparent url('../../img/avoid.svg') no-repeat;
+  background: transparent url('../img/avoid.svg') no-repeat;
 }
 
 .announcer .mg-icon {
-  background: transparent url('../../img/announcer.svg') no-repeat;
+  background: transparent url('../img/announcer.svg') no-repeat;
 }
 
 /*

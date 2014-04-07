@@ -20,7 +20,7 @@
   display: inline-block;
   width: 30px;
   height: 20px;
-  background: transparent url('../../img/radio.svg') no-repeat;
+  background: transparent url('../img/radio.svg') no-repeat;
 }
 
 .radiodan-logo img {

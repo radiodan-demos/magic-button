@@ -79,11 +79,11 @@
 }
 
 .st-btn-avoider i {
-  background: transparent url('../../img/avoid-circle-inactive.svg') no-repeat;
+  background: transparent url('../img/avoid-circle-inactive.svg') no-repeat;
 }
 
 .is-active.st-btn-avoider i {
-  background: transparent url('../../img/avoid-circle-active.svg') no-repeat;
+  background: transparent url('../img/avoid-circle-active.svg') no-repeat;
 }
 
 .is-active.st-btn-avoider {
@@ -91,7 +91,7 @@
 }
 
 .st-btn-announcer i {
-  background: transparent url('../../img/announcer-circle-inactive.svg') no-repeat;
+  background: transparent url('../img/announcer-circle-inactive.svg') no-repeat;
 }
 
 .is-active.st-btn-announcer {
@@ -99,6 +99,6 @@
 }
 
 .is-active.st-btn-announcer i {
-  background: transparent url('../../img/announcer-circle-active.svg') no-repeat;
+  background: transparent url('../img/announcer-circle-active.svg') no-repeat;
 }
 

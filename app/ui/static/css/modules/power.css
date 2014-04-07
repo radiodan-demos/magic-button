@@ -6,7 +6,7 @@
   display: inline-block;
   width: 29px;
   height: 29px;
-  background: #000 url('../../img/power-mask.svg') no-repeat;
+  background: #000 url('../img/power-mask.svg') no-repeat;
 }
 
 .power-button.is-on > i {

@@ -85,7 +85,7 @@
 .track > i {
   width: 25px;
   height: 25px;
-  background: transparent url('../../img/track.svg');
+  background: transparent url('../img/track.svg');
 }
 
 .track > span {
