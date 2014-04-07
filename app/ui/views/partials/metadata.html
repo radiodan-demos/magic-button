@@ -3,7 +3,7 @@
 {{#radio.current}}
 <div class="lo-single metadata-panel cf is-{{ ui.panels.metadata.view }}">
   {{#first(nowAndNext)}}
-  <div class="metadata">
+  <div class="cf metadata md-prog">
     {{#image}}
       <img class="md-img"
            src="{{ imageUrl(templateUrl, '272x153') }}" />
@@ -13,7 +13,13 @@
   </div>
   {{/nowAndNext}}
   {{#nowPlaying}}
-  <div class="metadata">
+  <div class="cf metadata md-track">
+    {{#contributions.0}}
+      {{#image_pid}}
+      <img class="md-img"
+           src="http://ichef.bbci.co.uk/images/ic/272x153/{{image_pid}}" />
+      {{/image_pid}}
+    {{/contributions.0}}
     <p class="md-primary">{{ title }}</p>
     <p class="md-secondary">{{ artist }}</p>
   </div>

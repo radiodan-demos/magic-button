@@ -17,7 +17,7 @@
 }
 
 #metadata {
-  height: 130px;
+  min-height: 130px;
   border-bottom: 1px dotted red;
 }
 
