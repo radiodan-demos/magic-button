@@ -3,7 +3,7 @@
 }
 
 .st-hd {
-  border-bottom: 1px solid red;
+  border-bottom: 1px solid #d0d0d1;
 }
 
 .st-hd > h2{
@@ -58,18 +58,18 @@
   text-transform: lowercase;
   font-size: 18px;
 
-  color: red;
+  color: #949494;
 }
 
 .st-btn {
   padding: 16px;
   margin-bottom: 8px;
-  border: 1px solid red;
+  border: 1px solid #d8d8d9;
   background: #e3e6e8;
 }
 
 .is-active .st-btn {
-  background: #f4f8fa;
+  background: none;
 }
 
 .st-st i {

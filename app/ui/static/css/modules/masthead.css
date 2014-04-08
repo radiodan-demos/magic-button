@@ -1,3 +1,7 @@
+.masthead {
+  background-color: #fff;
+}
+
 .setup-btn {
   display: inline-block;
   height: 100%;
@@ -11,7 +15,7 @@
   width: 30px;
   height: 100%;
   line-height: 1em;
-  border-left: 1px solid red;
+  border-left: 1px solid #e1e1e2;
   font-size: 12px;
   text-align: center;
 }

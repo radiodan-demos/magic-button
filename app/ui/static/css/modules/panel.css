@@ -1,6 +1,6 @@
 .panel {
   overflow: hidden;
-  border-bottom: 1px solid red;
+  border-bottom: 1px solid #e1e1e2;
   transition: height 0.4s ease-in-out;
 }
 

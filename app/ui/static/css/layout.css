@@ -11,6 +11,10 @@
   line-height: 48px;
 }
 
+#services {
+  background-color: #fff;
+}
+
 #volume {
   height: 40px;
   line-height: 40px;
@@ -18,7 +22,7 @@
 
 #metadata {
   min-height: 130px;
-  border-bottom: 1px dotted red;
+  border-bottom: 1px dotted #d0d0d1;
 }
 
 .is-off #controls {
