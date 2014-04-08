@@ -29,7 +29,7 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
     var current = services.current(),
         data = {};
     if (current) {
-      data = services.bbc.get(current);
+      data = services.get(current);
     }
     res.json(200, data);
   });
@@ -37,9 +37,9 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
   app.get('/services', listServices);
 
   function listServices(req, res) {
-    services.bbc.ready
-      .then(function () {
-        res.json(services.bbc.get());
+    services.all()
+      .then(function (services) {
+        res.json(services);
       });
   }
 
@@ -54,7 +54,7 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
     var current, state;
 
     if(services.current()) {
-      var programme = services.bbc.get(services.current());
+      var programme = services.get(services.current());
       current = {
         id: programme.id,
         title: programme.title,
@@ -68,7 +68,7 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
     utils.promise.spread(
       [
         audio.status(),
-        services.bbc.stations()
+        services.all()
       ],
       function (audioStatus, stations) {
         logger.info('Stations %s, status:', stations.length, audioStatus);
