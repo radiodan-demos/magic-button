@@ -73,7 +73,7 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
       function (status, stations) {
         logger.info('Stations %s, status:', stations.length, status);
         try {
-          logger.info('Responding with state', state);
+          logger.info('Responding with state', states.state);
 
           state = {
             power   : { isOn: (states.state != 'standby') },
