@@ -1279,6 +1279,8 @@ a.pure-button-selected {
 .panel {
   overflow: hidden;
   border-bottom: 1px solid red;
+  -webkit-transition: height 0.4s ease-in-out;
+  transition: height 0.4s ease-in-out;
 }
 .panel.is-closed {
   height: 0 !important;
