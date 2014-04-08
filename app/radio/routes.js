@@ -70,8 +70,8 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
         audio.status(),
         services.bbc.stations()
       ],
-      function (status, stations) {
-        logger.info('Stations %s, status:', stations.length, status);
+      function (audioStatus, stations) {
+        logger.info('Stations %s, status:', stations.length, audioStatus);
         try {
           logger.info('Responding with state', states.state);
 
@@ -79,7 +79,7 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
             power   : { isOn: (states.state != 'standby') },
             services: stations,
             current : current,
-            audio   : { volume  : status.volume },
+            audio   : { volume  : audioStatus.volume },
             avoider : { isAvoiding: false }
           };
         } catch (err) {
