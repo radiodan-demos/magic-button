@@ -1,7 +1,7 @@
 var fs             = require('fs'),
     utils          = require('radiodan-client').utils,
     settingsRoutes = require('../settings/routes'),
-    logger         = utils.logger(__filename),
+    logger         = utils.logger('announcer-routes'),
     announcersPath = __dirname + '/../../audio/';
 
 module.exports = routes;

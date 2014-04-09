@@ -1,6 +1,6 @@
 var utils    = require('radiodan-client').utils,
     settingsRoutes = require('../settings/routes'),
-    logger   = utils.logger(__filename);
+    logger   = utils.logger('avoider-routes');
 
 module.exports = routes;
 

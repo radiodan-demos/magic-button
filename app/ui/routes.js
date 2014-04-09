@@ -1,5 +1,5 @@
 var utils  = require("radiodan-client").utils,
-    logger = utils.logger(__filename);
+    logger = utils.logger('ui-routes');
 
 module.exports = routes;
 
