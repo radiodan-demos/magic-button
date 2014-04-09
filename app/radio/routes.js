@@ -46,6 +46,11 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
   /*
     Change state
   */
+  app.get('/power', function (req, res) {
+    res.json({
+      power: { isOn: (states.state != 'standby') }
+    });
+  });
   app.put('/power', start); // tee hee
   app.post('/power', start);
   app.delete('/power', standby);
