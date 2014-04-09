@@ -11,7 +11,7 @@ var utils = require("radiodan-client").utils;
 
 chai.use(chaiAsPromised);
 
-var BBCServices = require("../../lib/bbc-services");
+var BBCServices = require("../../lib/services/bbc-services");
 
 describe("cache", function(){
   it("stores data", function(){
