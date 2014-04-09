@@ -6,7 +6,7 @@ module.exports = routes;
 
 function routes(app, eventBus, radiodan, states, services, Settings) {
 
-  var audio  = radiodan.audio.get('default'),
+  var audio    = radiodan.audio.get('default'),
       settings = Settings.build("radio");
 
   /*
@@ -54,7 +54,7 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
     var current, state;
 
     if(services.current()) {
-      var programme = services.get(services.current());
+      var programme = services.programmeFor(services.current());
       current = {
         id: programme.id,
         title: programme.title,
@@ -77,10 +77,10 @@ function routes(app, eventBus, radiodan, states, services, Settings) {
 
           state = {
             power   : { isOn: (states.state != 'standby') },
-            services: stations,
             current : current,
             audio   : { volume  : audioStatus.volume },
-            avoider : { isAvoiding: false }
+            avoider : { isAvoiding: false },
+            services: stations
           };
         } catch (err) {
           logger.warn(err);
