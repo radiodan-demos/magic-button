@@ -93,9 +93,13 @@ function initWithData(states) {
   state.radio = {
     power: radio.power || defaults.radio.power,
     audio: radio.audio || defaults.radio.audio,
-    magic: defaults.radio.magic,
-    current: radio.current || defaults.radio.current
+    magic: defaults.radio.magic
   };
+
+  /*
+    Merge current data with corresponding service
+  */
+  augmentServiceWithCurrent(radio.current || defaults.radio.current, state.services);
 
   // Magic features
   state.radio.magic.avoider = {
@@ -143,6 +147,9 @@ function initWithData(states) {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
     }
   });
+
+  // Set the current service
+  setCurrentServiceById(radio.current.id);
 
   /*
     Logging
@@ -336,21 +343,36 @@ function formatTimeDiff(diffInMs) {
 
 var currentServiceObserver = null;
 
-function processServiceChange(content) {
+/*
+  Sets a new current service in the app
+  This ensures that any data updates for the service
+  is synced with `radio.current`
+*/
+function setCurrentServiceById(id) {
   if (currentServiceObserver) {
     console.log('Cancelling old currentServiceObserver');
     currentServiceObserver.cancel();
   }
 
-  if (content.data) {
-    // Set-up an observer for keeping `radio.current` in sync
-    var keypath = keypathForServiceId(content.data.id, state.services);
-    currentServiceObserver = ui.observe(keypath, function () {
-      ui.set('radio.current', ui.get(keypath));
-    });
+  // Set-up an observer for keeping `radio.current` in sync
+  var keypath = keypathForServiceId(id, state.services);
+  currentServiceObserver = ui.observe(keypath, function () {
+    ui.set('radio.current', ui.get(keypath));
+  });
+}
 
-    // Setting the new service will now update
-    // radio.current as will nowPlaying and nowAndNext
+function processServiceChange(content) {
+  var keypath;
+
+  if (content.data) {
+
+    // Change the service, setting up new sync observers
+    setCurrentServiceById(content.data.id);
+
+    keypath = keypathForServiceId(content.data.id, state.services);
+
+    // Setting data on the new service will now update
+    // `radio.current` as will nowPlaying and nowAndNext
     // updates for this service
     ui.set(keypath, content.data);
   } else {
@@ -429,6 +451,17 @@ function findIndexById(id, services) {
 
 function keypathForServiceId(id, services) {
   return 'services.' + findIndexById(id, services);
+}
+
+function augmentServiceWithCurrent(source, services) {
+  var id = source.id,
+      service = services[findIndexById(id, services)];
+
+  Object.keys(source)
+        .forEach(function (key) {
+          console.log(key, service[key], source[key]);
+          service[key] = source[key];
+        });
 }
 
 /*
