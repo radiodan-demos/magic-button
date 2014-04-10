@@ -333,6 +333,30 @@ function formatTimeDiff(diffInMs) {
   return Math.floor(mins) + 'm ' + secsLeft;
 }
 
+var currentServiceObserver = null;
+
+function processServiceChange(content) {
+  if (currentServiceObserver) {
+    console.log('Cancelling old currentServiceObserver');
+    currentServiceObserver.cancel();
+  }
+
+  if (content.data) {
+    // Set-up an observer for keeping `radio.current` in sync
+    var keypath = keypathForServiceId(content.data.id, state.services);
+    currentServiceObserver = ui.observe(keypath, function () {
+      ui.set('radio.current', ui.get(keypath));
+    });
+
+    // Setting the new service will now update
+    // radio.current as will nowPlaying and nowAndNext
+    // updates for this service
+    ui.set(keypath, content.data);
+  } else {
+    ui.set('radio.current', null);
+  }
+}
+
 /*
   State -> UI
 */
@@ -348,12 +372,7 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('radio.audio', content.data);
       break;
     case 'service.changed':
-      if (content.data) {
-        ui.set(keypathForServiceId(content.data.id, state.services), content.data);
-        ui.set('radio.current', content.data);
-      } else {
-        ui.set('radio.current', null);
-      }
+      processServiceChange(content);
       break;
     case 'power':
       ui.set('radio.power', content.data);
