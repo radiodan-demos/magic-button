@@ -9,8 +9,8 @@ var express        = require('express'),
     eventBus       = require('./lib/event-bus').create(),
     Settings       = require('./lib/settings').create(eventBus),
     services       = require('./lib/services').create(eventBus, radiodan),
-    config         = require('./radiodan-config.json'),
-    states         = require('./lib/states').create(config, radiodan, services, eventBus);
+    ui             = require('./lib/physical-ui').create(eventBus, radiodan),
+    states         = require('./lib/states').create(radiodan, services, eventBus);
 
 if (!module.parent) {
   var gracefulExit = require('./lib/graceful-exit')(radiodan);
