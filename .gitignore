@@ -15,7 +15,6 @@ npm-debug.log
 node_modules
 
 .env
-radiodan-config.json
 db/*db*
 *.debug.js
 .DS_Store

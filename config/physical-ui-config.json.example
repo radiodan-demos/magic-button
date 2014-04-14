@@ -1,0 +1,36 @@
+{
+  "buttons": [
+    {
+      "id": "next",
+      "pins": [2]
+    },
+    {
+      "id": "magic",
+      "pins": [3]
+    },
+    {
+      "id": "power",
+      "pins": [7]
+    }
+  ],
+  "rotaryEncoders": [
+    {
+      "id": "magic",
+      "pins": [4,5]
+    },
+    {
+      "id": "volume",
+      "pins": [8,9]
+    }
+  ],
+  "RGBLEDs": [
+    {
+      "id": "magic",
+      "pins": [6,10,11]
+    },
+    {
+      "id": "power",
+      "pins": [12,13,14]
+    }
+  ]
+}
