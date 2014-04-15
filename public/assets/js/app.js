@@ -149,7 +149,9 @@ function initWithData(states) {
   });
 
   // Set the current service
-  setCurrentServiceById(radio.current.id);
+  if (radio.current) {
+    setCurrentServiceById( radio.current.id );
+  }
 
   /*
     Logging
@@ -454,6 +456,9 @@ function keypathForServiceId(id, services) {
 }
 
 function augmentServiceWithCurrent(source, services) {
+
+  if (!source) { return; }
+
   var id = source.id,
       service = services[findIndexById(id, services)];
 
