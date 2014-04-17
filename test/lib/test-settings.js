@@ -15,7 +15,7 @@ chai.use(chaiAsPromised);
 beforeEach(function() {
   this.options  = { inMemoryOnly: true };
   this.defaults = { station: false, avoidType: 'programme' };
-  this.subject = Settings.create(null, this.options).build(
+  this.subject = Settings.create(null, this.options).get(
     'avoider',
     this.defaults
   );
@@ -48,7 +48,7 @@ describe('settings', function(){
 
   it('Emits when data changes', function(done){
     var mockEmitter = {emit: sinon.spy()},
-        subject = Settings.create(mockEmitter, this.options).build(
+        subject = Settings.create(mockEmitter, this.options).get(
           'avoider',
           this.defaults
         ),
@@ -74,7 +74,7 @@ describe('settings', function(){
 
   it('allows a partial update of data', function(done){
     var mockEmitter = {emit: sinon.spy()},
-        subject = Settings.create(mockEmitter, this.options).build(
+        subject = Settings.create(mockEmitter, this.options).get(
           'avoider',
           this.defaults
         ),
