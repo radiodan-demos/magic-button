@@ -14,7 +14,7 @@
     "preferredServices": [
       "radio1", "1xtra", "radio2", "radio3",
       "radio4", "radio4extra", "5live", "5livesportsextra",
-      "6music", "asiannetwork", "worldservice"
+      "6music", "asiannetwork", "worldservice", "my-music"
     ]
   }
 }

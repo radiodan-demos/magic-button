@@ -4,10 +4,14 @@ var utils = require("radiodan-client").utils,
 
 module.exports = routes;
 
-function routes(app, eventBus, radiodan, states, services, Settings) {
+function routes(app, eventBus, radiodan, states, services, settings) {
 
-  var audio    = radiodan.audio.get('default'),
-      settings = Settings.build("radio");
+  var audio    = radiodan.audio.get('default');
+
+  app.get('/next', function(req, res) {
+    states.handle('playNextService');
+    res.send(200);
+  });
 
   /*
     A big ball of state

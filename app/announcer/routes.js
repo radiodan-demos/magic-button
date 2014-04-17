@@ -6,9 +6,8 @@ var fs             = require('fs'),
 
 module.exports = routes;
 
-function routes(app, states, Settings) {
-  var settings = Settings.build('announcer'),
-      availableAnnouncers = findAvailableAnnouncers(announcersPath);
+function routes(app, states, settings) {
+  var availableAnnouncers = findAvailableAnnouncers(announcersPath);
 
   settings.update({available: availableAnnouncers});
 

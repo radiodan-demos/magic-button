@@ -8,7 +8,9 @@ var express        = require('express'),
     app            = module.exports = express(),
     eventBus       = require('./lib/event-bus').create(),
     Settings       = require('./lib/settings').create(eventBus),
-    services       = require('./lib/services').create(eventBus, radiodan),
+    services       = require('./lib/services').create(
+                       eventBus, radiodan, Settings.get('radio')
+                     ),
     states         = require('./lib/states').create(radiodan, services, eventBus);
 
 if (!module.parent) {
@@ -38,19 +40,20 @@ app.use(require('morgan')('dev'));
 
 app.use('/announcer',
   require('./app/announcer/routes')(
-    express.Router(), states, Settings
+    express.Router(), states, Settings.get('announcer')
   )
 );
 
 app.use('/avoider',
   require('./app/avoider/routes')(
-    express.Router(), states, Settings, eventBus
+    express.Router(), states, Settings.get('avoider'), eventBus
   )
 );
 
 app.use('/radio',
   require('./app/radio/routes')(
-    express.Router(), eventBus, radiodan, states, services, Settings
+    express.Router(), eventBus, radiodan,
+    states, services, Settings.get('radio')
   )
 );
 

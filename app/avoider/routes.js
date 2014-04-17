@@ -4,9 +4,8 @@ var utils    = require('radiodan-client').utils,
 
 module.exports = routes;
 
-function routes(app, states, Settings, eventBus) {
-  var settings = Settings.build('avoider'),
-      currentAvoid = { isAvoiding: false };
+function routes(app, states, settings, eventBus) {
+  var currentAvoid = { isAvoiding: false };
 
   app.get('/', index);
   app.get('/state.json', state);
