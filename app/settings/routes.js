@@ -17,7 +17,7 @@ module.exports = function(settings) {
   function settingsUpdate(req, res) {
     var newSettings = req.body;
 
-    settings.set(newSettings).then(function() {
+    settings.update(newSettings).then(function() {
       res.json(newSettings);
     }, function(err) { res.json(500, {error: err.toString()}) });
   }
