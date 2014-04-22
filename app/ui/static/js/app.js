@@ -53,7 +53,7 @@ defaults = {
       avoider  : { state: null, settings: null },
       announcer: { state: null, settings: null }
     },
-    settings: {},
+    settings: { services: [] },
     current: null
   },
   ui: { panels: {} },
@@ -65,7 +65,8 @@ var initialStateData = Promise.all([
   xhr.get('/avoider/state.json'),
   xhr.get('/avoider/settings.json'),
   xhr.get('/announcer/state.json'),
-  xhr.get('/announcer/settings.json')
+  xhr.get('/announcer/settings.json'),
+  xhr.get('/radio/settings.json')
 ]);
 
 initialStateData
@@ -78,7 +79,8 @@ function initWithData(states) {
       avoider  = JSON.parse(states[1]),
       avoiderSettings = JSON.parse(states[2]),
       announcer = JSON.parse(states[3]),
-      announcerSettings = JSON.parse(states[4]);
+      announcerSettings = JSON.parse(states[4]),
+      radioSettings = JSON.parse(states[5]);
 
   // Services available
   state.services = radio.services || defaults.services;
@@ -94,6 +96,29 @@ function initWithData(states) {
     audio: radio.audio || defaults.radio.audio,
     magic: defaults.radio.magic
   };
+
+  // Radio settings
+  state.radio.settings = {
+    action  : 'radioNextSettingService',
+    services: transformServices(radioSettings.preferredServices, state.services) || defaults.radio.services
+  };
+
+  /*
+    Return a copy of the services list with 
+    active services marked
+  */
+  function transformServices(preferred, all) {
+    return all.map(function (service) {
+      var copy = clone(service);
+      copy._isActive = preferred.indexOf(copy.id) > -1;
+      copy.isActive = function () { return copy._isActive; };
+      return copy;
+    });
+  }
+
+  function clone(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
 
   /*
     Merge current data with corresponding service
@@ -113,15 +138,6 @@ function initWithData(states) {
   state.radio.magic.announcer = {
     state   : announcer,
     settings: announcerSettings
-  };
-
-  // Radio settings
-  state.radio.settings = {
-    action  : 'radioNextSettingService',
-    isActive: function (id) {
-      return false;
-      // return this.get('radio.magic.avoider.settings.serviceId') === id;
-    }
   };
 
   // State of this UI
@@ -177,6 +193,10 @@ function initWithData(states) {
   ui.on('avoidSettingService', function (event) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
+  ui.on('radioNextSettingService', function (event) {
+    ui.set(event.keypath + '._isActive', !event.context._isActive);
+  });
+  ui.observe('radio.settings', uiRadioSettings, { init: false });
   ui.observe('radio.magic.avoider.settings', uiAvoidSettings, { init: false });
   ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
   ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
@@ -259,6 +279,26 @@ function uiAvoidSettings(data) {
       };
   console.log('Avoid settings changed', opts);
   xhr.post('/avoider/settings.json', opts);
+}
+
+function uiRadioSettings(data) {
+  console.log('uiRadioSettings', data);
+  var settings = {
+        preferredServices: extractActiveServices(data.services)
+      },
+      payload = JSON.stringify(settings),
+      opts = {
+        headers: { 'Content-type': 'application/json' },
+        data: payload
+      };
+  console.log('Radio settings changed', opts);
+  xhr.post('/radio/settings.json', opts);
+}
+
+function extractActiveServices(services) {
+  return services.map(function (service) { 
+    return service._isActive ? service.id : undefined;
+  }).filter(function(item){return item}); ;
 }
 
 function uiAvoidState(state) {
@@ -442,6 +482,11 @@ function failure(msg) {
 /*
   Helpers
 */
+function findServiceById(id, services) {
+  var index = findIndexById(id, services);
+  return services[index];
+}
+
 function findIndexById(id, services) {
   var index = null;
   services.forEach(function (item, idx) {
