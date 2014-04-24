@@ -128,10 +128,6 @@ function routes(app, eventBus, radiodan, states, services, settings) {
     params[action] = value;
 
     audio.volume(params)
-         .then(function (result) {
-          eventBus.emit('audio.volume', result);
-          return result;
-         })
          .then(
             respondWithSuccess(req, res),
             respondWithError(req, res)
