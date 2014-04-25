@@ -2,7 +2,12 @@
   "buttons": [
     {
       "id": "next",
-      "pins": [2]
+      "pins": [
+        {
+          "pin": 2,
+          "pull": "up"
+        }
+      ]
     },
     {
       "id": "magic",
@@ -10,17 +15,41 @@
     },
     {
       "id": "power",
-      "pins": [7]
+      "pins": [
+        {
+          "pin": 7,
+          "pull": "down",
+          "pressedIsHigh": true
+        }
+      ]
     }
   ],
   "rotaryEncoders": [
     {
       "id": "magic",
-      "pins": [4,5]
+      "pins": [
+        {
+          "pin": 4,
+          "pull": "up"
+        },
+        {
+          "pin": 5,
+          "pull": "up"
+        }
+      ]
     },
     {
       "id": "volume",
-      "pins": [8,9]
+      "pins": [
+        {
+          "pin": 8,
+          "pull": "up"
+        },
+        {
+          "pin": 9,
+          "pull": "up"
+        }
+      ]
     }
   ],
   "RGBLEDs": [
