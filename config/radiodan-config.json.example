@@ -15,7 +15,7 @@
     {
       "name": "Announcer",
       "id": "announcer",
-      "music": "./audio"
+      "music": "../audio"
     }
   ]
 }
