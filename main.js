@@ -11,7 +11,7 @@ var express        = require('express'),
     services       = require('./lib/services').create(
                        eventBus, radiodan, Settings.get('radio')
                      ),
-    states         = require('./lib/states').create(radiodan, services, eventBus);
+    states         = require('./lib/states').create(radiodan, services, eventBus, Settings);
 
 if (!module.parent) {
   var gracefulExit = require('./lib/graceful-exit')(radiodan);
