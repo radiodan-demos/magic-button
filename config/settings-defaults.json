@@ -8,6 +8,9 @@
     "serviceId": "radio1",
     "avoidType": "programme"
   },
+  "magic-button": {
+    "action": null
+  },
   "radio": {
     "serviceId": "radio4",
     "playing":   true,

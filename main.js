@@ -50,16 +50,22 @@ app.use('/avoider',
   )
 );
 
+app.use('/events',
+  require('./app/events/routes')(
+    express.Router(), eventBus, services
+  )
+);
+
+app.use('/magic-button',
+  require('./app/magic-button/routes')(
+    express.Router(), states, Settings.get('magic-button')
+  )
+);
+
 app.use('/radio',
   require('./app/radio/routes')(
     express.Router(), eventBus, radiodan,
     states, services, Settings.get('radio')
-  )
-);
-
-app.use('/events',
-  require('./app/events/routes')(
-    express.Router(), eventBus, services
   )
 );
 
