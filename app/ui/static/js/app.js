@@ -204,10 +204,10 @@ function initWithData(states) {
   /*
     UI -> UI
   */
-  ui.on('stations-button', createPanelToggleHandler('services'));
-  ui.on('volume-button', createPanelToggleHandler('volume'));
-  ui.on('settings-button', createPanelToggleHandler('settings'));
-  ui.on('avoid-settings', createPanelToggleHandler('avoiderSettings'));
+  ui.on('stations-button', utils.createPanelToggleHandler('services'));
+  ui.on('volume-button', utils.createPanelToggleHandler('volume'));
+  ui.on('settings-button', utils.createPanelToggleHandler('settings'));
+  ui.on('avoid-settings', utils.createPanelToggleHandler('avoiderSettings'));
   ui.on('track-display', function () {
     var current = ui.get('ui.panels.metadata.view');
     ui.set('ui.panels.metadata.view', current === 'track' ? 'prog' : 'track');
@@ -230,14 +230,6 @@ function initWithData(states) {
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
-}
-
-function createPanelToggleHandler(panelId) {
-  var keypath = 'ui.panels.' + panelId + '.isOpen';
-  return function (/* evt */) {
-    var isOpen = this.get(keypath);
-    this.set(keypath, !isOpen);
-  };
 }
 
 function uiVolumeChange(evt) {

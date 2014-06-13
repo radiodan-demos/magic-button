@@ -2,6 +2,17 @@
 'use strict';
 
 module.exports = {
+  /*
+    Returns a function that will toggle the state of 
+    `ui.panels.<panelId>.isOpen` each time it's executed
+  */
+  createPanelToggleHandler: function createPanelToggleHandler(panelId) {
+    var keypath = 'ui.panels.' + panelId + '.isOpen';
+    return function (/* evt */) {
+      var isOpen = this.get(keypath);
+      this.set(keypath, !isOpen);
+    };
+  },
   debounce: function debounce(fn, delay) {
     var timer = null;
     return function () {
