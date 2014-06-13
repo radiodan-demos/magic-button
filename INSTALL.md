@@ -55,3 +55,27 @@ Use Ctl-C to kill these processes.
 
 The magic button must be quit first otherwise it will hang waiting for the radiodan server to reply to its messages.
 
+## Development
+
+The front-end single-page web app is in `app/ui`. Templates are in `views`. `index.html` is the main page that pulls in a load of partials representing the different components on the page.
+
+### Javascript
+
+`static/js` contains all the javascript. [Browserify](http://browserify.org/) is used which enables the javascript to be written in a modular way and each module is included when necessary using `require`.
+
+We try to adhere to the [AirBnB style guide](https://github.com/airbnb/javascript).
+
+### CSS
+
+`static/css` contains a single LESS file `app.less` that includes all the individual CSS files inc `static/css/modules/`. No LESS features are used, we favour plain CSS but LESS supports the inclusion and compilation of multiple files into a single file.
+
+`lib` contains any library CSS such as [Pure](http://purecss.io/).
+
+### Building
+
+`grunt` is used to compile all the javascript into a single file `public/assets/js/app.js` for deployment.
+
+When changing the front-end code you must run `grunt build` otherwise you won't see the changes to your javascript or CSS.
+
+You must commit the compiled JS/CSS in public when you commit your code changes.
+
