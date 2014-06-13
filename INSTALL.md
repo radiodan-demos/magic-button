@@ -45,7 +45,7 @@ Radiodan server:
 In another terminal, start the magic button:
 
     $ cd magic-button
-    $ BBC_SERVICES_URL=<url> ./bin/server ../magic-button/config/radiodan-config.json
+    $ BBC_SERVICES_URL=<url> node main.js config/radiodan-config.json
 
 You should be able to see the magic button web interface running on port 5000 at [http://localhost:5000]().
 
