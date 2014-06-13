@@ -178,15 +178,20 @@ function initWithData(states) {
   });
 
   /*
-    UI -> Radio State
+    UI actions -> Radio State
   */
   var uiToAction = utils.uiToAction;
 
-  ui.on('volume', utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
-  ui.on('service', uiToAction('id', require('./actions/service')));
-  ui.on('power', uiToAction('isOn', require('./actions/power')));
-  ui.on('avoid', uiToAction('isAvoiding', require('./actions/avoid')));
-  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce')));
+  ui.on('volume',   utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
+  ui.on('service',  uiToAction('id', require('./actions/service')));
+  ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
+  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
+  ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
+  ui.observe('radio.magic.avoider.settings', require('./actions/avoid').settings, { init: false });
+
+  ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
+  ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
   ui.on('services-partial', function (event, action) {
     event.original.preventDefault();
@@ -199,10 +204,6 @@ function initWithData(states) {
   ui.on('radioNextSettingService', function (event) {
     ui.set(event.keypath + '._isActive', !event.context._isActive);
   });
-  ui.observe('radio.settings', uiRadioSettings, { init: false });
-  ui.observe('radio.magic.avoider.settings', uiAvoidSettings, { init: false });
-  ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
-  ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
   /*
     UI -> UI
@@ -233,37 +234,6 @@ function initWithData(states) {
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
-}
-
-function uiAvoidSettings(data) {
-  console.log('uiAvoidSettings');
-  var payload = JSON.stringify(data),
-      opts = {
-        headers: { 'Content-type': 'application/json' },
-        data: payload
-      };
-  console.log('Avoid settings changed', opts);
-  xhr.post('/avoider/settings.json', opts);
-}
-
-function uiRadioSettings(data) {
-  console.log('uiRadioSettings', data);
-  var settings = {
-        preferredServices: extractActiveServices(data.services)
-      },
-      payload = JSON.stringify(settings),
-      opts = {
-        headers: { 'Content-type': 'application/json' },
-        data: payload
-      };
-  console.log('Radio settings changed', opts);
-  xhr.post('/radio/settings.json', opts);
-}
-
-function extractActiveServices(services) {
-  return services.map(function (service) { 
-    return service._isActive ? service.id : undefined;
-  }).filter(function(item){return item}); ;
 }
 
 function uiAvoidState(state) {

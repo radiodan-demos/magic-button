@@ -7,16 +7,26 @@ module.exports = function (isAnnouncing) {
   var method = isAnnouncing ? 'DELETE' : 'POST';
   xhr(method, '/announcer');
 }
-},{"../utils":8,"../xhr":9}],2:[function(require,module,exports){
+},{"../utils":9,"../xhr":10}],2:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
 
-module.exports = function (isAvoiding) {
+module.exports.set = function (isAvoiding) {
   var method = isAvoiding ? 'DELETE' : 'POST';
   xhr(method, '/avoider');
 }
-},{"../utils":8,"../xhr":9}],3:[function(require,module,exports){
+
+module.exports.settings = function (data) {
+  var payload = JSON.stringify(data),
+      opts = {
+        headers: { 'Content-type': 'application/json' },
+        data: payload
+      };
+  console.log('Avoid settings changed', opts);
+  xhr.post('/avoider/settings.json', opts);
+}
+},{"../utils":9,"../xhr":10}],3:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -27,7 +37,26 @@ module.exports = function (value) {
 
   xhr(method, '/radio/power');
 }
-},{"../utils":8,"../xhr":9}],4:[function(require,module,exports){
+},{"../utils":9,"../xhr":10}],4:[function(require,module,exports){
+var xhr = require('../xhr'),
+    utils = require('../utils'),
+    success = utils.success,
+    failure = utils.failure;
+
+module.exports = function (data) {
+  console.warn('data', data);
+  var settings = {
+        preferredServices: utils.extractActiveServices(data.services)
+      },
+      payload = JSON.stringify(settings),
+      opts = {
+        headers: { 'Content-type': 'application/json' },
+        data: payload
+      };
+  console.log('Radio settings changed', opts);
+  xhr.post('/radio/settings.json', opts);
+}
+},{"../utils":9,"../xhr":10}],5:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -36,7 +65,7 @@ module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":8,"../xhr":9}],5:[function(require,module,exports){
+},{"../utils":9,"../xhr":10}],6:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -45,7 +74,7 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":8,"../xhr":9}],6:[function(require,module,exports){
+},{"../utils":9,"../xhr":10}],7:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 /* global EventSource */
 'use strict';
@@ -226,15 +255,20 @@ function initWithData(states) {
   });
 
   /*
-    UI -> Radio State
+    UI actions -> Radio State
   */
   var uiToAction = utils.uiToAction;
 
-  ui.on('volume', utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
-  ui.on('service', uiToAction('id', require('./actions/service')));
-  ui.on('power', uiToAction('isOn', require('./actions/power')));
-  ui.on('avoid', uiToAction('isAvoiding', require('./actions/avoid')));
-  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce')));
+  ui.on('volume',   utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
+  ui.on('service',  uiToAction('id', require('./actions/service')));
+  ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
+  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
+  ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
+  ui.observe('radio.magic.avoider.settings', require('./actions/avoid').settings, { init: false });
+
+  ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
+  ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
   ui.on('services-partial', function (event, action) {
     event.original.preventDefault();
@@ -247,10 +281,6 @@ function initWithData(states) {
   ui.on('radioNextSettingService', function (event) {
     ui.set(event.keypath + '._isActive', !event.context._isActive);
   });
-  ui.observe('radio.settings', uiRadioSettings, { init: false });
-  ui.observe('radio.magic.avoider.settings', uiAvoidSettings, { init: false });
-  ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
-  ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
   /*
     UI -> UI
@@ -281,37 +311,6 @@ function initWithData(states) {
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
-}
-
-function uiAvoidSettings(data) {
-  console.log('uiAvoidSettings');
-  var payload = JSON.stringify(data),
-      opts = {
-        headers: { 'Content-type': 'application/json' },
-        data: payload
-      };
-  console.log('Avoid settings changed', opts);
-  xhr.post('/avoider/settings.json', opts);
-}
-
-function uiRadioSettings(data) {
-  console.log('uiRadioSettings', data);
-  var settings = {
-        preferredServices: extractActiveServices(data.services)
-      },
-      payload = JSON.stringify(settings),
-      opts = {
-        headers: { 'Content-type': 'application/json' },
-        data: payload
-      };
-  console.log('Radio settings changed', opts);
-  xhr.post('/radio/settings.json', opts);
-}
-
-function extractActiveServices(services) {
-  return services.map(function (service) { 
-    return service._isActive ? service.id : undefined;
-  }).filter(function(item){return item}); ;
 }
 
 function uiAvoidState(state) {
@@ -504,7 +503,7 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-},{"../lib/owl-carousel/owl.carousel":10,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/service":4,"./actions/volume":5,"./lib/d3":7,"./utils":8,"./xhr":9,"es6-promise":12,"jquery":23,"ractive":25,"ractive-events-tap":24}],7:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":11,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/radio-settings":4,"./actions/service":5,"./actions/volume":6,"./lib/d3":8,"./utils":9,"./xhr":10,"es6-promise":13,"jquery":24,"ractive":26,"ractive-events-tap":25}],8:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9799,11 +9798,16 @@ function augmentServiceWithCurrent(source, services) {
     this.d3 = d3;
   }
 }();
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
 module.exports = {
+  extractActiveServices: function extractActiveServices(services) {
+    return services.map(function (service) { 
+      return service._isActive ? service.id : undefined;
+    }).filter(function(item){return item}); ;
+  },
   /*
     Object comparison helpers
   */
@@ -9896,7 +9900,7 @@ module.exports = {
   }
 };
 
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -9958,7 +9962,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":12}],10:[function(require,module,exports){
+},{"es6-promise":13}],11:[function(require,module,exports){
 /*
  *  jQuery OwlCarousel v1.3.2
  *
@@ -11471,7 +11475,7 @@ if (typeof Object.create !== "function") {
         afterLazyLoad: false
     };
 }(jQuery, window, document));
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -11526,13 +11530,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":17,"./promise/promise":18}],13:[function(require,module,exports){
+},{"./promise/polyfill":18,"./promise/promise":19}],14:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -11626,7 +11630,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":22}],14:[function(require,module,exports){
+},{"./utils":23}],15:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -11690,7 +11694,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":11}],15:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":12}],16:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -11758,7 +11762,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -11774,7 +11778,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -11803,7 +11807,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":18,"./utils":22}],18:[function(require,module,exports){
+},{"./promise":19,"./utils":23}],19:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -12017,7 +12021,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":13,"./asap":14,"./cast":15,"./config":16,"./race":19,"./reject":20,"./resolve":21,"./utils":22}],19:[function(require,module,exports){
+},{"./all":14,"./asap":15,"./cast":16,"./config":17,"./race":20,"./reject":21,"./resolve":22,"./utils":23}],20:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -12107,7 +12111,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":22}],20:[function(require,module,exports){
+},{"./utils":23}],21:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -12155,7 +12159,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -12198,7 +12202,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -12221,7 +12225,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -21334,7 +21338,7 @@ return jQuery;
 
 }));
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -21599,7 +21603,7 @@ return jQuery;
 
 }));
 
-},{"ractive":25}],25:[function(require,module,exports){
+},{"ractive":26}],26:[function(require,module,exports){
 /*
 
 	Ractive - v0.3.9-317-d23e408 - 2014-03-21
@@ -32200,4 +32204,4 @@ return jQuery;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}]},{},[6]);
+},{}]},{},[7]);

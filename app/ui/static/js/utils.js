@@ -2,6 +2,11 @@
 'use strict';
 
 module.exports = {
+  extractActiveServices: function extractActiveServices(services) {
+    return services.map(function (service) { 
+      return service._isActive ? service.id : undefined;
+    }).filter(function(item){return item}); ;
+  },
   /*
     Object comparison helpers
   */
