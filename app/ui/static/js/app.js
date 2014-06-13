@@ -188,7 +188,7 @@ function initWithData(states) {
     console.log('firing', action, event);
     ui.fire(action, event);
   });
-  ui.on('service', uiServiceChange);
+  ui.on('service', uiToAction('id', require('./actions/service')));
   ui.on('power', uiPower);
   ui.on('avoid', uiAvoid);
   ui.on('announce', uiAnnounce);
@@ -232,15 +232,6 @@ function initWithData(states) {
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
-}
-
-function uiServiceChange(evt) {
-  evt.original.preventDefault();
-
-  var id = evt.context.id;
-
-  console.log('ui: service selected', id);
-  xhr.post('/radio/service/' + id ).then(utils.success('service'), utils.failure('service'));
 }
 
 function uiPower(evt) {

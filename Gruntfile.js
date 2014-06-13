@@ -40,7 +40,7 @@ module.exports = function(grunt) {
     },
     watch: {
       js: {
-        files: [ "**/static/**/*.js*" ],
+        files: [ "**/static/**/*.js*", "**/static/**/**/*.js*" ],
         tasks: [ 'default' ]
       },
       css: {
