@@ -1,0 +1,8 @@
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
+module.exports = function (isAvoiding) {
+  var method = isAvoiding ? 'DELETE' : 'POST';
+  xhr(method, '/avoider');
+}

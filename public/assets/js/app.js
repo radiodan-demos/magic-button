@@ -3,11 +3,40 @@ var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
 
+module.exports = function (isAnnouncing) {
+  var method = isAnnouncing ? 'DELETE' : 'POST';
+  xhr(method, '/announcer');
+}
+},{"../utils":8,"../xhr":9}],2:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
+module.exports = function (isAvoiding) {
+  var method = isAvoiding ? 'DELETE' : 'POST';
+  xhr(method, '/avoider');
+}
+},{"../utils":8,"../xhr":9}],3:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
+module.exports = function (value) {
+  var isOn = value,
+      method = isOn ? 'DELETE' : 'PUT';
+
+  xhr(method, '/radio/power');
+}
+},{"../utils":8,"../xhr":9}],4:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
 module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":5,"../xhr":6}],2:[function(require,module,exports){
+},{"../utils":8,"../xhr":9}],5:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -16,7 +45,7 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":5,"../xhr":6}],3:[function(require,module,exports){
+},{"../utils":8,"../xhr":9}],6:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 /* global EventSource */
 'use strict';
@@ -202,15 +231,16 @@ function initWithData(states) {
   var uiToAction = utils.uiToAction;
 
   ui.on('volume', utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
+  ui.on('service', uiToAction('id', require('./actions/service')));
+  ui.on('power', uiToAction('isOn', require('./actions/power')));
+  ui.on('avoid', uiToAction('isAvoiding', require('./actions/avoid')));
+  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce')));
+
   ui.on('services-partial', function (event, action) {
     event.original.preventDefault();
     console.log('firing', action, event);
     ui.fire(action, event);
-  });
-  ui.on('service', uiToAction('id', require('./actions/service')));
-  ui.on('power', uiPower);
-  ui.on('avoid', uiAvoid);
-  ui.on('announce', uiAnnounce);
+  });  
   ui.on('avoidSettingService', function (event) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
@@ -251,20 +281,6 @@ function initWithData(states) {
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
-}
-
-function uiPower(evt) {
-  evt.original.preventDefault();
-  var isOn = evt.context.isOn,
-      method = isOn ? 'DELETE' : 'PUT';
-
-  xhr(method, '/radio/power');
-}
-
-function uiAvoid(evt) {
-  evt.original.preventDefault();
-  var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
-  xhr(method, '/avoider');
 }
 
 function uiAvoidSettings(data) {
@@ -340,12 +356,6 @@ function updateAvoidState() {
       progressArcPath: activeArc({ endAngle: 0 })
     });
   }
-}
-
-function uiAnnounce(evt) {
-  evt.original.preventDefault();
-  var method = evt.context.isAnnouncing ? 'DELETE' : 'POST';
-  xhr(method, '/announcer');
 }
 
 function uiAnnounceState(state) {
@@ -442,7 +452,7 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('radio.magic.avoider.state', content.data);
       break;
     case 'settings.avoider':
-      ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
+      utils.ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
       break;
     case 'nowPlaying':
       ui.set(keypathForServiceId(content.service, ui.get('services')) + '.nowPlaying', content.data);
@@ -494,32 +504,7 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-
-/*
-  Object comparison helpers
-*/
-function hasDifferentProperties(first, second) {
-  return Object.keys(first).some(
-    function (key) {
-      var firstProp  = first[key],
-          secondProp = second[key];
-      return firstProp !== secondProp;
-    }
-  );
-}
-
-/*
-  Ractive-specific helpers
-*/
-function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
-  var current = ractive.get(keypath);
-
-  if ( hasDifferentProperties(obj, current) ) {
-    ractive.set(keypath, obj);
-  }
-}
-
-},{"../lib/owl-carousel/owl.carousel":7,"./actions/service":1,"./actions/volume":2,"./lib/d3":4,"./utils":5,"./xhr":6,"es6-promise":9,"jquery":20,"ractive":22,"ractive-events-tap":21}],4:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":10,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/service":4,"./actions/volume":5,"./lib/d3":7,"./utils":8,"./xhr":9,"es6-promise":12,"jquery":23,"ractive":25,"ractive-events-tap":24}],7:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9814,11 +9799,33 @@ function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
     this.d3 = d3;
   }
 }();
-},{}],5:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
 module.exports = {
+  /*
+    Object comparison helpers
+  */
+  hasDifferentProperties: function hasDifferentProperties(first, second) {
+    return Object.keys(first).some(
+      function (key) {
+        var firstProp  = first[key],
+            secondProp = second[key];
+        return firstProp !== secondProp;
+      }
+    );
+  },
+  /*
+    Ractive-specific helpers
+  */
+  ractiveSetIfObjectPropertiesChanged: function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
+    var current = ractive.get(keypath);
+
+    if ( this.hasDifferentProperties(obj, current) ) {
+      ractive.set(keypath, obj);
+    }
+  },
   /*
     Creates a handler to bind a context[key] changes
     to an action function.
@@ -9889,7 +9896,7 @@ module.exports = {
   }
 };
 
-},{}],6:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -9951,7 +9958,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":9}],7:[function(require,module,exports){
+},{"es6-promise":12}],10:[function(require,module,exports){
 /*
  *  jQuery OwlCarousel v1.3.2
  *
@@ -11464,7 +11471,7 @@ if (typeof Object.create !== "function") {
         afterLazyLoad: false
     };
 }(jQuery, window, document));
-},{}],8:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -11519,13 +11526,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],9:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":14,"./promise/promise":15}],10:[function(require,module,exports){
+},{"./promise/polyfill":17,"./promise/promise":18}],13:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -11619,7 +11626,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":19}],11:[function(require,module,exports){
+},{"./utils":22}],14:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -11683,7 +11690,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":8}],12:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":11}],15:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -11751,7 +11758,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],13:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -11767,7 +11774,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],14:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -11796,7 +11803,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":15,"./utils":19}],15:[function(require,module,exports){
+},{"./promise":18,"./utils":22}],18:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -12010,7 +12017,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":10,"./asap":11,"./cast":12,"./config":13,"./race":16,"./reject":17,"./resolve":18,"./utils":19}],16:[function(require,module,exports){
+},{"./all":13,"./asap":14,"./cast":15,"./config":16,"./race":19,"./reject":20,"./resolve":21,"./utils":22}],19:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -12100,7 +12107,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":19}],17:[function(require,module,exports){
+},{"./utils":22}],20:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -12148,7 +12155,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -12191,7 +12198,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -12214,7 +12221,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -21327,7 +21334,7 @@ return jQuery;
 
 }));
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -21592,7 +21599,7 @@ return jQuery;
 
 }));
 
-},{"ractive":22}],22:[function(require,module,exports){
+},{"ractive":25}],25:[function(require,module,exports){
 /*
 
 	Ractive - v0.3.9-317-d23e408 - 2014-03-21
@@ -32193,4 +32200,4 @@ return jQuery;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}]},{},[3]);
+},{}]},{},[6]);

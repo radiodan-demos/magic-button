@@ -3,6 +3,28 @@
 
 module.exports = {
   /*
+    Object comparison helpers
+  */
+  hasDifferentProperties: function hasDifferentProperties(first, second) {
+    return Object.keys(first).some(
+      function (key) {
+        var firstProp  = first[key],
+            secondProp = second[key];
+        return firstProp !== secondProp;
+      }
+    );
+  },
+  /*
+    Ractive-specific helpers
+  */
+  ractiveSetIfObjectPropertiesChanged: function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
+    var current = ractive.get(keypath);
+
+    if ( this.hasDifferentProperties(obj, current) ) {
+      ractive.set(keypath, obj);
+    }
+  },
+  /*
     Creates a handler to bind a context[key] changes
     to an action function.
     Prevents default on the original event.

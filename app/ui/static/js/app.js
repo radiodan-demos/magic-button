@@ -183,15 +183,16 @@ function initWithData(states) {
   var uiToAction = utils.uiToAction;
 
   ui.on('volume', utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
+  ui.on('service', uiToAction('id', require('./actions/service')));
+  ui.on('power', uiToAction('isOn', require('./actions/power')));
+  ui.on('avoid', uiToAction('isAvoiding', require('./actions/avoid')));
+  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce')));
+
   ui.on('services-partial', function (event, action) {
     event.original.preventDefault();
     console.log('firing', action, event);
     ui.fire(action, event);
-  });
-  ui.on('service', uiToAction('id', require('./actions/service')));
-  ui.on('power', uiPower);
-  ui.on('avoid', uiAvoid);
-  ui.on('announce', uiAnnounce);
+  });  
   ui.on('avoidSettingService', function (event) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
@@ -232,20 +233,6 @@ function initWithData(states) {
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
-}
-
-function uiPower(evt) {
-  evt.original.preventDefault();
-  var isOn = evt.context.isOn,
-      method = isOn ? 'DELETE' : 'PUT';
-
-  xhr(method, '/radio/power');
-}
-
-function uiAvoid(evt) {
-  evt.original.preventDefault();
-  var method = evt.context.isAvoiding ? 'DELETE' : 'POST';
-  xhr(method, '/avoider');
 }
 
 function uiAvoidSettings(data) {
@@ -321,12 +308,6 @@ function updateAvoidState() {
       progressArcPath: activeArc({ endAngle: 0 })
     });
   }
-}
-
-function uiAnnounce(evt) {
-  evt.original.preventDefault();
-  var method = evt.context.isAnnouncing ? 'DELETE' : 'POST';
-  xhr(method, '/announcer');
 }
 
 function uiAnnounceState(state) {
@@ -423,7 +404,7 @@ eventSource.addEventListener('message', function (evt) {
       ui.set('radio.magic.avoider.state', content.data);
       break;
     case 'settings.avoider':
-      ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
+      utils.ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
       break;
     case 'nowPlaying':
       ui.set(keypathForServiceId(content.service, ui.get('services')) + '.nowPlaying', content.data);
@@ -474,28 +455,4 @@ function augmentServiceWithCurrent(source, services) {
           console.log(key, service[key], source[key]);
           service[key] = source[key];
         });
-}
-
-/*
-  Object comparison helpers
-*/
-function hasDifferentProperties(first, second) {
-  return Object.keys(first).some(
-    function (key) {
-      var firstProp  = first[key],
-          secondProp = second[key];
-      return firstProp !== secondProp;
-    }
-  );
-}
-
-/*
-  Ractive-specific helpers
-*/
-function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
-  var current = ractive.get(keypath);
-
-  if ( hasDifferentProperties(obj, current) ) {
-    ractive.set(keypath, obj);
-  }
 }
