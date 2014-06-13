@@ -3,6 +3,31 @@
 
 module.exports = {
   /*
+    Creates a handler to bind a context[key] changes
+    to an action function.
+    Prevents default on the original event.
+  */
+  uiToAction: function uiToAction(key, action) {
+    return function (evt) {
+      evt.original.preventDefault();
+      var value = evt.context[key];
+      action(value);
+    };
+  },
+  /*
+    Generic promise success or failure options
+  */
+  success: function success(msg) {
+    return function (content) {
+      console.log(msg, 'success', content);
+    };
+  },
+  failure: function failure(msg) {
+    return function (err) {
+      console.warn(msg, 'failure', err.stack);
+    };
+  },
+  /*
     Returns a function that will toggle the state of 
     `ui.panels.<panelId>.isOpen` each time it's executed
   */

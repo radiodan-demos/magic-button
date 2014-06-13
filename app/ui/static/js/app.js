@@ -71,7 +71,7 @@ var initialStateData = Promise.all([
 
 initialStateData
   .then(initWithData)
-  .then(null, failure('state'));
+  .then(null, utils.failure('state'));
 
 function initWithData(states) {
   console.log('initWithData', states);
@@ -180,7 +180,9 @@ function initWithData(states) {
   /*
     UI -> Radio State
   */
-  ui.on('volume', utils.debounce(uiVolumeChange, 250));
+  var uiToAction = utils.uiToAction;
+
+  ui.on('volume', utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
   ui.on('services-partial', function (event, action) {
     event.original.preventDefault();
     console.log('firing', action, event);
@@ -232,20 +234,13 @@ function initWithData(states) {
   console.log('initialised with data', state);
 }
 
-function uiVolumeChange(evt) {
-  console.log('vol', evt.context);
-  var value = evt.context.volume;
-  console.log('ui: volume changed', value);
-  xhr.post('/radio/volume/value/' + value ).then(success('volume'), failure('volume'));
-}
-
 function uiServiceChange(evt) {
   evt.original.preventDefault();
 
   var id = evt.context.id;
 
   console.log('ui: service selected', id);
-  xhr.post('/radio/service/' + id ).then(success('service'), failure('service'));
+  xhr.post('/radio/service/' + id ).then(utils.success('service'), utils.failure('service'));
 }
 
 function uiPower(evt) {
@@ -455,21 +450,6 @@ eventSource.addEventListener('message', function (evt) {
 eventSource.addEventListener('error', function (evt) {
   console.warn(evt);
 });
-
-/*
-  Generic promise success or failure options
-*/
-function success(msg) {
-  return function (content) {
-    console.log(msg, 'success', content);
-  };
-}
-
-function failure(msg) {
-  return function (err) {
-    console.warn(msg, 'failure', err.stack);
-  };
-}
 
 /*
   Helpers

@@ -1,4 +1,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
+module.exports = function (value) {
+  xhr.post('/radio/volume/value/' + value )
+     .then(success('volume'), failure('volume'));
+}
+},{"../utils":4,"../xhr":5}],2:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 /* global EventSource */
 'use strict';
@@ -72,7 +81,7 @@ var initialStateData = Promise.all([
 
 initialStateData
   .then(initWithData)
-  .then(null, failure('state'));
+  .then(null, utils.failure('state'));
 
 function initWithData(states) {
   console.log('initWithData', states);
@@ -181,7 +190,9 @@ function initWithData(states) {
   /*
     UI -> Radio State
   */
-  ui.on('volume', utils.debounce(uiVolumeChange, 250));
+  var uiToAction = utils.uiToAction;
+
+  ui.on('volume', utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
   ui.on('services-partial', function (event, action) {
     event.original.preventDefault();
     console.log('firing', action, event);
@@ -231,13 +242,6 @@ function initWithData(states) {
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
   console.log('initialised with data', state);
-}
-
-function uiVolumeChange(evt) {
-  console.log('vol', evt.context);
-  var value = evt.context.volume;
-  console.log('ui: volume changed', value);
-  xhr.post('/radio/volume/value/' + value ).then(success('volume'), failure('volume'));
 }
 
 function uiServiceChange(evt) {
@@ -458,21 +462,6 @@ eventSource.addEventListener('error', function (evt) {
 });
 
 /*
-  Generic promise success or failure options
-*/
-function success(msg) {
-  return function (content) {
-    console.log(msg, 'success', content);
-  };
-}
-
-function failure(msg) {
-  return function (err) {
-    console.warn(msg, 'failure', err.stack);
-  };
-}
-
-/*
   Helpers
 */
 function findServiceById(id, services) {
@@ -530,7 +519,7 @@ function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
   }
 }
 
-},{"../lib/owl-carousel/owl.carousel":5,"./lib/d3":2,"./utils":3,"./xhr":4,"es6-promise":7,"jquery":18,"ractive":20,"ractive-events-tap":19}],2:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":6,"./actions/volume":1,"./lib/d3":3,"./utils":4,"./xhr":5,"es6-promise":8,"jquery":19,"ractive":21,"ractive-events-tap":20}],3:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9825,11 +9814,36 @@ function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
     this.d3 = d3;
   }
 }();
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
 module.exports = {
+  /*
+    Creates a handler to bind a context[key] changes
+    to an action function.
+    Prevents default on the original event.
+  */
+  uiToAction: function uiToAction(key, action) {
+    return function (evt) {
+      evt.original.preventDefault();
+      var value = evt.context[key];
+      action(value);
+    };
+  },
+  /*
+    Generic promise success or failure options
+  */
+  success: function success(msg) {
+    return function (content) {
+      console.log(msg, 'success', content);
+    };
+  },
+  failure: function failure(msg) {
+    return function (err) {
+      console.warn(msg, 'failure', err.stack);
+    };
+  },
   /*
     Returns a function that will toggle the state of 
     `ui.panels.<panelId>.isOpen` each time it's executed
@@ -9875,7 +9889,7 @@ module.exports = {
   }
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -9937,7 +9951,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":7}],5:[function(require,module,exports){
+},{"es6-promise":8}],6:[function(require,module,exports){
 /*
  *  jQuery OwlCarousel v1.3.2
  *
@@ -11450,7 +11464,7 @@ if (typeof Object.create !== "function") {
         afterLazyLoad: false
     };
 }(jQuery, window, document));
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -11505,13 +11519,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":12,"./promise/promise":13}],8:[function(require,module,exports){
+},{"./promise/polyfill":13,"./promise/promise":14}],9:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -11605,7 +11619,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":17}],9:[function(require,module,exports){
+},{"./utils":18}],10:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -11669,7 +11683,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":6}],10:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":7}],11:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -11737,7 +11751,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -11753,7 +11767,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -11782,7 +11796,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":13,"./utils":17}],13:[function(require,module,exports){
+},{"./promise":14,"./utils":18}],14:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -11996,7 +12010,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":8,"./asap":9,"./cast":10,"./config":11,"./race":14,"./reject":15,"./resolve":16,"./utils":17}],14:[function(require,module,exports){
+},{"./all":9,"./asap":10,"./cast":11,"./config":12,"./race":15,"./reject":16,"./resolve":17,"./utils":18}],15:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -12086,7 +12100,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":17}],15:[function(require,module,exports){
+},{"./utils":18}],16:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -12134,7 +12148,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -12177,7 +12191,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -12200,7 +12214,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -21313,7 +21327,7 @@ return jQuery;
 
 }));
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -21578,7 +21592,7 @@ return jQuery;
 
 }));
 
-},{"ractive":20}],20:[function(require,module,exports){
+},{"ractive":21}],21:[function(require,module,exports){
 /*
 
 	Ractive - v0.3.9-317-d23e408 - 2014-03-21
@@ -32179,4 +32193,4 @@ return jQuery;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}]},{},[1]);
+},{}]},{},[2]);
