@@ -14,6 +14,8 @@ var Ractive = require('ractive'),
     d3      = require('./lib/d3'),
     jQuery  = require('jquery');
 
+Ractive.components.CircularProgress = require('./components/circular-progress');
+
 window.jQuery = jQuery;
 // owl.carousel requires global jQuery - boo!
 require('../lib/owl-carousel/owl.carousel');
@@ -29,19 +31,7 @@ var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]#mainTmpl').innerText,
     state = {},
     defaults,
-    ui,
-    activeArc,
-    inactiveArc;
-
-activeArc = d3.svg.arc()
-              .innerRadius(44.4827586)
-              .outerRadius(50)
-              .startAngle(0);
-
-inactiveArc = d3.svg.arc()
-                .innerRadius(49.5)
-                .outerRadius(50)
-                .startAngle(0);
+    ui;
 
 window.state = state;
 
@@ -221,15 +211,8 @@ function initWithData(states) {
   /*
     Create magic buttons
   */
-  ui.set('ui.magic.avoider', {
-    outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
-    progressArcPath: activeArc({ endAngle: 0 })
-  });
-
-  ui.set('ui.magic.announcer', {
-    outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
-    progressArcPath: activeArc({ endAngle: 0 })
-  });
+  ui.set('ui.magic.avoider', {});
+  ui.set('ui.magic.announcer', {});
 
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
@@ -267,25 +250,21 @@ function updateAvoidState() {
     }
 
     ui.set('ui.magic.avoider', {
-      outerArcPath: activeArc({ endAngle: Math.PI * 2 }),
-      progressArcPath: activeArc({ endAngle: angle })
+      angle: angle
     });
 
     window.setTimeout(updateAvoidState, 1000);
   } else {
     ui.set('ui.magic.avoider', {
-      outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
-      progressArcPath: activeArc({ endAngle: 0 })
+      angle: 0
     });
   }
 }
 
 function uiAnnounceState(state) {
-  var path = activeArc({ endAngle: Math.PI * 2 });
   ui.set('ui.magic.announcer', {
-        outerArcPath: path,
-        progressArcPath: path
-      });
+    angle: 0
+  });
 }
 
 function angleForTimePeriod(start, end, now) {

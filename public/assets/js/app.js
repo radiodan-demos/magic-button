@@ -7,7 +7,7 @@ module.exports = function (isAnnouncing) {
   var method = isAnnouncing ? 'DELETE' : 'POST';
   xhr(method, '/announcer');
 }
-},{"../utils":9,"../xhr":10}],2:[function(require,module,exports){
+},{"../utils":10,"../xhr":11}],2:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -26,7 +26,7 @@ module.exports.settings = function (data) {
   console.log('Avoid settings changed', opts);
   xhr.post('/avoider/settings.json', opts);
 }
-},{"../utils":9,"../xhr":10}],3:[function(require,module,exports){
+},{"../utils":10,"../xhr":11}],3:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -37,7 +37,7 @@ module.exports = function (value) {
 
   xhr(method, '/radio/power');
 }
-},{"../utils":9,"../xhr":10}],4:[function(require,module,exports){
+},{"../utils":10,"../xhr":11}],4:[function(require,module,exports){
 var xhr = require('../xhr'),
     utils = require('../utils'),
     success = utils.success,
@@ -56,7 +56,7 @@ module.exports = function (data) {
   console.log('Radio settings changed', opts);
   xhr.post('/radio/settings.json', opts);
 }
-},{"../utils":9,"../xhr":10}],5:[function(require,module,exports){
+},{"../utils":10,"../xhr":11}],5:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -65,7 +65,7 @@ module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":9,"../xhr":10}],6:[function(require,module,exports){
+},{"../utils":10,"../xhr":11}],6:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -74,7 +74,7 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":9,"../xhr":10}],7:[function(require,module,exports){
+},{"../utils":10,"../xhr":11}],7:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 /* global EventSource */
 'use strict';
@@ -91,6 +91,8 @@ var Ractive = require('ractive'),
     d3      = require('./lib/d3'),
     jQuery  = require('jquery');
 
+Ractive.components.CircularProgress = require('./components/circular-progress');
+
 window.jQuery = jQuery;
 // owl.carousel requires global jQuery - boo!
 require('../lib/owl-carousel/owl.carousel');
@@ -106,19 +108,7 @@ var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]#mainTmpl').innerText,
     state = {},
     defaults,
-    ui,
-    activeArc,
-    inactiveArc;
-
-activeArc = d3.svg.arc()
-              .innerRadius(44.4827586)
-              .outerRadius(50)
-              .startAngle(0);
-
-inactiveArc = d3.svg.arc()
-                .innerRadius(49.5)
-                .outerRadius(50)
-                .startAngle(0);
+    ui;
 
 window.state = state;
 
@@ -298,15 +288,8 @@ function initWithData(states) {
   /*
     Create magic buttons
   */
-  ui.set('ui.magic.avoider', {
-    outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
-    progressArcPath: activeArc({ endAngle: 0 })
-  });
-
-  ui.set('ui.magic.announcer', {
-    outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
-    progressArcPath: activeArc({ endAngle: 0 })
-  });
+  ui.set('ui.magic.avoider', {});
+  ui.set('ui.magic.announcer', {});
 
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
@@ -344,25 +327,21 @@ function updateAvoidState() {
     }
 
     ui.set('ui.magic.avoider', {
-      outerArcPath: activeArc({ endAngle: Math.PI * 2 }),
-      progressArcPath: activeArc({ endAngle: angle })
+      angle: angle
     });
 
     window.setTimeout(updateAvoidState, 1000);
   } else {
     ui.set('ui.magic.avoider', {
-      outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
-      progressArcPath: activeArc({ endAngle: 0 })
+      angle: 0
     });
   }
 }
 
 function uiAnnounceState(state) {
-  var path = activeArc({ endAngle: Math.PI * 2 });
   ui.set('ui.magic.announcer', {
-        outerArcPath: path,
-        progressArcPath: path
-      });
+    angle: 0
+  });
 }
 
 function angleForTimePeriod(start, end, now) {
@@ -503,7 +482,53 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-},{"../lib/owl-carousel/owl.carousel":11,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/radio-settings":4,"./actions/service":5,"./actions/volume":6,"./lib/d3":8,"./utils":9,"./xhr":10,"es6-promise":13,"jquery":24,"ractive":26,"ractive-events-tap":25}],8:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":12,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/radio-settings":4,"./actions/service":5,"./actions/volume":6,"./components/circular-progress":8,"./lib/d3":9,"./utils":10,"./xhr":11,"es6-promise":14,"jquery":25,"ractive":27,"ractive-events-tap":26}],8:[function(require,module,exports){
+var Ractive = require('ractive'),
+    d3      = require('../lib/d3');
+
+var activeArc,
+    inactiveArc;
+
+/*
+  The arcs
+*/
+activeArc = d3.svg.arc()
+              .innerRadius(44.4827586)
+              .outerRadius(50)
+              .startAngle(0);
+
+inactiveArc = d3.svg.arc()
+                .innerRadius(49.5)
+                .outerRadius(50)
+                .startAngle(0);
+
+var initialState = {
+  outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
+  progressArcPath: activeArc({ endAngle: 0 })
+};
+
+var CircularProgress = Ractive.extend({
+  template: '#progressTempl',
+  init: function () {
+    this.set(initialState);
+
+    this.observe('angle', function (angle) {
+      // var isActive = this.get('isActive'),  
+      //     arc = isActive ? activeArc : inactiveArc;
+
+      console.log('set angle', angle);
+
+      arc = activeArc;
+
+      this.set({
+        progressArcPath: arc({ endAngle: angle })
+      });
+    });
+  }
+});
+
+module.exports = CircularProgress;
+},{"../lib/d3":9,"ractive":27}],9:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9798,7 +9823,7 @@ function augmentServiceWithCurrent(source, services) {
     this.d3 = d3;
   }
 }();
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -9900,7 +9925,7 @@ module.exports = {
   }
 };
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -9962,7 +9987,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":13}],11:[function(require,module,exports){
+},{"es6-promise":14}],12:[function(require,module,exports){
 /*
  *  jQuery OwlCarousel v1.3.2
  *
@@ -11475,7 +11500,7 @@ if (typeof Object.create !== "function") {
         afterLazyLoad: false
     };
 }(jQuery, window, document));
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -11530,13 +11555,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":18,"./promise/promise":19}],14:[function(require,module,exports){
+},{"./promise/polyfill":19,"./promise/promise":20}],15:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -11630,7 +11655,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":23}],15:[function(require,module,exports){
+},{"./utils":24}],16:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -11694,7 +11719,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":12}],16:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":13}],17:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -11762,7 +11787,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -11778,7 +11803,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -11807,7 +11832,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":19,"./utils":23}],19:[function(require,module,exports){
+},{"./promise":20,"./utils":24}],20:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -12021,7 +12046,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":14,"./asap":15,"./cast":16,"./config":17,"./race":20,"./reject":21,"./resolve":22,"./utils":23}],20:[function(require,module,exports){
+},{"./all":15,"./asap":16,"./cast":17,"./config":18,"./race":21,"./reject":22,"./resolve":23,"./utils":24}],21:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -12111,7 +12136,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":23}],21:[function(require,module,exports){
+},{"./utils":24}],22:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -12159,7 +12184,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -12202,7 +12227,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -12225,7 +12250,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -21338,7 +21363,7 @@ return jQuery;
 
 }));
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -21603,7 +21628,7 @@ return jQuery;
 
 }));
 
-},{"ractive":26}],26:[function(require,module,exports){
+},{"ractive":27}],27:[function(require,module,exports){
 /*
 
 	Ractive - v0.3.9-317-d23e408 - 2014-03-21
