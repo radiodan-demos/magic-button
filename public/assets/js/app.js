@@ -314,15 +314,12 @@ function updateAvoidState() {
     }
 
     var diff = end - now;
-
     var angle = Math.PI * 2;
 
     // Handle negative time
     if (diff >= 0) {
       var formattedDiff = formatTimeDiff(diff);
-
       ui.set('radio.magic.avoider.state.timeLeft', formattedDiff);
-
       angle = angleForTimePeriod(start, end, now);
     }
 
@@ -513,13 +510,7 @@ var CircularProgress = Ractive.extend({
     this.set(initialState);
 
     this.observe('angle', function (angle) {
-      // var isActive = this.get('isActive'),  
-      //     arc = isActive ? activeArc : inactiveArc;
-
-      console.log('set angle', angle);
-
       arc = activeArc;
-
       this.set({
         progressArcPath: arc({ endAngle: angle })
       });
