@@ -27,6 +27,11 @@ window.d3 = d3;
 */
 require('ractive-events-tap');
 
+/*
+  Ractive-Backbone adaptor
+*/
+require('ractive-backbone/Ractive-Backbone');
+
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]#mainTmpl').innerText,
     state = {},
@@ -72,13 +77,35 @@ function initWithData(states) {
       announcerSettings = JSON.parse(states[4]),
       radioSettings = JSON.parse(states[5]);
 
-  // Services available
-  state.services = radio.services || defaults.services;
+  /*
+    Services available
+    Construct a ServiceCollection of available radio stations
+  */
+  var services = createServiceCollection(radio.services || []);
+  state.services = services;
+
+  window.services = services;
+
+  // TOOD: Replace with models above
+  // state.services = radio.services || defaults.services;
   state.action = 'service';
-  state.isActive = function (id) {
-    var current = this.get('radio.current.id');
-    return current === id;
-  };
+  // state.isActive = function (id) {
+  //   var current = this.get('radio.current.id');
+  //   return current === id;
+  // };
+  /*
+    Merge current data with corresponding service
+  */
+  // augmentServiceWithCurrent(radio.current || defaults.radio.current, state.services);
+  // Set the current service
+  // if (radio.current) {
+  //   setCurrentServiceById( radio.current.id );
+  // }
+
+
+  if (radio.current) {
+    setCurrentService(radio.current, services);
+  }
 
   // State of the radio
   state.radio = {
@@ -109,11 +136,6 @@ function initWithData(states) {
   function clone(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
-
-  /*
-    Merge current data with corresponding service
-  */
-  augmentServiceWithCurrent(radio.current || defaults.radio.current, state.services);
 
   // Magic features
   state.radio.magic.avoider = {
@@ -147,16 +169,12 @@ function initWithData(states) {
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,
+    adaptors  : [ 'Backbone' ],
     data      : state,
     complete  : function () {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
     }
   });
-
-  // Set the current service
-  if (radio.current) {
-    setCurrentServiceById( radio.current.id );
-  }
 
   /*
     Logging
@@ -295,6 +313,15 @@ var currentServiceObserver = null;
   is synced with `radio.current`
 */
 function setCurrentServiceById(id) {
+  var oldCurrent = services.findWhere({ isActive: true }),
+      newCurrent = services.findWhere({ id: id });
+  oldCurrent.set({ isActive: false });
+  newCurrent.set({ isActive: true  });
+}
+
+// TODO: Delete
+/*
+function setCurrentServiceById(id) {
   if (currentServiceObserver) {
     console.log('Cancelling old currentServiceObserver');
     currentServiceObserver.cancel();
@@ -306,7 +333,43 @@ function setCurrentServiceById(id) {
     ui.set('radio.current', ui.get(keypath));
   });
 }
+*/
 
+function createServiceCollection(servicesData) {
+  var Service = require('./models/service'),
+      ServiceCollection = require('./models/service-collection'),
+      services = [],
+      serviceCollection;
+
+  if (servicesData) {
+    services = servicesData.map(function (json) {
+      return new Service(json);
+    });
+    serviceCollection = new ServiceCollection(services);
+  }
+
+  console.log('createServiceCollection', serviceCollection);
+
+  return serviceCollection;
+}
+
+function setCurrentService(current, services) {
+  var service = services.findWhere({ id: current.id });
+  if (service) {
+    service.set(current);
+    service.set({ isActive: true });
+  }
+}
+
+function processServiceChange(content) {
+  if (content.data) {
+    // Change the service, setting up new sync observers
+    setCurrentServiceById(content.data.id);
+  } else {
+    ui.set('radio.current', null);
+  }
+}
+/*
 function processServiceChange(content) {
   var keypath;
 
@@ -325,6 +388,7 @@ function processServiceChange(content) {
     ui.set('radio.current', null);
   }
 }
+*/
 
 /*
   State -> UI

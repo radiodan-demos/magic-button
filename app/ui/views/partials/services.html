@@ -3,10 +3,10 @@
 <ul class="service-list">
 {{#services}}
   <li on-tap="services-partial:{{action}}"
-      class="service-item {{ _isActive || isActive(id) ? 'is-active' : '' }}"
+      class="service-item {{ isActive ? 'is-active' : '' }}"
       data-action="{{action}}">
     <a  href="/radio/service/{{ id }}">
-      <img src="{{ _isActive || isActive(id) ? logos.active : logos.inactive }}" alt="{{ title }}" />
+      <img src="{{ isActive ? logos.active : logos.inactive }}" alt="{{ title }}" />
     </a>
   </li>
 {{/services}}
