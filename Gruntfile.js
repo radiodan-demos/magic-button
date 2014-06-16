@@ -66,5 +66,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('css', [ 'less', 'autoprefixer' ]);
-  grunt.registerTask('default', [ 'browserify', 'uglify:js', 'css' ]);
+  grunt.registerTask('default', [ 'browserify', /*'uglify:js',*/ 'css' ]);
 }
