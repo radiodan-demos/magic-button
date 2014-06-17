@@ -92,7 +92,7 @@ function initWithData(states) {
   var radioModel = new Radio({
     services: services,
     events: events,
-    power: { isOn: true },
+    isOn: radio.power.isOn,
     volume: radio.audio.volume
   });
 
@@ -209,8 +209,12 @@ function initWithData(states) {
       250
     )
   );
-  ui.on('service',  uiToAction('id', require('./actions/service')));
-  ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  // ui.on('service',  uiToAction('id', require('./actions/service')));
+  // ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  ui.on('power', function (evt) {
+    evt.original.preventDefault();
+    radioModel.togglePower();
+  });
   ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
   ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
   ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
@@ -352,9 +356,6 @@ eventSource.addEventListener('message', function (evt) {
   console.group('New message:', content.topic, content);
 
   switch(content.topic) {
-    // case 'power':
-    //   ui.set('radio.power', content.data);
-    //   break;
     case 'avoider':
       ui.set('radio.magic.avoider.state', content.data);
       break;

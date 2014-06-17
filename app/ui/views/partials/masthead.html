@@ -1,12 +1,12 @@
 <script id="mastheadTmpl" data-ui-template type="text/ractive">
 {% raw %}
-{{#radio.power}}
+{{ #radio }}
 <p class="lo-left">
   <a  class="power-button {{ isOn ? 'is-on' : 'is-off' }}"
       on-tap="power"
       href="/power"><i></i></a>
 </p>
-{{/radio.power}}
+{{ /radio }}
 <p class="lo-center radiodan-logo">
   <span><img src="/assets/img/radiodan.svg" alt="Radiodan"/></span>
 </p>

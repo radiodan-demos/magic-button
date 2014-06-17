@@ -42,13 +42,15 @@
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
-        <div class="{{radio.power.isOn ? 'is-on' : 'is-off' }} {{ ui.panels.settings.isOpen ? 'is-settings' : 'is-controls' }}">
+        <div class="{{radio.isOn ? 'is-on' : 'is-off' }} {{ ui.panels.settings.isOpen ? 'is-settings' : 'is-controls' }}">
         <section id="masthead" class="layout panel masthead">
           {{>mastheadTmpl}}
         </section>
 
-        {{>standbyTmpl}}
-
+        {{^radio.isOn}}
+          {{>standbyTmpl}}
+        {{/radio.isOn}}
+        
         {{#ui.error}}
         <section id="error" class="panel">
           {{>errorTmpl}}

@@ -1,7 +1,8 @@
 var Backbone = require('backbone'),
     actions = {
       volume : require('../actions/volume'),
-      service: require('../actions/service')
+      service: require('../actions/service'),
+      power  : require('../actions/power')
     };
 
 var Radio = Backbone.Model.extend({
@@ -25,6 +26,17 @@ var Radio = Backbone.Model.extend({
     });
 
     /*
+      Set power when this property is changed
+      The boolean value indicates the target 
+      state of the system.
+    */
+    this.on('change:isOn', function (model, value, options) {
+      if ( options.type !== 'info' ) {
+        actions.power(value);
+      }
+    });
+
+    /*
       Listen for remote service change events
     */
     this.get('events').addEventListener('message', function (evt) {
@@ -34,13 +46,16 @@ var Radio = Backbone.Model.extend({
           this.setCurrentServiceById(content.data ? content.data.id : null);
           break;
         case 'power':
-          this.set({ power: content.data });
+          this.set({ isOn: content.data.isOn }, { type: 'info' });
           break;
         case 'audio.volume':
           this.set({ volume: content.data.volume }, { type: 'info' });
           break;
       }
     }.bind(this));
+  },
+  togglePower: function () {
+    this.set({ isOn: !this.get('isOn') });
   },
   setCurrentServiceById: function (id, data) {
     console.log('setCurrentServiceById', id, data);

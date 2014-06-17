@@ -31,10 +31,8 @@ var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
 
-module.exports = function (value) {
-  var isOn = value,
-      method = isOn ? 'DELETE' : 'PUT';
-
+module.exports = function (turnOn) {
+  var method = turnOn ? 'PUT' : 'DELETE';
   xhr(method, '/radio/power');
 }
 },{"../utils":13,"../xhr":14}],4:[function(require,module,exports){
@@ -169,7 +167,7 @@ function initWithData(states) {
   var radioModel = new Radio({
     services: services,
     events: events,
-    power: { isOn: true },
+    isOn: radio.power.isOn,
     volume: radio.audio.volume
   });
 
@@ -286,8 +284,12 @@ function initWithData(states) {
       250
     )
   );
-  ui.on('service',  uiToAction('id', require('./actions/service')));
-  ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  // ui.on('service',  uiToAction('id', require('./actions/service')));
+  // ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  ui.on('power', function (evt) {
+    evt.original.preventDefault();
+    radioModel.togglePower();
+  });
   ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
   ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
   ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
@@ -429,9 +431,6 @@ eventSource.addEventListener('message', function (evt) {
   console.group('New message:', content.topic, content);
 
   switch(content.topic) {
-    // case 'power':
-    //   ui.set('radio.power', content.data);
-    //   break;
     case 'avoider':
       ui.set('radio.magic.avoider.state', content.data);
       break;
@@ -493,7 +492,7 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/radio-settings":4,"./actions/service":5,"./components/circular-progress":8,"./lib/d3":9,"./models/radio":10,"./models/service":12,"./models/service-collection":11,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/circular-progress":8,"./lib/d3":9,"./models/radio":10,"./models/service":12,"./models/service-collection":11,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -9832,7 +9831,8 @@ module.exports = CircularProgress;
 var Backbone = require('backbone'),
     actions = {
       volume : require('../actions/volume'),
-      service: require('../actions/service')
+      service: require('../actions/service'),
+      power  : require('../actions/power')
     };
 
 var Radio = Backbone.Model.extend({
@@ -9856,6 +9856,17 @@ var Radio = Backbone.Model.extend({
     });
 
     /*
+      Set power when this property is changed
+      The boolean value indicates the target 
+      state of the system.
+    */
+    this.on('change:isOn', function (model, value, options) {
+      if ( options.type !== 'info' ) {
+        actions.power(value);
+      }
+    });
+
+    /*
       Listen for remote service change events
     */
     this.get('events').addEventListener('message', function (evt) {
@@ -9865,13 +9876,16 @@ var Radio = Backbone.Model.extend({
           this.setCurrentServiceById(content.data ? content.data.id : null);
           break;
         case 'power':
-          this.set({ power: content.data });
+          this.set({ isOn: content.data.isOn }, { type: 'info' });
           break;
         case 'audio.volume':
           this.set({ volume: content.data.volume }, { type: 'info' });
           break;
       }
     }.bind(this));
+  },
+  togglePower: function () {
+    this.set({ isOn: !this.get('isOn') });
   },
   setCurrentServiceById: function (id, data) {
     console.log('setCurrentServiceById', id, data);
@@ -9898,7 +9912,7 @@ var Radio = Backbone.Model.extend({
 
 
 module.exports = Radio;
-},{"../actions/service":5,"../actions/volume":6,"backbone":16}],11:[function(require,module,exports){
+},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"backbone":16}],11:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 
