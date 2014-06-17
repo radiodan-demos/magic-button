@@ -77,6 +77,8 @@ function initWithData(states) {
       announcerSettings = JSON.parse(states[4]),
       radioSettings = JSON.parse(states[5]);
 
+  var events = getEventStream();
+
   /*
     Services available
     Construct a ServiceCollection of available radio stations
@@ -85,6 +87,20 @@ function initWithData(states) {
   state.services = services;
 
   window.services = services;
+
+  var Radio = require('./models/radio');
+  var radioModel = new Radio({
+    services: services,
+    events: events,
+    power: { isOn: true }
+  });
+
+  if (radio.current) {
+    // setCurrentService(radio.current, services);
+    radioModel.setCurrentServiceById(radio.current.id, radio.current);
+  }
+
+  state.radio = radioModel;
 
   // TOOD: Replace with models above
   // state.services = radio.services || defaults.services;
@@ -102,23 +118,18 @@ function initWithData(states) {
   //   setCurrentServiceById( radio.current.id );
   // }
 
-
-  if (radio.current) {
-    setCurrentService(radio.current, services);
-  }
-
   // State of the radio
-  state.radio = {
-    power: radio.power || defaults.radio.power,
-    audio: radio.audio || defaults.radio.audio,
-    magic: defaults.radio.magic
-  };
+  // state.radio = {
+  //   power: radio.power || defaults.radio.power,
+  //   audio: radio.audio || defaults.radio.audio,
+  //   magic: defaults.radio.magic
+  // };
 
   // Radio settings
-  state.radio.settings = {
-    action  : 'radioNextSettingService',
-    services: transformServices(radioSettings.preferredServices, state.services) || defaults.radio.services
-  };
+  // state.radio.settings = {
+  //   action  : 'radioNextSettingService',
+  //   services: transformServices(radioSettings.preferredServices, state.services) || defaults.radio.services
+  // };
 
   /*
     Return a copy of the services list with 
@@ -138,19 +149,19 @@ function initWithData(states) {
   }
 
   // Magic features
-  state.radio.magic.avoider = {
-    state   : avoider, // current state of the feature
-    settings: avoiderSettings, // settings for the feature
-    action  : 'avoidSettingService',
-    isActive: function (id) {
-      return this.get('radio.magic.avoider.settings.serviceId') === id;
-    }
-  };
+  // state.radio.magic.avoider = {
+  //   state   : avoider, // current state of the feature
+  //   settings: avoiderSettings, // settings for the feature
+  //   action  : 'avoidSettingService',
+  //   isActive: function (id) {
+  //     return this.get('radio.magic.avoider.settings.serviceId') === id;
+  //   }
+  // };
 
-  state.radio.magic.announcer = {
-    state   : announcer,
-    settings: announcerSettings
-  };
+  // state.radio.magic.announcer = {
+  //   state   : announcer,
+  //   settings: announcerSettings
+  // };
 
   // State of this UI
   state.ui = defaults.ui;
@@ -169,11 +180,19 @@ function initWithData(states) {
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,
-    adaptors  : [ 'Backbone' ],
+    adapt     : [ 'Backbone' ],
     data      : state,
     complete  : function () {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
     }
+  });
+
+  // WORKAROUND:
+  // Force ractive to re-scan the model
+  // when the current service changes
+  // 
+  radioModel.on('change:current', function () {
+    ui.update('radio.current');
   });
 
   /*
@@ -244,7 +263,7 @@ function uiAvoidState(state) {
 function updateAvoidState() {
   var state = ui.get('radio.magic.avoider.state');
 
-  if (state.isAvoiding) {
+  if (state && state.isAvoiding) {
     var now = Date.now();
     var start = Date.parse(state.start);
     var end = Date.parse(state.end);
@@ -315,8 +334,14 @@ var currentServiceObserver = null;
 function setCurrentServiceById(id) {
   var oldCurrent = services.findWhere({ isActive: true }),
       newCurrent = services.findWhere({ id: id });
-  oldCurrent.set({ isActive: false });
-  newCurrent.set({ isActive: true  });
+
+  if (oldCurrent) {
+    oldCurrent.set({ isActive: false });
+  }
+
+  if (newCurrent) {
+    newCurrent.set({ isActive: true  });
+  }
 }
 
 // TODO: Delete
@@ -401,15 +426,15 @@ eventSource.addEventListener('message', function (evt) {
   console.group('New message:', content.topic, content);
 
   switch(content.topic) {
-    case 'audio.volume':
-      ui.set('radio.audio', content.data);
-      break;
-    case 'service.changed':
-      processServiceChange(content);
-      break;
-    case 'power':
-      ui.set('radio.power', content.data);
-      break;
+    // case 'audio.volume':
+    //   ui.set('radio.audio', content.data);
+    //   break;
+    // case 'service.changed':
+    //   processServiceChange(content);
+    //   break;
+    // case 'power':
+    //   ui.set('radio.power', content.data);
+    //   break;
     case 'avoider':
       ui.set('radio.magic.avoider.state', content.data);
       break;
@@ -432,6 +457,11 @@ eventSource.addEventListener('message', function (evt) {
 eventSource.addEventListener('error', function (evt) {
   console.warn(evt);
 });
+
+function getEventStream() {
+  return new EventSource('/events');
+}
+
 
 /*
   Helpers
