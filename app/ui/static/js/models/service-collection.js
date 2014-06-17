@@ -4,12 +4,38 @@ var Backbone = require('backbone'),
 module.exports = Backbone.Collection.extend({
   model: Service,
   initialize: function (props) {
+
+    props.initialState
+         .then(function (state) {
+            if (state.current) {
+              this.updateServiceDataForId(state.current.id, state.current);
+            }
+         }.bind(this));
+
     props.events.addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
-      if (content.topic === 'service.changed' && content.data && content.data.id) {
-        this.updateServiceDataForId(content.data.id, content.data);
+      switch (content.topic) {
+        case 'service.changed': 
+          if (content.data && content.data.id) {
+            this.updateServiceDataForId(content.data.id, content.data);
+          }
+          break;
+        case 'nowPlaying':
+          this.updateNowPlayingDataForId(content.service, content.data);
+          break;
+        case 'nowAndNext':
+          this.updateNowAndNextDataForId(content.service, content.data);
+          break;
       }
     }.bind(this));
+  },
+  updateNowPlayingDataForId: function (id, data) {
+    var service = this.findWhere({ id: id });
+    service.set({ nowPlaying: data });
+  },
+  updateNowAndNextDataForId: function (id, data) {
+    var service = this.findWhere({ id: id });
+    service.set({ nowAndNext: data });
   },
   updateServiceDataForId: function (id, data) {
     console.log('updateServiceDataForId', id, data);

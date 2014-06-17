@@ -325,12 +325,6 @@ eventSource.addEventListener('message', function (evt) {
     case 'settings.avoider':
       utils.ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
       break;
-    case 'nowPlaying':
-      ui.set(keypathForServiceId(content.service, ui.get('services')) + '.nowPlaying', content.data);
-      break;
-    case 'nowAndNext':
-      ui.set(keypathForServiceId(content.service, ui.get('services')) + '.nowAndNext', content.data);
-      break;
     default:
       // console.log('Unhandled topic', content.topic, content);
   }

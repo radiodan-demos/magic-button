@@ -12,7 +12,15 @@ var Backbone = require('backbone'),
 var Radio = Backbone.Model.extend({
   initialize: function () {
 
-    this.set({ services: new ServiceCollection({ events: this.get('events') }) });
+    this.initialState = xhr.get('/radio/state.json')
+                           .then(function (json) { return JSON.parse(json); });
+
+    this.set({ 
+      services: new ServiceCollection({ 
+        initialState: this.initialState,
+        events: this.get('events') 
+      })
+    });
 
     /*
       Set current service of remote radio
@@ -71,12 +79,10 @@ var Radio = Backbone.Model.extend({
     this.fetch();
   },
   fetch: function () {
-    xhr.get('/radio/state.json')
-       .then( this.parse.bind(this) );
+    this.initialState
+        .then( this.parse.bind(this) );
   },
-  parse: function (json) {
-    var state = JSON.parse(json);
-
+  parse: function (state) {
     /*
       Services available
       Construct a ServiceCollection of available radio stations
@@ -84,13 +90,13 @@ var Radio = Backbone.Model.extend({
     this.get('services').set(state.services || []);
 
     if (state.current) {
-      this.setCurrentServiceById(state.current.id);
+      this.setCurrentServiceById(state.current.id, { type: 'info' });
     }
 
     this.set({
       isOn     : state.power.isOn,
       volume   : state.audio.volume
-    });
+    }, { type: 'info' });
   },
   togglePower: function () {
     this.set({ isOn: !this.get('isOn') });
