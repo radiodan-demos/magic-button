@@ -154,14 +154,6 @@ function initWithData(states) {
 
   var events = getEventStream();
 
-  /*
-    Services available
-    Construct a ServiceCollection of available radio stations
-  */
-  // var services = createServiceCollection(radio.services || []);
-  // state.services = services;
-  // window.services = services;
-
   var Radio = require('./models/radio');
   var radioModel = new Radio({
     events: events
@@ -269,14 +261,6 @@ function initWithData(states) {
   */
   var uiToAction = utils.uiToAction;
 
-  ui.on('volume',   
-    utils.debounce(
-      function (evt) {
-        radioModel.set({ volume: evt.context.volume }); 
-      }, 
-      250
-    )
-  );
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
   ui.on('service', function (evt) {
@@ -399,24 +383,6 @@ function formatTimeDiff(diffInMs) {
   return Math.floor(mins) + 'm ' + secsLeft;
 }
 
-function createServiceCollection(servicesData) {
-  var Service = require('./models/service'),
-      ServiceCollection = require('./models/service-collection'),
-      services = [],
-      serviceCollection;
-
-  if (servicesData) {
-    services = servicesData.map(function (json) {
-      return new Service(json);
-    });
-    serviceCollection = new ServiceCollection(services);
-  }
-
-  console.log('createServiceCollection', serviceCollection);
-
-  return serviceCollection;
-}
-
 /*
   State -> UI
 */
@@ -489,7 +455,7 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/circular-progress":8,"./lib/d3":9,"./models/radio":10,"./models/service":12,"./models/service-collection":11,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/circular-progress":8,"./lib/d3":9,"./models/radio":10,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -9829,6 +9795,7 @@ var Backbone = require('backbone'),
     xhr = require('../xhr'),
     Service = require('./service'),
     ServiceCollection = require('./service-collection'),
+    utils = require('../utils'),
     actions = {
       volume : require('../actions/volume'),
       service: require('../actions/service'),
@@ -9838,25 +9805,30 @@ var Backbone = require('backbone'),
 var Radio = Backbone.Model.extend({
   initialize: function () {
 
-    this.set({ services: new ServiceCollection() });
+    this.set({ services: new ServiceCollection({ events: this.get('events') }) });
 
     /*
       Set current service of remote radio
     */
     this.on('change:current', function (model, value, options) {
       if ( options.type !== 'info' ) {
-        actions.service(value);
+        actions.service(value.id);
       }
     });
 
     /*
       Set volume when this property is changed
     */
-    this.on('change:volume', function (model, value, options) {
-      if ( options.type !== 'info' ) {
-        actions.volume(value);
-      }
-    });
+    this.on('change:volume', 
+      utils.debounce(
+        function (model, value, options) {
+          if ( options.type !== 'info' ) {
+            actions.volume(value);
+          }
+        },
+        250
+      )
+    );
 
     /*
       Set power when this property is changed
@@ -9876,7 +9848,9 @@ var Radio = Backbone.Model.extend({
       var content = JSON.parse(evt.data);
       switch(content.topic) {
         case 'service.changed':
-          this.setCurrentServiceById(content.data ? content.data.id : null);
+          this.setCurrentServiceById(
+            (content.data ? content.data.id : null), { type: 'info' }
+          );
           break;
         case 'power':
           this.set({ isOn: content.data.isOn }, { type: 'info' });
@@ -9900,11 +9874,10 @@ var Radio = Backbone.Model.extend({
       Services available
       Construct a ServiceCollection of available radio stations
     */
-    var services = this.parseServices(state.services || []);
-    this.get('services').add(services);
+    this.get('services').set(state.services || []);
 
     if (state.current) {
-      this.setCurrentServiceById(state.current.id, state.current);
+      this.setCurrentServiceById(state.current.id);
     }
 
     this.set({
@@ -9915,8 +9888,7 @@ var Radio = Backbone.Model.extend({
   togglePower: function () {
     this.set({ isOn: !this.get('isOn') });
   },
-  setCurrentServiceById: function (id, data) {
-    console.log('setCurrentServiceById', id, data);
+  setCurrentServiceById: function (id, opts) {
     var services = this.get('services');
 
     var oldCurrent = services.findWhere({ isActive: true }),
@@ -9928,36 +9900,33 @@ var Radio = Backbone.Model.extend({
 
     if (newCurrent) {
       newCurrent.set({ isActive: true  });
-
-      // Augment current service with new data
-      if (data) {
-        newCurrent.set(data);
-      }
     }
 
-    this.set({ current: newCurrent }, { type: 'info' });
-  },
-  parseServices: function (servicesData) {
-    var services = [];
-
-    if (servicesData && servicesData.length) {
-      services = servicesData.map(function (json) {
-        return new Service(json);
-      });
-    }
-
-    return services;
+    this.set({ current: newCurrent }, opts);
   }
 });
 
 
 module.exports = Radio;
-},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"../xhr":14,"./service":12,"./service-collection":11,"backbone":16}],11:[function(require,module,exports){
+},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"../utils":13,"../xhr":14,"./service":12,"./service-collection":11,"backbone":16}],11:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 
 module.exports = Backbone.Collection.extend({
   model: Service,
+  initialize: function (props) {
+    props.events.addEventListener('message', function (evt) {
+      var content = JSON.parse(evt.data);
+      if (content.topic === 'service.changed' && content.data && content.data.id) {
+        this.updateServiceDataForId(content.data.id, content.data);
+      }
+    }.bind(this));
+  },
+  updateServiceDataForId: function (id, data) {
+    console.log('updateServiceDataForId', id, data);
+    var service = this.findWhere({ id: id });
+    service.set(data);
+  },
   isActive: function (id) {
     var current = this.find(function (item) { return item.isActive === true; });
     if (current.id) {

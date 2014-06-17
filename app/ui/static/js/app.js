@@ -79,14 +79,6 @@ function initWithData(states) {
 
   var events = getEventStream();
 
-  /*
-    Services available
-    Construct a ServiceCollection of available radio stations
-  */
-  // var services = createServiceCollection(radio.services || []);
-  // state.services = services;
-  // window.services = services;
-
   var Radio = require('./models/radio');
   var radioModel = new Radio({
     events: events
@@ -194,14 +186,6 @@ function initWithData(states) {
   */
   var uiToAction = utils.uiToAction;
 
-  ui.on('volume',   
-    utils.debounce(
-      function (evt) {
-        radioModel.set({ volume: evt.context.volume }); 
-      }, 
-      250
-    )
-  );
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
   ui.on('service', function (evt) {
@@ -322,24 +306,6 @@ function formatTimeDiff(diffInMs) {
     secsLeft = '0' + secsLeft;
   }
   return Math.floor(mins) + 'm ' + secsLeft;
-}
-
-function createServiceCollection(servicesData) {
-  var Service = require('./models/service'),
-      ServiceCollection = require('./models/service-collection'),
-      services = [],
-      serviceCollection;
-
-  if (servicesData) {
-    services = servicesData.map(function (json) {
-      return new Service(json);
-    });
-    serviceCollection = new ServiceCollection(services);
-  }
-
-  console.log('createServiceCollection', serviceCollection);
-
-  return serviceCollection;
 }
 
 /*

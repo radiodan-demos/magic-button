@@ -2,6 +2,7 @@ var Backbone = require('backbone'),
     xhr = require('../xhr'),
     Service = require('./service'),
     ServiceCollection = require('./service-collection'),
+    utils = require('../utils'),
     actions = {
       volume : require('../actions/volume'),
       service: require('../actions/service'),
@@ -11,25 +12,30 @@ var Backbone = require('backbone'),
 var Radio = Backbone.Model.extend({
   initialize: function () {
 
-    this.set({ services: new ServiceCollection() });
+    this.set({ services: new ServiceCollection({ events: this.get('events') }) });
 
     /*
       Set current service of remote radio
     */
     this.on('change:current', function (model, value, options) {
       if ( options.type !== 'info' ) {
-        actions.service(value);
+        actions.service(value.id);
       }
     });
 
     /*
       Set volume when this property is changed
     */
-    this.on('change:volume', function (model, value, options) {
-      if ( options.type !== 'info' ) {
-        actions.volume(value);
-      }
-    });
+    this.on('change:volume', 
+      utils.debounce(
+        function (model, value, options) {
+          if ( options.type !== 'info' ) {
+            actions.volume(value);
+          }
+        },
+        250
+      )
+    );
 
     /*
       Set power when this property is changed
@@ -49,7 +55,9 @@ var Radio = Backbone.Model.extend({
       var content = JSON.parse(evt.data);
       switch(content.topic) {
         case 'service.changed':
-          this.setCurrentServiceById(content.data ? content.data.id : null);
+          this.setCurrentServiceById(
+            (content.data ? content.data.id : null), { type: 'info' }
+          );
           break;
         case 'power':
           this.set({ isOn: content.data.isOn }, { type: 'info' });
@@ -73,11 +81,10 @@ var Radio = Backbone.Model.extend({
       Services available
       Construct a ServiceCollection of available radio stations
     */
-    var services = this.parseServices(state.services || []);
-    this.get('services').add(services);
+    this.get('services').set(state.services || []);
 
     if (state.current) {
-      this.setCurrentServiceById(state.current.id, state.current);
+      this.setCurrentServiceById(state.current.id);
     }
 
     this.set({
@@ -88,8 +95,7 @@ var Radio = Backbone.Model.extend({
   togglePower: function () {
     this.set({ isOn: !this.get('isOn') });
   },
-  setCurrentServiceById: function (id, data) {
-    console.log('setCurrentServiceById', id, data);
+  setCurrentServiceById: function (id, opts) {
     var services = this.get('services');
 
     var oldCurrent = services.findWhere({ isActive: true }),
@@ -101,25 +107,9 @@ var Radio = Backbone.Model.extend({
 
     if (newCurrent) {
       newCurrent.set({ isActive: true  });
-
-      // Augment current service with new data
-      if (data) {
-        newCurrent.set(data);
-      }
     }
 
-    this.set({ current: newCurrent }, { type: 'info' });
-  },
-  parseServices: function (servicesData) {
-    var services = [];
-
-    if (servicesData && servicesData.length) {
-      services = servicesData.map(function (json) {
-        return new Service(json);
-      });
-    }
-
-    return services;
+    this.set({ current: newCurrent }, opts);
   }
 });
 
