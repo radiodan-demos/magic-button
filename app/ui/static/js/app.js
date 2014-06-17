@@ -92,7 +92,8 @@ function initWithData(states) {
   var radioModel = new Radio({
     services: services,
     events: events,
-    power: { isOn: true }
+    power: { isOn: true },
+    volume: radio.audio.volume
   });
 
   if (radio.current) {
@@ -200,7 +201,7 @@ function initWithData(states) {
   */
   ui.on('change', function (changes) {
     Object.keys(changes).forEach(function (keypath) {
-      console.log('changed: ', keypath, changes[keypath]);
+      console.log('ui changed: ', keypath, changes[keypath]);
     });
   });
 
@@ -209,7 +210,14 @@ function initWithData(states) {
   */
   var uiToAction = utils.uiToAction;
 
-  ui.on('volume',   utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
+  ui.on('volume',   
+    utils.debounce(
+      function (evt) {
+        radioModel.set({ volume: evt.context.volume }); 
+      }, 
+      250
+    )
+  );
   ui.on('service',  uiToAction('id', require('./actions/service')));
   ui.on('power',    uiToAction('isOn', require('./actions/power')));
   ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
@@ -426,9 +434,6 @@ eventSource.addEventListener('message', function (evt) {
   console.group('New message:', content.topic, content);
 
   switch(content.topic) {
-    // case 'audio.volume':
-    //   ui.set('radio.audio', content.data);
-    //   break;
     // case 'service.changed':
     //   processServiceChange(content);
     //   break;

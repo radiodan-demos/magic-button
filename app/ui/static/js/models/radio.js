@@ -1,13 +1,22 @@
-var Backbone = require('backbone');
+var Backbone = require('backbone'),
+    volumeAction = require('../actions/volume');
 
 var Radio = Backbone.Model.extend({
   initialize: function () {
     /*
-      Set remote radio state when current service
-      is changed
+      Set current service of remote radio
     */
-    this.on('change:current', function () {
-      console.log('change:current -> xhr.POST /service/current');
+    this.on('change:current', function (model, value, options) {
+      console.log('XHR change:current?', value);
+    });
+
+    /*
+      Set volume when this property is changed
+    */
+    this.on('change:volume', function (model, value, options) {
+      if ( options.type !== 'info' ) {
+        volumeAction(value);
+      }
     });
 
     /*
@@ -16,14 +25,14 @@ var Radio = Backbone.Model.extend({
     this.get('events').addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
       switch(content.topic) {
-        case 'service.changed': 
-          this.setCurrentServiceById(content.data.id);
+        case 'service.changed':
+          this.setCurrentServiceById(content.data ? content.data.id : null);
           break;
         case 'power':
           this.set({ power: content.data });
           break;
         case 'audio.volume':
-          this.set({ 'audio', content.data });
+          this.set({ volume: content.data.volume }, { type: 'info' });
           break;
       }
     }.bind(this));

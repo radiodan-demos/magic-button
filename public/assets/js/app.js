@@ -169,7 +169,8 @@ function initWithData(states) {
   var radioModel = new Radio({
     services: services,
     events: events,
-    power: { isOn: true }
+    power: { isOn: true },
+    volume: radio.audio.volume
   });
 
   if (radio.current) {
@@ -277,7 +278,7 @@ function initWithData(states) {
   */
   ui.on('change', function (changes) {
     Object.keys(changes).forEach(function (keypath) {
-      console.log('changed: ', keypath, changes[keypath]);
+      console.log('ui changed: ', keypath, changes[keypath]);
     });
   });
 
@@ -286,7 +287,14 @@ function initWithData(states) {
   */
   var uiToAction = utils.uiToAction;
 
-  ui.on('volume',   utils.debounce(uiToAction('volume', require('./actions/volume')), 250));
+  ui.on('volume',   
+    utils.debounce(
+      function (evt) {
+        radioModel.set({ volume: evt.context.volume }); 
+      }, 
+      250
+    )
+  );
   ui.on('service',  uiToAction('id', require('./actions/service')));
   ui.on('power',    uiToAction('isOn', require('./actions/power')));
   ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
@@ -503,9 +511,6 @@ eventSource.addEventListener('message', function (evt) {
   console.group('New message:', content.topic, content);
 
   switch(content.topic) {
-    case 'audio.volume':
-      ui.set('radio.audio', content.data);
-      break;
     // case 'service.changed':
     //   processServiceChange(content);
     //   break;
@@ -573,7 +578,7 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/radio-settings":4,"./actions/service":5,"./actions/volume":6,"./components/circular-progress":8,"./lib/d3":9,"./models/radio":10,"./models/service":12,"./models/service-collection":11,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/power":3,"./actions/radio-settings":4,"./actions/service":5,"./components/circular-progress":8,"./lib/d3":9,"./models/radio":10,"./models/service":12,"./models/service-collection":11,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -9909,16 +9914,25 @@ module.exports = CircularProgress;
   }
 }();
 },{}],10:[function(require,module,exports){
-var Backbone = require('backbone');
+var Backbone = require('backbone'),
+    volumeAction = require('../actions/volume');
 
 var Radio = Backbone.Model.extend({
   initialize: function () {
     /*
-      Set remote radio state when current service
-      is changed
+      Set current service of remote radio
     */
-    this.on('change:current', function () {
-      console.log('change:current -> xhr.POST /service/current');
+    this.on('change:current', function (model, value, options) {
+      console.log('XHR change:current?', value);
+    });
+
+    /*
+      Set volume when this property is changed
+    */
+    this.on('change:volume', function (model, value, options) {
+      if ( options.type !== 'info' ) {
+        volumeAction(value);
+      }
     });
 
     /*
@@ -9927,11 +9941,14 @@ var Radio = Backbone.Model.extend({
     this.get('events').addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
       switch(content.topic) {
-        case 'service.changed': 
-          this.setCurrentServiceById(content.data.id);
+        case 'service.changed':
+          this.setCurrentServiceById(content.data ? content.data.id : null);
           break;
         case 'power':
           this.set({ power: content.data });
+          break;
+        case 'audio.volume':
+          this.set({ volume: content.data.volume }, { type: 'info' });
           break;
       }
     }.bind(this));
@@ -9961,7 +9978,7 @@ var Radio = Backbone.Model.extend({
 
 
 module.exports = Radio;
-},{"backbone":16}],11:[function(require,module,exports){
+},{"../actions/volume":6,"backbone":16}],11:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 
