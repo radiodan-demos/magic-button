@@ -81,7 +81,7 @@ function initWithData(states) {
 
   var Radio = require('./models/radio');
   var radioModel = new Radio({
-    events: events
+    eventSource: events
   });
 
   state.radio = radioModel;

@@ -12,7 +12,7 @@ module.exports = Backbone.Collection.extend({
             }
          }.bind(this));
 
-    props.events.addEventListener('message', function (evt) {
+    props.eventSource.addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
       switch (content.topic) {
         case 'service.changed': 

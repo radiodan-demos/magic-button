@@ -18,7 +18,7 @@ var Radio = Backbone.Model.extend({
     this.set({ 
       services: new ServiceCollection({ 
         initialState: this.initialState,
-        events: this.get('events') 
+        eventSource: this.get('eventSource') 
       })
     });
 
@@ -59,7 +59,7 @@ var Radio = Backbone.Model.extend({
     /*
       Listen for remote service change events
     */
-    this.get('events').addEventListener('message', function (evt) {
+    this.get('eventSource').addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
       switch(content.topic) {
         case 'service.changed':
