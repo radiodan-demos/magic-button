@@ -158,24 +158,17 @@ function initWithData(states) {
     Services available
     Construct a ServiceCollection of available radio stations
   */
-  var services = createServiceCollection(radio.services || []);
-  state.services = services;
-
-  window.services = services;
+  // var services = createServiceCollection(radio.services || []);
+  // state.services = services;
+  // window.services = services;
 
   var Radio = require('./models/radio');
   var radioModel = new Radio({
-    services: services,
-    events: events,
-    isOn: radio.power.isOn,
-    volume: radio.audio.volume
+    events: events
   });
 
-  if (radio.current) {
-    radioModel.setCurrentServiceById(radio.current.id, radio.current);
-  }
-
   state.radio = radioModel;
+  state.services = radioModel.get('services');
 
   // TOOD: Replace with models above
   // state.services = radio.services || defaults.services;
@@ -286,6 +279,10 @@ function initWithData(states) {
   );
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  ui.on('service', function (evt) {
+    evt.original.preventDefault();
+    radioModel.setCurrentServiceById(evt.context.id);
+  });
   ui.on('power', function (evt) {
     evt.original.preventDefault();
     radioModel.togglePower();
@@ -9829,6 +9826,9 @@ module.exports = CircularProgress;
 }();
 },{}],10:[function(require,module,exports){
 var Backbone = require('backbone'),
+    xhr = require('../xhr'),
+    Service = require('./service'),
+    ServiceCollection = require('./service-collection'),
     actions = {
       volume : require('../actions/volume'),
       service: require('../actions/service'),
@@ -9837,6 +9837,9 @@ var Backbone = require('backbone'),
 
 var Radio = Backbone.Model.extend({
   initialize: function () {
+
+    this.set({ services: new ServiceCollection() });
+
     /*
       Set current service of remote radio
     */
@@ -9883,12 +9886,38 @@ var Radio = Backbone.Model.extend({
           break;
       }
     }.bind(this));
+
+    this.fetch();
+  },
+  fetch: function () {
+    xhr.get('/radio/state.json')
+       .then( this.parse.bind(this) );
+  },
+  parse: function (json) {
+    var state = JSON.parse(json);
+
+    /*
+      Services available
+      Construct a ServiceCollection of available radio stations
+    */
+    var services = this.parseServices(state.services || []);
+    this.get('services').add(services);
+
+    if (state.current) {
+      this.setCurrentServiceById(state.current.id, state.current);
+    }
+
+    this.set({
+      isOn     : state.power.isOn,
+      volume   : state.audio.volume
+    });
   },
   togglePower: function () {
     this.set({ isOn: !this.get('isOn') });
   },
   setCurrentServiceById: function (id, data) {
     console.log('setCurrentServiceById', id, data);
+    var services = this.get('services');
 
     var oldCurrent = services.findWhere({ isActive: true }),
         newCurrent = services.findWhere({ id: id });
@@ -9907,12 +9936,23 @@ var Radio = Backbone.Model.extend({
     }
 
     this.set({ current: newCurrent }, { type: 'info' });
+  },
+  parseServices: function (servicesData) {
+    var services = [];
+
+    if (servicesData && servicesData.length) {
+      services = servicesData.map(function (json) {
+        return new Service(json);
+      });
+    }
+
+    return services;
   }
 });
 
 
 module.exports = Radio;
-},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"backbone":16}],11:[function(require,module,exports){
+},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"../xhr":14,"./service":12,"./service-collection":11,"backbone":16}],11:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 

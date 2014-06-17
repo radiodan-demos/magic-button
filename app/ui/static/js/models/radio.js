@@ -1,4 +1,7 @@
 var Backbone = require('backbone'),
+    xhr = require('../xhr'),
+    Service = require('./service'),
+    ServiceCollection = require('./service-collection'),
     actions = {
       volume : require('../actions/volume'),
       service: require('../actions/service'),
@@ -7,6 +10,9 @@ var Backbone = require('backbone'),
 
 var Radio = Backbone.Model.extend({
   initialize: function () {
+
+    this.set({ services: new ServiceCollection() });
+
     /*
       Set current service of remote radio
     */
@@ -53,12 +59,38 @@ var Radio = Backbone.Model.extend({
           break;
       }
     }.bind(this));
+
+    this.fetch();
+  },
+  fetch: function () {
+    xhr.get('/radio/state.json')
+       .then( this.parse.bind(this) );
+  },
+  parse: function (json) {
+    var state = JSON.parse(json);
+
+    /*
+      Services available
+      Construct a ServiceCollection of available radio stations
+    */
+    var services = this.parseServices(state.services || []);
+    this.get('services').add(services);
+
+    if (state.current) {
+      this.setCurrentServiceById(state.current.id, state.current);
+    }
+
+    this.set({
+      isOn     : state.power.isOn,
+      volume   : state.audio.volume
+    });
   },
   togglePower: function () {
     this.set({ isOn: !this.get('isOn') });
   },
   setCurrentServiceById: function (id, data) {
     console.log('setCurrentServiceById', id, data);
+    var services = this.get('services');
 
     var oldCurrent = services.findWhere({ isActive: true }),
         newCurrent = services.findWhere({ id: id });
@@ -77,6 +109,17 @@ var Radio = Backbone.Model.extend({
     }
 
     this.set({ current: newCurrent }, { type: 'info' });
+  },
+  parseServices: function (servicesData) {
+    var services = [];
+
+    if (servicesData && servicesData.length) {
+      services = servicesData.map(function (json) {
+        return new Service(json);
+      });
+    }
+
+    return services;
   }
 });
 

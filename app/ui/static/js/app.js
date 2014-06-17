@@ -83,24 +83,17 @@ function initWithData(states) {
     Services available
     Construct a ServiceCollection of available radio stations
   */
-  var services = createServiceCollection(radio.services || []);
-  state.services = services;
-
-  window.services = services;
+  // var services = createServiceCollection(radio.services || []);
+  // state.services = services;
+  // window.services = services;
 
   var Radio = require('./models/radio');
   var radioModel = new Radio({
-    services: services,
-    events: events,
-    isOn: radio.power.isOn,
-    volume: radio.audio.volume
+    events: events
   });
 
-  if (radio.current) {
-    radioModel.setCurrentServiceById(radio.current.id, radio.current);
-  }
-
   state.radio = radioModel;
+  state.services = radioModel.get('services');
 
   // TOOD: Replace with models above
   // state.services = radio.services || defaults.services;
@@ -211,6 +204,10 @@ function initWithData(states) {
   );
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
+  ui.on('service', function (evt) {
+    evt.original.preventDefault();
+    radioModel.setCurrentServiceById(evt.context.id);
+  });
   ui.on('power', function (evt) {
     evt.original.preventDefault();
     radioModel.togglePower();
