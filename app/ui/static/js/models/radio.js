@@ -1,5 +1,8 @@
 var Backbone = require('backbone'),
-    volumeAction = require('../actions/volume');
+    actions = {
+      volume : require('../actions/volume'),
+      service: require('../actions/service')
+    };
 
 var Radio = Backbone.Model.extend({
   initialize: function () {
@@ -7,7 +10,9 @@ var Radio = Backbone.Model.extend({
       Set current service of remote radio
     */
     this.on('change:current', function (model, value, options) {
-      console.log('XHR change:current?', value);
+      if ( options.type !== 'info' ) {
+        actions.service(value);
+      }
     });
 
     /*
@@ -15,7 +20,7 @@ var Radio = Backbone.Model.extend({
     */
     this.on('change:volume', function (model, value, options) {
       if ( options.type !== 'info' ) {
-        volumeAction(value);
+        actions.volume(value);
       }
     });
 
@@ -56,7 +61,7 @@ var Radio = Backbone.Model.extend({
       }
     }
 
-    this.set({ current: newCurrent });
+    this.set({ current: newCurrent }, { type: 'info' });
   }
 });
 

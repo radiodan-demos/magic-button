@@ -174,7 +174,6 @@ function initWithData(states) {
   });
 
   if (radio.current) {
-    // setCurrentService(radio.current, services);
     radioModel.setCurrentServiceById(radio.current.id, radio.current);
   }
 
@@ -187,14 +186,6 @@ function initWithData(states) {
   //   var current = this.get('radio.current.id');
   //   return current === id;
   // };
-  /*
-    Merge current data with corresponding service
-  */
-  // augmentServiceWithCurrent(radio.current || defaults.radio.current, state.services);
-  // Set the current service
-  // if (radio.current) {
-  //   setCurrentServiceById( radio.current.id );
-  // }
 
   // State of the radio
   // state.radio = {
@@ -409,42 +400,6 @@ function formatTimeDiff(diffInMs) {
   return Math.floor(mins) + 'm ' + secsLeft;
 }
 
-var currentServiceObserver = null;
-
-/*
-  Sets a new current service in the app
-  This ensures that any data updates for the service
-  is synced with `radio.current`
-*/
-function setCurrentServiceById(id) {
-  var oldCurrent = services.findWhere({ isActive: true }),
-      newCurrent = services.findWhere({ id: id });
-
-  if (oldCurrent) {
-    oldCurrent.set({ isActive: false });
-  }
-
-  if (newCurrent) {
-    newCurrent.set({ isActive: true  });
-  }
-}
-
-// TODO: Delete
-/*
-function setCurrentServiceById(id) {
-  if (currentServiceObserver) {
-    console.log('Cancelling old currentServiceObserver');
-    currentServiceObserver.cancel();
-  }
-
-  // Set-up an observer for keeping `radio.current` in sync
-  var keypath = keypathForServiceId(id, state.services);
-  currentServiceObserver = ui.observe(keypath, function () {
-    ui.set('radio.current', ui.get(keypath));
-  });
-}
-*/
-
 function createServiceCollection(servicesData) {
   var Service = require('./models/service'),
       ServiceCollection = require('./models/service-collection'),
@@ -463,43 +418,6 @@ function createServiceCollection(servicesData) {
   return serviceCollection;
 }
 
-function setCurrentService(current, services) {
-  var service = services.findWhere({ id: current.id });
-  if (service) {
-    service.set(current);
-    service.set({ isActive: true });
-  }
-}
-
-function processServiceChange(content) {
-  if (content.data) {
-    // Change the service, setting up new sync observers
-    setCurrentServiceById(content.data.id);
-  } else {
-    ui.set('radio.current', null);
-  }
-}
-/*
-function processServiceChange(content) {
-  var keypath;
-
-  if (content.data) {
-
-    // Change the service, setting up new sync observers
-    setCurrentServiceById(content.data.id);
-
-    keypath = keypathForServiceId(content.data.id, state.services);
-
-    // Setting data on the new service will now update
-    // `radio.current` as will nowPlaying and nowAndNext
-    // updates for this service
-    ui.set(keypath, content.data);
-  } else {
-    ui.set('radio.current', null);
-  }
-}
-*/
-
 /*
   State -> UI
 */
@@ -511,9 +429,6 @@ eventSource.addEventListener('message', function (evt) {
   console.group('New message:', content.topic, content);
 
   switch(content.topic) {
-    // case 'service.changed':
-    //   processServiceChange(content);
-    //   break;
     // case 'power':
     //   ui.set('radio.power', content.data);
     //   break;
@@ -9915,7 +9830,10 @@ module.exports = CircularProgress;
 }();
 },{}],10:[function(require,module,exports){
 var Backbone = require('backbone'),
-    volumeAction = require('../actions/volume');
+    actions = {
+      volume : require('../actions/volume'),
+      service: require('../actions/service')
+    };
 
 var Radio = Backbone.Model.extend({
   initialize: function () {
@@ -9923,7 +9841,9 @@ var Radio = Backbone.Model.extend({
       Set current service of remote radio
     */
     this.on('change:current', function (model, value, options) {
-      console.log('XHR change:current?', value);
+      if ( options.type !== 'info' ) {
+        actions.service(value);
+      }
     });
 
     /*
@@ -9931,7 +9851,7 @@ var Radio = Backbone.Model.extend({
     */
     this.on('change:volume', function (model, value, options) {
       if ( options.type !== 'info' ) {
-        volumeAction(value);
+        actions.volume(value);
       }
     });
 
@@ -9972,13 +9892,13 @@ var Radio = Backbone.Model.extend({
       }
     }
 
-    this.set({ current: newCurrent });
+    this.set({ current: newCurrent }, { type: 'info' });
   }
 });
 
 
 module.exports = Radio;
-},{"../actions/volume":6,"backbone":16}],11:[function(require,module,exports){
+},{"../actions/service":5,"../actions/volume":6,"backbone":16}],11:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 

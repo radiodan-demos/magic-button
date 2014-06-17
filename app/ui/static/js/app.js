@@ -97,7 +97,6 @@ function initWithData(states) {
   });
 
   if (radio.current) {
-    // setCurrentService(radio.current, services);
     radioModel.setCurrentServiceById(radio.current.id, radio.current);
   }
 
@@ -110,14 +109,6 @@ function initWithData(states) {
   //   var current = this.get('radio.current.id');
   //   return current === id;
   // };
-  /*
-    Merge current data with corresponding service
-  */
-  // augmentServiceWithCurrent(radio.current || defaults.radio.current, state.services);
-  // Set the current service
-  // if (radio.current) {
-  //   setCurrentServiceById( radio.current.id );
-  // }
 
   // State of the radio
   // state.radio = {
@@ -332,42 +323,6 @@ function formatTimeDiff(diffInMs) {
   return Math.floor(mins) + 'm ' + secsLeft;
 }
 
-var currentServiceObserver = null;
-
-/*
-  Sets a new current service in the app
-  This ensures that any data updates for the service
-  is synced with `radio.current`
-*/
-function setCurrentServiceById(id) {
-  var oldCurrent = services.findWhere({ isActive: true }),
-      newCurrent = services.findWhere({ id: id });
-
-  if (oldCurrent) {
-    oldCurrent.set({ isActive: false });
-  }
-
-  if (newCurrent) {
-    newCurrent.set({ isActive: true  });
-  }
-}
-
-// TODO: Delete
-/*
-function setCurrentServiceById(id) {
-  if (currentServiceObserver) {
-    console.log('Cancelling old currentServiceObserver');
-    currentServiceObserver.cancel();
-  }
-
-  // Set-up an observer for keeping `radio.current` in sync
-  var keypath = keypathForServiceId(id, state.services);
-  currentServiceObserver = ui.observe(keypath, function () {
-    ui.set('radio.current', ui.get(keypath));
-  });
-}
-*/
-
 function createServiceCollection(servicesData) {
   var Service = require('./models/service'),
       ServiceCollection = require('./models/service-collection'),
@@ -386,43 +341,6 @@ function createServiceCollection(servicesData) {
   return serviceCollection;
 }
 
-function setCurrentService(current, services) {
-  var service = services.findWhere({ id: current.id });
-  if (service) {
-    service.set(current);
-    service.set({ isActive: true });
-  }
-}
-
-function processServiceChange(content) {
-  if (content.data) {
-    // Change the service, setting up new sync observers
-    setCurrentServiceById(content.data.id);
-  } else {
-    ui.set('radio.current', null);
-  }
-}
-/*
-function processServiceChange(content) {
-  var keypath;
-
-  if (content.data) {
-
-    // Change the service, setting up new sync observers
-    setCurrentServiceById(content.data.id);
-
-    keypath = keypathForServiceId(content.data.id, state.services);
-
-    // Setting data on the new service will now update
-    // `radio.current` as will nowPlaying and nowAndNext
-    // updates for this service
-    ui.set(keypath, content.data);
-  } else {
-    ui.set('radio.current', null);
-  }
-}
-*/
-
 /*
   State -> UI
 */
@@ -434,9 +352,6 @@ eventSource.addEventListener('message', function (evt) {
   console.group('New message:', content.topic, content);
 
   switch(content.topic) {
-    // case 'service.changed':
-    //   processServiceChange(content);
-    //   break;
     // case 'power':
     //   ui.set('radio.power', content.data);
     //   break;
