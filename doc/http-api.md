@@ -1,4 +1,4 @@
-==Radiodan Restful API==
+## Radiodan Restful API
 
 This is probably the simplest way of controlling the radio, and the rest of the Magic 
 Button App uses this API.
@@ -8,7 +8,7 @@ tool for transferring data with URL sntax.
 
 The code itself is [here](https://github.com/radiodan/magic-button/blob/master/app/) and ends up installed in <code>/opt/radiodan/magic/app</code> 
 
-===radio===
+### Radio
 
 <code>radio/routes.js</code>
 
@@ -185,8 +185,7 @@ Result example:
         ]
      }
 
-
-===announcer===
+### Announcer
 
 <code>announcer/routes.js</code>
 
@@ -216,7 +215,7 @@ Response:
      OK
 
 
-===Avoider===
+### Avoider
 
 <code>avoider/routes.js</code>
 
