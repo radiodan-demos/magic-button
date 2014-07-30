@@ -58,6 +58,6 @@
     "ractive": "~0.4.0-pre2",
     "ractive-events-tap": "https://github.com/ractivejs/ractive-events-tap/archive/master.tar.gz",
     "backbone": "~1.1.2",
-    "ractive-backbone": "~0.1.0"
+    "ractive-backbone": "ractivejs/ractive-adaptors-backbone"
   }
 }
