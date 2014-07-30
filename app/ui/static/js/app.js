@@ -195,6 +195,11 @@ function initUi() {
   radioModel.on('change:current', function () {
     ui.update();
   });
+  // And also when the services collection changes
+  radioModel.on('change:services', function () {
+    ui.update();
+  });
+
 
   /*
     UI actions -> Radio State

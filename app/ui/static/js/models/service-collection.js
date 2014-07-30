@@ -3,16 +3,8 @@ var Backbone = require('backbone'),
 
 module.exports = Backbone.Collection.extend({
   model: Service,
-  initialize: function (props) {
-
-    props.initialState
-         .then(function (state) {
-            if (state.current) {
-              this.updateServiceDataForId(state.current.id, state.current);
-            }
-         }.bind(this));
-
-    props.eventSource.addEventListener('message', function (evt) {
+  bindToEventSource: function (eventSource) {
+   eventSource.addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
       switch (content.topic) {
         case 'service.changed': 
@@ -38,8 +30,8 @@ module.exports = Backbone.Collection.extend({
     service.set({ nowAndNext: data });
   },
   updateServiceDataForId: function (id, data) {
-    console.log('updateServiceDataForId', id, data);
     var service = this.findWhere({ id: id });
+    console.log('updateServiceDataForId', id, data, service);
     service.set(data);
   },
   isActive: function (id) {

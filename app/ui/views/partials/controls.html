@@ -19,6 +19,12 @@
     <Volume
       volume="{{ radio.volume }}">
   </section>
+
+  <section id="metadata" class="layout">
+    <Metadata 
+      nowAndNext="{{radio.current.nowAndNext}}"
+      nowPlaying="{{radio.current.nowPlaying}}" />
+  </section>
 </div><!-- #controls -->
 {% endraw %}
 </script>
