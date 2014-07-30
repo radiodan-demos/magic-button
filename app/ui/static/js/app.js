@@ -88,44 +88,6 @@ function initWithData(states) {
   state.radio = radioModel;
   state.services = radioModel.get('services');
 
-  // TOOD: Replace with models above
-  // state.services = radio.services || defaults.services;
-  state.action = 'service';
-  // state.isActive = function (id) {
-  //   var current = this.get('radio.current.id');
-  //   return current === id;
-  // };
-
-  // State of the radio
-  // state.radio = {
-  //   power: radio.power || defaults.radio.power,
-  //   audio: radio.audio || defaults.radio.audio,
-  //   magic: defaults.radio.magic
-  // };
-
-  // Radio settings
-  // state.radio.settings = {
-  //   action  : 'radioNextSettingService',
-  //   services: transformServices(radioSettings.preferredServices, state.services) || defaults.radio.services
-  // };
-
-  /*
-    Return a copy of the services list with 
-    active services marked
-  */
-  function transformServices(preferred, all) {
-    return all.map(function (service) {
-      var copy = clone(service);
-      copy._isActive = preferred.indexOf(copy.id) > -1;
-      copy.isActive = function () { return copy._isActive; };
-      return copy;
-    });
-  }
-
-  function clone(obj) {
-    return JSON.parse(JSON.stringify(obj));
-  }
-
   // Magic features
   // state.radio.magic.avoider = {
   //   state   : avoider, // current state of the feature
@@ -140,20 +102,6 @@ function initWithData(states) {
   //   state   : announcer,
   //   settings: announcerSettings
   // };
-
-  // State of this UI
-  state.ui = defaults.ui;
-
-  // Helper functions for templates
-  state.first = function (array) {
-    return array[0];
-  };
-
-  // Parse an image URL template to a specific
-  // size
-  state.imageUrl = function (template, size) {
-    return template.replace('$recipe', size);
-  };
 }
 
 function initUi() {
@@ -204,10 +152,6 @@ function initUi() {
   /*
     UI actions -> Radio State
   */
-  var uiToAction = utils.uiToAction;
-
-  // ui.on('service',  uiToAction('id', require('./actions/service')));
-  // ui.on('power',    uiToAction('isOn', require('./actions/power')));
   ui.on('service-selected', function (serviceId) {
     radioModel.setCurrentServiceById(serviceId);
   });
@@ -215,6 +159,12 @@ function initUi() {
     evt.original.preventDefault();
     radioModel.togglePower();
   });
+
+  // To be removed
+  var uiToAction = utils.uiToAction;
+
+  // ui.on('service',  uiToAction('id', require('./actions/service')));
+  // ui.on('power',    uiToAction('isOn', require('./actions/power')));
   ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
   ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
   ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
@@ -223,11 +173,6 @@ function initUi() {
   ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
   ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
-  ui.on('services-partial', function (event, action) {
-    event.original.preventDefault();
-    console.log('firing', action, event);
-    ui.fire(action, event);
-  });  
   ui.on('avoidSettingService', function (event) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
@@ -238,15 +183,8 @@ function initUi() {
   /*
     UI -> UI
   */
-  ui.on('stations-button', utils.createPanelToggleHandler('services'));
-  ui.on('volume-button', utils.createPanelToggleHandler('volume'));
   ui.on('settings-button', utils.createPanelToggleHandler('settings'));
   ui.on('avoid-settings', utils.createPanelToggleHandler('avoiderSettings'));
-  ui.on('track-display', function () {
-    var current = ui.get('ui.panels.metadata.view');
-    ui.set('ui.panels.metadata.view', current === 'track' ? 'prog' : 'track');
-  });
-  ui.set('ui.panels.metadata.view', 'prog');
 
   /*
     Create magic buttons
@@ -358,39 +296,4 @@ eventSource.addEventListener('error', function (evt) {
 
 function getEventStream() {
   return new EventSource('/events');
-}
-
-
-/*
-  Helpers
-*/
-function findServiceById(id, services) {
-  var index = findIndexById(id, services);
-  return services[index];
-}
-
-function findIndexById(id, services) {
-  var index = null;
-  services.forEach(function (item, idx) {
-    if (item.id === id) { index = idx; }
-  });
-  return index;
-}
-
-function keypathForServiceId(id, services) {
-  return 'services.' + findIndexById(id, services);
-}
-
-function augmentServiceWithCurrent(source, services) {
-
-  if (!source) { return; }
-
-  var id = source.id,
-      service = services[findIndexById(id, services)];
-
-  Object.keys(source)
-        .forEach(function (key) {
-          console.log(key, service[key], source[key]);
-          service[key] = source[key];
-        });
 }
