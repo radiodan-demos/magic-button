@@ -110,6 +110,7 @@ require('ractive-backbone/Ractive-Backbone');
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]#mainTmpl').innerText,
     state = {},
+    radioModel,
     defaults,
     ui;
 
@@ -155,7 +156,7 @@ function initWithData(states) {
   var events = getEventStream();
 
   var Radio = require('./models/radio');
-  var radioModel = new Radio({
+  radioModel = new Radio({
     eventSource: events
   });
 
@@ -229,6 +230,21 @@ function initWithData(states) {
     return template.replace('$recipe', size);
   };
 
+  radioModel.on('change:isLoaded', initUi);
+
+  // WORKAROUND:
+  // Force ractive to re-scan the model
+  // when the current service changes
+  // 
+  radioModel.on('change:current', function () {
+    ui.update('radio.current');
+  });
+
+}
+
+function initUi() {
+  console.log('initUi');
+  
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,
@@ -237,14 +253,6 @@ function initWithData(states) {
     complete  : function () {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
     }
-  });
-
-  // WORKAROUND:
-  // Force ractive to re-scan the model
-  // when the current service changes
-  // 
-  radioModel.on('change:current', function () {
-    ui.update('radio.current');
   });
 
   /*
@@ -9806,7 +9814,8 @@ var Radio = Backbone.Model.extend({
       services: new ServiceCollection({ 
         initialState: this.initialState,
         eventSource: this.get('eventSource') 
-      })
+      }),
+      isLoaded: false
     });
 
     /*
@@ -9882,7 +9891,8 @@ var Radio = Backbone.Model.extend({
 
     this.set({
       isOn     : state.power.isOn,
-      volume   : state.audio.volume
+      volume   : state.audio.volume,
+      isLoaded : true
     }, { type: 'info' });
   },
   togglePower: function () {

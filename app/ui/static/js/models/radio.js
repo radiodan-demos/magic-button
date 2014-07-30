@@ -19,7 +19,8 @@ var Radio = Backbone.Model.extend({
       services: new ServiceCollection({ 
         initialState: this.initialState,
         eventSource: this.get('eventSource') 
-      })
+      }),
+      isLoaded: false
     });
 
     /*
@@ -95,7 +96,8 @@ var Radio = Backbone.Model.extend({
 
     this.set({
       isOn     : state.power.isOn,
-      volume   : state.audio.volume
+      volume   : state.audio.volume,
+      isLoaded : true
     }, { type: 'info' });
   },
   togglePower: function () {
