@@ -4,6 +4,7 @@
   <section id="playout" class="layout panel">
     <Playout radio="{{ radio }}" 
              on-services-panel-toggle="services-panel-toggle"
+             on-volume-panel-toggle="volume-panel-toggle"
              services="{{ services }}" />
   </section>
 
@@ -12,6 +13,11 @@
     <ServicesList 
         services="{{ radio.services }}"
         on-selected="service-selected" />
+  </section>
+
+  <section id="volume" class="layout panel {{ volume.isOpen ? '' : 'is-closed' }}">
+    <Volume
+      volume="{{ radio.volume }}">
   </section>
 </div><!-- #controls -->
 {% endraw %}

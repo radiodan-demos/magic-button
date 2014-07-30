@@ -472,7 +472,8 @@ module.exports = Ractive.extend({
   isolated: true,
   components: {
     Playout      : require('./simple')('#playoutTmpl'),
-    ServicesList : require('./services-list')
+    ServicesList : require('./services-list'),
+    Volume       : require('./simple')('#volumeTmpl')
   },
   data: {
     services: {
@@ -484,6 +485,10 @@ module.exports = Ractive.extend({
       'services-panel-toggle': function (evt) {
         var currentState = this.get('services.isOpen');
         this.set('services.isOpen', !currentState);
+      },
+      'volume-panel-toggle': function (evt) {
+        var currentState = this.get('volume.isOpen');
+        this.set('volume.isOpen', !currentState);
       }
     });
   }
