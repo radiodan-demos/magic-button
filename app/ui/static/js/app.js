@@ -14,8 +14,6 @@ var Ractive = require('ractive'),
     d3      = require('./lib/d3'),
     jQuery  = require('jquery');
 
-Ractive.components.CircularProgress = require('./components/circular-progress');
-
 window.jQuery = jQuery;
 // owl.carousel requires global jQuery - boo!
 require('../lib/owl-carousel/owl.carousel');
@@ -38,6 +36,8 @@ var container = document.querySelector('[data-ui-container]'),
     radioModel,
     defaults,
     ui;
+
+console.log('template %o, container %o', template, container);
 
 window.state = state;
 
@@ -84,6 +84,8 @@ function initWithData(states) {
   radioModel = new Radio({
     eventSource: events
   });
+  
+  radioModel.on('change:isLoaded', initUi);
 
   state.radio = radioModel;
   state.services = radioModel.get('services');
@@ -155,8 +157,6 @@ function initWithData(states) {
     return template.replace('$recipe', size);
   };
 
-  radioModel.on('change:isLoaded', initUi);
-
   // WORKAROUND:
   // Force ractive to re-scan the model
   // when the current service changes
@@ -174,11 +174,17 @@ function initUi() {
     el        : container,
     template  : template,
     adapt     : [ 'Backbone' ],
+    debug     : true,
     data      : state,
     complete  : function () {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
+    },
+    components: {
+      Masthead: require('./components/masthead')
     }
   });
+
+  console.log('ui', ui);
 
   /*
     Logging

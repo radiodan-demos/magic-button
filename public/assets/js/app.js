@@ -89,8 +89,6 @@ var Ractive = require('ractive'),
     d3      = require('./lib/d3'),
     jQuery  = require('jquery');
 
-Ractive.components.CircularProgress = require('./components/circular-progress');
-
 window.jQuery = jQuery;
 // owl.carousel requires global jQuery - boo!
 require('../lib/owl-carousel/owl.carousel');
@@ -113,6 +111,8 @@ var container = document.querySelector('[data-ui-container]'),
     radioModel,
     defaults,
     ui;
+
+console.log('template %o, container %o', template, container);
 
 window.state = state;
 
@@ -159,6 +159,8 @@ function initWithData(states) {
   radioModel = new Radio({
     eventSource: events
   });
+  
+  radioModel.on('change:isLoaded', initUi);
 
   state.radio = radioModel;
   state.services = radioModel.get('services');
@@ -230,8 +232,6 @@ function initWithData(states) {
     return template.replace('$recipe', size);
   };
 
-  radioModel.on('change:isLoaded', initUi);
-
   // WORKAROUND:
   // Force ractive to re-scan the model
   // when the current service changes
@@ -249,11 +249,17 @@ function initUi() {
     el        : container,
     template  : template,
     adapt     : [ 'Backbone' ],
+    debug     : true,
     data      : state,
     complete  : function () {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
+    },
+    components: {
+      Masthead: require('./components/masthead')
     }
   });
+
+  console.log('ui', ui);
 
   /*
     Logging
@@ -457,47 +463,13 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/circular-progress":8,"./lib/d3":9,"./models/radio":10,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
-var Ractive = require('ractive'),
-    d3      = require('../lib/d3');
+},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/masthead":8,"./lib/d3":9,"./models/radio":10,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
+var Ractive = require('ractive');
 
-var activeArc,
-    inactiveArc;
-
-/*
-  The arcs
-*/
-activeArc = d3.svg.arc()
-              .innerRadius(44.4827586)
-              .outerRadius(50)
-              .startAngle(0);
-
-inactiveArc = d3.svg.arc()
-                .innerRadius(49.5)
-                .outerRadius(50)
-                .startAngle(0);
-
-var initialState = {
-  outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
-  progressArcPath: activeArc({ endAngle: 0 })
-};
-
-var CircularProgress = Ractive.extend({
-  template: '#progressTempl',
-  init: function () {
-    this.set(initialState);
-
-    this.observe('angle', function (angle) {
-      arc = activeArc;
-      this.set({
-        progressArcPath: arc({ endAngle: angle })
-      });
-    });
-  }
+module.exports = Ractive.extend({
+  template: '#mastheadTmpl'
 });
-
-module.exports = CircularProgress;
-},{"../lib/d3":9,"ractive":33}],9:[function(require,module,exports){
+},{"ractive":33}],9:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9879,6 +9851,8 @@ var Radio = Backbone.Model.extend({
         .then( this.parse.bind(this) );
   },
   parse: function (state) {
+    console.log('RadioModel.parse', state);
+
     /*
       Services available
       Construct a ServiceCollection of available radio stations
@@ -9888,6 +9862,8 @@ var Radio = Backbone.Model.extend({
     if (state.current) {
       this.setCurrentServiceById(state.current.id, { type: 'info' });
     }
+
+    console.log('RadioModel - current');
 
     this.set({
       isOn     : state.power.isOn,
@@ -9912,7 +9888,7 @@ var Radio = Backbone.Model.extend({
       newCurrent.set({ isActive: true  });
     }
 
-    this.set({ current: newCurrent }, opts);
+    // this.set({ current: newCurrent }, opts);
   }
 });
 

@@ -42,6 +42,23 @@
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
+        <div class="{{radio.isOn ? 'is-on' : 'is-off' }}">
+          <!-- App masthead -->
+          <Masthead on-power="power" />
+
+          <!-- Main app views -->
+          {{#radio.isOn}}
+          ON
+          {{/radio.isOn}}
+          {{^radio.isOn}}
+          OFF
+          {{/radio.isOn}}
+        </div>
+      {% endraw %}
+    </script>
+
+    <script id="mainTmpl-old" type="text/ractive">
+      {% raw %}
         <div class="{{radio.isOn ? 'is-on' : 'is-off' }} {{ ui.panels.settings.isOpen ? 'is-settings' : 'is-controls' }}">
         <section id="masthead" class="layout panel masthead">
           {{>mastheadTmpl}}
@@ -90,6 +107,7 @@
         </section>
       {% endraw %}
     </script>
+
     </div><!-- #viewporter -->
     <script src="assets/js/app.{% if isDebug %}debug.{% endif %}js"></script>
   </body>

@@ -84,6 +84,8 @@ var Radio = Backbone.Model.extend({
         .then( this.parse.bind(this) );
   },
   parse: function (state) {
+    console.log('RadioModel.parse', state);
+
     /*
       Services available
       Construct a ServiceCollection of available radio stations
@@ -93,6 +95,8 @@ var Radio = Backbone.Model.extend({
     if (state.current) {
       this.setCurrentServiceById(state.current.id, { type: 'info' });
     }
+
+    console.log('RadioModel - current');
 
     this.set({
       isOn     : state.power.isOn,
@@ -117,7 +121,7 @@ var Radio = Backbone.Model.extend({
       newCurrent.set({ isActive: true  });
     }
 
-    this.set({ current: newCurrent }, opts);
+    // this.set({ current: newCurrent }, opts);
   }
 });
 
