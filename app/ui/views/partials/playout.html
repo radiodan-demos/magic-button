@@ -1,7 +1,7 @@
 <script id="playoutTmpl" data-ui-template type="text/ractive">
 {% raw %}
 <div class="lo-left current-panel">
-  <a on-click="stations-button"
+  <a on-tap="services-panel-toggle"
      class="ct-btn">
     {{#radio.current.logos.active}}
       <img class="ct-logo"
@@ -9,7 +9,7 @@
     {{/radio.current.logos.active}}
 
     <span class="ct-indicator">
-      {{ ui.panels.services.isOpen ? '⬇' : '⬆' }}
+      {{ services.isOpen ? '⬇' : '⬆' }}
     </span>
 
     {{^radio.current}}

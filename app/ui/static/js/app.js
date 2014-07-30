@@ -37,8 +37,6 @@ var container = document.querySelector('[data-ui-container]'),
     defaults,
     ui;
 
-console.log('template %o, container %o', template, container);
-
 window.state = state;
 
 defaults = {
@@ -156,15 +154,6 @@ function initWithData(states) {
   state.imageUrl = function (template, size) {
     return template.replace('$recipe', size);
   };
-
-  // WORKAROUND:
-  // Force ractive to re-scan the model
-  // when the current service changes
-  // 
-  radioModel.on('change:current', function () {
-    ui.update('radio.current');
-  });
-
 }
 
 function initUi() {
@@ -180,7 +169,11 @@ function initUi() {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
     },
     components: {
-      Masthead: require('./components/masthead')
+      // Main Views
+      Standby : require('./components/simple')('#standbyTmpl'),
+      Controls: require('./components/controls'),
+      // Components
+      Masthead: require('./components/simple')('#mastheadTmpl')
     }
   });
 
@@ -195,6 +188,14 @@ function initUi() {
     });
   });
 
+  // WORKAROUND:
+  // Force ractive to re-scan the model
+  // when the current service changes
+  // 
+  radioModel.on('change:current', function () {
+    ui.update();
+  });
+
   /*
     UI actions -> Radio State
   */
@@ -202,9 +203,8 @@ function initUi() {
 
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
-  ui.on('service', function (evt) {
-    evt.original.preventDefault();
-    radioModel.setCurrentServiceById(evt.context.id);
+  ui.on('service-selected', function (serviceId) {
+    radioModel.setCurrentServiceById(serviceId);
   });
   ui.on('power', function (evt) {
     evt.original.preventDefault();
@@ -330,7 +330,8 @@ var eventSource = new EventSource('/events');
 eventSource.addEventListener('message', function (evt) {
   var content = JSON.parse(evt.data);
 
-  console.group('New message:', content.topic, content);
+  // console.group('New message:', content.topic, content);
+  console.log('New message:', content.topic, content);
 
   switch(content.topic) {
     case 'avoider':
@@ -343,7 +344,7 @@ eventSource.addEventListener('message', function (evt) {
       // console.log('Unhandled topic', content.topic, content);
   }
 
-  console.groupEnd();
+  // console.groupEnd();
 });
 
 eventSource.addEventListener('error', function (evt) {

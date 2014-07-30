@@ -27,7 +27,9 @@ var Radio = Backbone.Model.extend({
       Set current service of remote radio
     */
     this.on('change:current', function (model, value, options) {
+      console.log('change:current', options);
       if ( options.type !== 'info' ) {
+        console.log('change:current - action');
         actions.service(value.id);
       }
     });
@@ -105,7 +107,8 @@ var Radio = Backbone.Model.extend({
     }, { type: 'info' });
   },
   togglePower: function () {
-    this.set({ isOn: !this.get('isOn') });
+    var isOn = !this.get('isOn');
+    this.set({ isOn: isOn });
   },
   setCurrentServiceById: function (id, opts) {
     var services = this.get('services');
@@ -121,7 +124,15 @@ var Radio = Backbone.Model.extend({
       newCurrent.set({ isActive: true  });
     }
 
-    // this.set({ current: newCurrent }, opts);
+    console.log('setCurrentServiceById: old %o, new %o', oldCurrent, newCurrent);
+
+    try {
+      this.set({ current: newCurrent }, opts);
+    } catch (e) {
+      console.error('e', e);
+    }
+
+    console.log('set({ current: newCurrent })')
   }
 });
 

@@ -1,0 +1,18 @@
+<script id="controlsTmpl" data-ui-template type="text/ractive">
+{% raw %}
+<div id="controls">
+  <section id="playout" class="layout panel">
+    <Playout radio="{{ radio }}" 
+             on-services-panel-toggle="services-panel-toggle"
+             services="{{ services }}" />
+  </section>
+
+  <section id="services"
+           class="layout panel services {{ services.isOpen ? '' : 'is-closed' }}">
+    <ServicesList 
+        services="{{ radio.services }}"
+        on-selected="service-selected" />
+  </section>
+</div><!-- #controls -->
+{% endraw %}
+</script>

@@ -37,6 +37,7 @@
     {% include "partials/avoider.html"   %}
     {% include "partials/announcer.html" %}
     {% include "partials/error.html" %}
+    {% include "partials/controls.html" %}
     {% include "partials/standby.html" %}
     {% include "partials/settings.html" %}
 
@@ -44,14 +45,16 @@
       {% raw %}
         <div class="{{radio.isOn ? 'is-on' : 'is-off' }}">
           <!-- App masthead -->
-          <Masthead on-power="power" />
+          <Masthead on-power="power" isOn="{{radio.isOn}}" />
 
           <!-- Main app views -->
           {{#radio.isOn}}
-          ON
+            <Controls 
+              radio="{{radio}}"
+              on-service-selected="service-selected">
           {{/radio.isOn}}
           {{^radio.isOn}}
-          OFF
+            <Standby>
           {{/radio.isOn}}
         </div>
       {% endraw %}

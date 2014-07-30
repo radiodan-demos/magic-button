@@ -7,7 +7,7 @@ module.exports = function (isAnnouncing) {
   var method = isAnnouncing ? 'DELETE' : 'POST';
   xhr(method, '/announcer');
 }
-},{"../utils":13,"../xhr":14}],2:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],2:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -26,7 +26,7 @@ module.exports.settings = function (data) {
   console.log('Avoid settings changed', opts);
   xhr.post('/avoider/settings.json', opts);
 }
-},{"../utils":13,"../xhr":14}],3:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],3:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -35,7 +35,7 @@ module.exports = function (turnOn) {
   var method = turnOn ? 'PUT' : 'DELETE';
   xhr(method, '/radio/power');
 }
-},{"../utils":13,"../xhr":14}],4:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],4:[function(require,module,exports){
 var xhr = require('../xhr'),
     utils = require('../utils'),
     success = utils.success,
@@ -54,7 +54,7 @@ module.exports = function (data) {
   console.log('Radio settings changed', opts);
   xhr.post('/radio/settings.json', opts);
 }
-},{"../utils":13,"../xhr":14}],5:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],5:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -63,7 +63,7 @@ module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":13,"../xhr":14}],6:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],6:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -72,7 +72,7 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":13,"../xhr":14}],7:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],7:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 /* global EventSource */
 'use strict';
@@ -111,8 +111,6 @@ var container = document.querySelector('[data-ui-container]'),
     radioModel,
     defaults,
     ui;
-
-console.log('template %o, container %o', template, container);
 
 window.state = state;
 
@@ -231,15 +229,6 @@ function initWithData(states) {
   state.imageUrl = function (template, size) {
     return template.replace('$recipe', size);
   };
-
-  // WORKAROUND:
-  // Force ractive to re-scan the model
-  // when the current service changes
-  // 
-  radioModel.on('change:current', function () {
-    ui.update('radio.current');
-  });
-
 }
 
 function initUi() {
@@ -255,7 +244,11 @@ function initUi() {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
     },
     components: {
-      Masthead: require('./components/masthead')
+      // Main Views
+      Standby : require('./components/simple')('#standbyTmpl'),
+      Controls: require('./components/controls'),
+      // Components
+      Masthead: require('./components/simple')('#mastheadTmpl')
     }
   });
 
@@ -270,6 +263,14 @@ function initUi() {
     });
   });
 
+  // WORKAROUND:
+  // Force ractive to re-scan the model
+  // when the current service changes
+  // 
+  radioModel.on('change:current', function () {
+    ui.update();
+  });
+
   /*
     UI actions -> Radio State
   */
@@ -277,9 +278,8 @@ function initUi() {
 
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
-  ui.on('service', function (evt) {
-    evt.original.preventDefault();
-    radioModel.setCurrentServiceById(evt.context.id);
+  ui.on('service-selected', function (serviceId) {
+    radioModel.setCurrentServiceById(serviceId);
   });
   ui.on('power', function (evt) {
     evt.original.preventDefault();
@@ -405,7 +405,8 @@ var eventSource = new EventSource('/events');
 eventSource.addEventListener('message', function (evt) {
   var content = JSON.parse(evt.data);
 
-  console.group('New message:', content.topic, content);
+  // console.group('New message:', content.topic, content);
+  console.log('New message:', content.topic, content);
 
   switch(content.topic) {
     case 'avoider':
@@ -418,7 +419,7 @@ eventSource.addEventListener('message', function (evt) {
       // console.log('Unhandled topic', content.topic, content);
   }
 
-  console.groupEnd();
+  // console.groupEnd();
 });
 
 eventSource.addEventListener('error', function (evt) {
@@ -463,13 +464,57 @@ function augmentServiceWithCurrent(source, services) {
           service[key] = source[key];
         });
 }
-},{"../lib/owl-carousel/owl.carousel":15,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/masthead":8,"./lib/d3":9,"./models/radio":10,"./utils":13,"./xhr":14,"es6-promise":19,"jquery":30,"ractive":33,"ractive-backbone/Ractive-Backbone":31,"ractive-events-tap":32}],8:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":17,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/controls":8,"./components/simple":10,"./lib/d3":11,"./models/radio":12,"./utils":15,"./xhr":16,"es6-promise":21,"jquery":32,"ractive":35,"ractive-backbone/Ractive-Backbone":33,"ractive-events-tap":34}],8:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
-  template: '#mastheadTmpl'
+  template: '#controlsTmpl',
+  isolated: true,
+  components: {
+    Playout      : require('./simple')('#playoutTmpl'),
+    ServicesList : require('./services-list')
+  },
+  data: {
+    services: {
+      isOpen: false
+    }
+  },
+  init: function () {
+    this.on({
+      'services-panel-toggle': function (evt) {
+        var currentState = this.get('services.isOpen');
+        this.set('services.isOpen', !currentState);
+      }
+    });
+  }
 });
-},{"ractive":33}],9:[function(require,module,exports){
+},{"./services-list":9,"./simple":10,"ractive":35}],9:[function(require,module,exports){
+var Ractive = require('ractive');
+
+module.exports = Ractive.extend({
+  template: '#servicesTmpl',
+  isolated: true,
+  init: function () {
+    var self = this;
+    this.on({
+      'services-partial': function (evt) {
+        evt.original.preventDefault();
+        var serviceId = evt.context.id;
+        self.fire('selected', serviceId);
+      }
+    });
+  }
+});
+},{"ractive":35}],10:[function(require,module,exports){
+var Ractive = require('ractive');
+
+module.exports = function (selector) {
+  return Ractive.extend({
+    template: selector,
+    isolated: true
+  });
+};
+},{"ractive":35}],11:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9764,7 +9809,7 @@ module.exports = Ractive.extend({
     this.d3 = d3;
   }
 }();
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var Backbone = require('backbone'),
     xhr = require('../xhr'),
     Service = require('./service'),
@@ -9794,7 +9839,9 @@ var Radio = Backbone.Model.extend({
       Set current service of remote radio
     */
     this.on('change:current', function (model, value, options) {
+      console.log('change:current', options);
       if ( options.type !== 'info' ) {
+        console.log('change:current - action');
         actions.service(value.id);
       }
     });
@@ -9872,7 +9919,8 @@ var Radio = Backbone.Model.extend({
     }, { type: 'info' });
   },
   togglePower: function () {
-    this.set({ isOn: !this.get('isOn') });
+    var isOn = !this.get('isOn');
+    this.set({ isOn: isOn });
   },
   setCurrentServiceById: function (id, opts) {
     var services = this.get('services');
@@ -9888,13 +9936,21 @@ var Radio = Backbone.Model.extend({
       newCurrent.set({ isActive: true  });
     }
 
-    // this.set({ current: newCurrent }, opts);
+    console.log('setCurrentServiceById: old %o, new %o', oldCurrent, newCurrent);
+
+    try {
+      this.set({ current: newCurrent }, opts);
+    } catch (e) {
+      console.error('e', e);
+    }
+
+    console.log('set({ current: newCurrent })')
   }
 });
 
 
 module.exports = Radio;
-},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"../utils":13,"../xhr":14,"./service":12,"./service-collection":11,"backbone":16}],11:[function(require,module,exports){
+},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"../utils":15,"../xhr":16,"./service":14,"./service-collection":13,"backbone":18}],13:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 
@@ -9948,7 +10004,7 @@ module.exports = Backbone.Collection.extend({
     }
   }
 });
-},{"./service.js":12,"backbone":16}],12:[function(require,module,exports){
+},{"./service.js":14,"backbone":18}],14:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var Service = Backbone.Model.extend({
@@ -9956,7 +10012,7 @@ var Service = Backbone.Model.extend({
 });
 
 module.exports = Service;
-},{"backbone":16}],13:[function(require,module,exports){
+},{"backbone":18}],15:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10058,7 +10114,7 @@ module.exports = {
   }
 };
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10120,7 +10176,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":19}],15:[function(require,module,exports){
+},{"es6-promise":21}],17:[function(require,module,exports){
 /*
  *  jQuery OwlCarousel v1.3.2
  *
@@ -11633,7 +11689,7 @@ if (typeof Object.create !== "function") {
         afterLazyLoad: false
     };
 }(jQuery, window, document));
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 //     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -13243,7 +13299,7 @@ if (typeof Object.create !== "function") {
 
 }));
 
-},{"underscore":17}],17:[function(require,module,exports){
+},{"underscore":19}],19:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -14588,7 +14644,7 @@ if (typeof Object.create !== "function") {
   }
 }).call(this);
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -14643,13 +14699,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],19:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":24,"./promise/promise":25}],20:[function(require,module,exports){
+},{"./promise/polyfill":26,"./promise/promise":27}],22:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -14743,7 +14799,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":29}],21:[function(require,module,exports){
+},{"./utils":31}],23:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -14807,7 +14863,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":18}],22:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":20}],24:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -14875,7 +14931,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -14891,7 +14947,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],24:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -14920,7 +14976,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":25,"./utils":29}],25:[function(require,module,exports){
+},{"./promise":27,"./utils":31}],27:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -15134,7 +15190,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":20,"./asap":21,"./cast":22,"./config":23,"./race":26,"./reject":27,"./resolve":28,"./utils":29}],26:[function(require,module,exports){
+},{"./all":22,"./asap":23,"./cast":24,"./config":25,"./race":28,"./reject":29,"./resolve":30,"./utils":31}],28:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -15224,7 +15280,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":29}],27:[function(require,module,exports){
+},{"./utils":31}],29:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -15272,7 +15328,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],28:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -15315,7 +15371,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -15338,7 +15394,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],30:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -24451,7 +24507,7 @@ return jQuery;
 
 }));
 
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /*
 
 	Backbone adaptor plugin
@@ -24621,7 +24677,7 @@ return jQuery;
 	};
 
 }));
-},{"backbone":16,"ractive":33}],32:[function(require,module,exports){
+},{"backbone":18,"ractive":35}],34:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -24886,7 +24942,7 @@ return jQuery;
 
 }));
 
-},{"ractive":33}],33:[function(require,module,exports){
+},{"ractive":35}],35:[function(require,module,exports){
 /*
 
 	Ractive - v0.3.9-317-d23e408 - 2014-03-21
