@@ -3,58 +3,11 @@ var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
 
-module.exports = function (isAnnouncing) {
-  var method = isAnnouncing ? 'DELETE' : 'POST';
-  xhr(method, '/announcer');
-}
-},{"../utils":16,"../xhr":17}],2:[function(require,module,exports){
-var xhr = require('../xhr'),
-    success = require('../utils').success,
-    failure = require('../utils').failure;
-
-module.exports.set = function (isAvoiding) {
-  var method = isAvoiding ? 'DELETE' : 'POST';
-  xhr(method, '/avoider');
-}
-
-module.exports.settings = function (data) {
-  var payload = JSON.stringify(data),
-      opts = {
-        headers: { 'Content-type': 'application/json' },
-        data: payload
-      };
-  console.log('Avoid settings changed', opts);
-  xhr.post('/avoider/settings.json', opts);
-}
-},{"../utils":16,"../xhr":17}],3:[function(require,module,exports){
-var xhr = require('../xhr'),
-    success = require('../utils').success,
-    failure = require('../utils').failure;
-
 module.exports = function (turnOn) {
   var method = turnOn ? 'PUT' : 'DELETE';
   xhr(method, '/radio/power');
 }
-},{"../utils":16,"../xhr":17}],4:[function(require,module,exports){
-var xhr = require('../xhr'),
-    utils = require('../utils'),
-    success = utils.success,
-    failure = utils.failure;
-
-module.exports = function (data) {
-  console.warn('data', data);
-  var settings = {
-        preferredServices: utils.extractActiveServices(data.services)
-      },
-      payload = JSON.stringify(settings),
-      opts = {
-        headers: { 'Content-type': 'application/json' },
-        data: payload
-      };
-  console.log('Radio settings changed', opts);
-  xhr.post('/radio/settings.json', opts);
-}
-},{"../utils":16,"../xhr":17}],5:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],2:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -63,7 +16,7 @@ module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":16,"../xhr":17}],6:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],3:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -72,7 +25,7 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":16,"../xhr":17}],7:[function(require,module,exports){
+},{"../utils":15,"../xhr":16}],4:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 /* global EventSource */
 'use strict';
@@ -153,9 +106,21 @@ function initWithData(states) {
 
   var events = getEventStream();
 
+  var Avoider = require('./models/avoider');
+  avoider = new Avoider({
+    eventSource: events
+  });
+
+  avoider.on('change', function () {
+    console.log('avoider#change', arguments);
+  });
+
   var Radio = require('./models/radio');
   radioModel = new Radio({
-    eventSource: events
+    eventSource: events,
+    magic: {
+      avoider: avoider
+    }
   });
   
   radioModel.on('change:isLoaded', initUi);
@@ -240,32 +205,34 @@ function initUi() {
 
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
-  ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
-  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
-  ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
-  ui.observe('radio.magic.avoider.settings', require('./actions/avoid').settings, { init: false });
+  //ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
+  //ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
+  //ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
+  //ui.observe('radio.magic.avoider.settings', require('./actions/avoid').settings, { init: false });
 
-  ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
-  ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
+  //ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
+  //ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
+  /*
   ui.on('avoidSettingService', function (event) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
   ui.on('radioNextSettingService', function (event) {
     ui.set(event.keypath + '._isActive', !event.context._isActive);
   });
+  */
 
   /*
     UI -> UI
   */
-  ui.on('settings-button', utils.createPanelToggleHandler('settings'));
-  ui.on('avoid-settings', utils.createPanelToggleHandler('avoiderSettings'));
+  //ui.on('settings-button', utils.createPanelToggleHandler('settings'));
+  //ui.on('avoid-settings', utils.createPanelToggleHandler('avoiderSettings'));
 
   /*
     Create magic buttons
   */
-  ui.set('ui.magic.avoider', {});
-  ui.set('ui.magic.announcer', {});
+  //ui.set('ui.magic.avoider', {});
+  //ui.set('ui.magic.announcer', {});
 
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
@@ -373,7 +340,39 @@ function getEventStream() {
   return new EventSource('/events');
 }
 
-},{"../lib/owl-carousel/owl.carousel":18,"./actions/announce":1,"./actions/avoid":2,"./actions/radio-settings":4,"./components/controls":8,"./components/simple":11,"./lib/d3":12,"./models/radio":13,"./utils":16,"./xhr":17,"es6-promise":22,"jquery":33,"ractive":36,"ractive-backbone/Ractive-Backbone":34,"ractive-events-tap":35}],8:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":17,"./components/controls":6,"./components/simple":9,"./lib/d3":10,"./models/avoider":11,"./models/radio":12,"./utils":15,"./xhr":16,"es6-promise":21,"jquery":32,"ractive":35,"ractive-backbone/Ractive-Backbone":33,"ractive-events-tap":34}],5:[function(require,module,exports){
+var Ractive = require('ractive');
+
+module.exports = Ractive.extend({
+  template: '#avoiderTmpl',
+  isolated: true,
+  data: {
+    isActive: true,
+    state: null
+  },
+  computed: {
+    timeLeft: function () {
+      var now   = this.get('now'),
+          end   = this.get('state.end'),
+          isInFuture = end > now,
+          left = null;
+
+      if (end && now && isInFuture) {
+        left = (end - now) / 1000;
+      }
+
+      return left;
+    }
+  },
+  init: function () {
+    this.observe('state.end', function () {
+      window.setTimeout(function () {
+        this.set('now', new Date());
+      }.bind(this), 1000);
+    });
+  }
+});
+},{"ractive":35}],6:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -383,7 +382,8 @@ module.exports = Ractive.extend({
     Playout      : require('./simple')('#playoutTmpl'),
     ServicesList : require('./services-list'),
     Volume       : require('./simple')('#volumeTmpl'),
-    Metadata     : require('./metadata')
+    Metadata     : require('./metadata'),
+    Avoider      : require('./avoider')
   },
   data: {
     services: {
@@ -403,7 +403,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./metadata":9,"./services-list":10,"./simple":11,"ractive":36}],9:[function(require,module,exports){
+},{"./avoider":5,"./metadata":7,"./services-list":8,"./simple":9,"ractive":35}],7:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -426,7 +426,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":36}],10:[function(require,module,exports){
+},{"ractive":35}],8:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -443,7 +443,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":36}],11:[function(require,module,exports){
+},{"ractive":35}],9:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = function (selector) {
@@ -452,7 +452,7 @@ module.exports = function (selector) {
     isolated: true
   });
 };
-},{"ractive":36}],12:[function(require,module,exports){
+},{"ractive":35}],10:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9747,7 +9747,39 @@ module.exports = function (selector) {
     this.d3 = d3;
   }
 }();
-},{}],13:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+var Backbone = require('backbone'),
+    clone = require('../utils').clone;
+
+module.exports = Backbone.Model.extend({
+  isAvoiding: false,
+  start: null,
+  end: null,
+  initialize: function () {
+    /*
+      Listen for remote service change events
+    */
+    this.get('eventSource').addEventListener('message', function (evt) {
+      var content = JSON.parse(evt.data);
+      switch(content.topic) {
+        case 'avoider':
+          console.log('avoider event', content.data);
+          var data = clone(content.data);
+          data.start = data.start ? new Date(data.start) : null;
+          data.end   = data.end   ? new Date(data.end)   : null;
+          console.log('avoider event - set ', data);
+
+          this.set(data);
+          break;
+        case 'settings.avoider':
+          console.log('settings.avoider', content.data);
+          break;
+      }
+    }.bind(this));
+  }
+});
+
+},{"../utils":15,"backbone":18}],12:[function(require,module,exports){
 var Backbone = require('backbone'),
     xhr = require('../xhr'),
     Service = require('./service'),
@@ -9895,7 +9927,7 @@ var Radio = Backbone.Model.extend({
 
 
 module.exports = Radio;
-},{"../actions/power":3,"../actions/service":5,"../actions/volume":6,"../utils":16,"../xhr":17,"./service":15,"./service-collection":14,"backbone":19}],14:[function(require,module,exports){
+},{"../actions/power":1,"../actions/service":2,"../actions/volume":3,"../utils":15,"../xhr":16,"./service":14,"./service-collection":13,"backbone":18}],13:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 
@@ -9941,7 +9973,7 @@ module.exports = Backbone.Collection.extend({
     }
   }
 });
-},{"./service.js":15,"backbone":19}],15:[function(require,module,exports){
+},{"./service.js":14,"backbone":18}],14:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var Service = Backbone.Model.extend({
@@ -9949,11 +9981,14 @@ var Service = Backbone.Model.extend({
 });
 
 module.exports = Service;
-},{"backbone":19}],16:[function(require,module,exports){
+},{"backbone":18}],15:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
+var _ = require('underscore');
+
 module.exports = {
+  clone: _.clone,
   extractActiveServices: function extractActiveServices(services) {
     return services.map(function (service) { 
       return service._isActive ? service.id : undefined;
@@ -10051,7 +10086,7 @@ module.exports = {
   }
 };
 
-},{}],17:[function(require,module,exports){
+},{"underscore":36}],16:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10113,7 +10148,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":22}],18:[function(require,module,exports){
+},{"es6-promise":21}],17:[function(require,module,exports){
 /*
  *  jQuery OwlCarousel v1.3.2
  *
@@ -11626,7 +11661,7 @@ if (typeof Object.create !== "function") {
         afterLazyLoad: false
     };
 }(jQuery, window, document));
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 //     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -13236,7 +13271,7 @@ if (typeof Object.create !== "function") {
 
 }));
 
-},{"underscore":20}],20:[function(require,module,exports){
+},{"underscore":19}],19:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -14581,7 +14616,7 @@ if (typeof Object.create !== "function") {
   }
 }).call(this);
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -14636,13 +14671,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],22:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":27,"./promise/promise":28}],23:[function(require,module,exports){
+},{"./promise/polyfill":26,"./promise/promise":27}],22:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -14736,7 +14771,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":32}],24:[function(require,module,exports){
+},{"./utils":31}],23:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -14800,7 +14835,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":21}],25:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":20}],24:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -14868,7 +14903,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],26:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -14884,7 +14919,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],27:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -14913,7 +14948,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":28,"./utils":32}],28:[function(require,module,exports){
+},{"./promise":27,"./utils":31}],27:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -15127,7 +15162,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":23,"./asap":24,"./cast":25,"./config":26,"./race":29,"./reject":30,"./resolve":31,"./utils":32}],29:[function(require,module,exports){
+},{"./all":22,"./asap":23,"./cast":24,"./config":25,"./race":28,"./reject":29,"./resolve":30,"./utils":31}],28:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -15217,7 +15252,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":32}],30:[function(require,module,exports){
+},{"./utils":31}],29:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -15265,7 +15300,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],31:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -15308,7 +15343,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],32:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -15331,7 +15366,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],33:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -24444,7 +24479,7 @@ return jQuery;
 
 }));
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /*
 
 	Backbone adaptor plugin
@@ -24614,7 +24649,7 @@ return jQuery;
 	};
 
 }));
-},{"backbone":19,"ractive":36}],35:[function(require,module,exports){
+},{"backbone":18,"ractive":35}],34:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -24879,7 +24914,7 @@ return jQuery;
 
 }));
 
-},{"ractive":36}],36:[function(require,module,exports){
+},{"ractive":35}],35:[function(require,module,exports){
 /*
 	ractive.js v0.5.5
 	2014-07-13 - commit 8b1d34ef 
@@ -38040,4 +38075,6 @@ return jQuery;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}]},{},[7]);
+},{}],36:[function(require,module,exports){
+module.exports=require(19)
+},{}]},{},[4]);

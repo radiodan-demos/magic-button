@@ -1,10 +1,10 @@
-<script id="avoiderTempl" data-ui-template type="text/ractive">
+<script id="avoiderTmpl" data-ui-template type="text/ractive">
 {% raw %}
-{{#avoider.state}}
-<li class="mg-item avoider {{ isAvoiding ? 'is-active' : 'is-inactive' }}">
+Timlife {{timeLeft}}
+<li class="mg-item avoider {{ state.isAvoiding ? 'is-active' : 'is-inactive' }}">
   <div>
     <h2 class="mg-name">
-    {{^isAvoiding}}Avoider{{/isAvoiding}}
+    {{^state.isAvoiding}}Avoider{{/state.isAvoiding}}
     {{#timeLeft}}Resume in:{{/timeLeft}}
     </h2>
 
@@ -15,7 +15,7 @@
 
       <div class="mg-label">
         {{^timeLeft}}<i class="mg-icon"></i>{{/timeLeft}}
-        {{#isAvoiding}}<span>{{ timeLeft }}</span>{{/isAvoiding}}
+        {{#timeLeft}}<span>{{ . }}</span>{{/timeLeft}}
       </div>
     </div>
   </div>
@@ -28,28 +28,6 @@
     </div>
     {{/isAvoiding}}
   </div>
-{{/avoider.state}}
-{{#ui.panels.avoiderSettings.isOpen}}
-  {{#avoider}}
-  <div class="mg-settings">
-    <h2>What would you like to avoid?</h2>
-    <p>
-      <label>
-        <input type='radio' name='{{settings.avoidType}}' value='tracks'>
-        The current track
-      </label>
-    </p>
-    <p>
-      <label>
-        <input type='radio' name='{{settings.avoidType}}' value='programmes'>
-        The entire programme
-      </label>
-    </p>
-    <h3>Avoid with</h3>
-    {{>servicesTmpl}}
-  </div>
-  </li>
-  {{/avoider}}
-{{/ui.panels.avoiderSettings.isOpen}}
+</li>
 {% endraw %}
 </script>

@@ -24,6 +24,7 @@ var initialState = {
 
 var CircularProgress = Ractive.extend({
   template: '#progressTempl',
+  isolated: true,
   init: function () {
     this.set(initialState);
 

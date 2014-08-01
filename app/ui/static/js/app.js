@@ -78,9 +78,21 @@ function initWithData(states) {
 
   var events = getEventStream();
 
+  var Avoider = require('./models/avoider');
+  avoider = new Avoider({
+    eventSource: events
+  });
+
+  avoider.on('change', function () {
+    console.log('avoider#change', arguments);
+  });
+
   var Radio = require('./models/radio');
   radioModel = new Radio({
-    eventSource: events
+    eventSource: events,
+    magic: {
+      avoider: avoider
+    }
   });
   
   radioModel.on('change:isLoaded', initUi);
@@ -165,32 +177,34 @@ function initUi() {
 
   // ui.on('service',  uiToAction('id', require('./actions/service')));
   // ui.on('power',    uiToAction('isOn', require('./actions/power')));
-  ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
-  ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
-  ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
-  ui.observe('radio.magic.avoider.settings', require('./actions/avoid').settings, { init: false });
+  //ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
+  //ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
+  //ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
+  //ui.observe('radio.magic.avoider.settings', require('./actions/avoid').settings, { init: false });
 
-  ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
-  ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
+  //ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
+  //ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
 
+  /*
   ui.on('avoidSettingService', function (event) {
     ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
   });
   ui.on('radioNextSettingService', function (event) {
     ui.set(event.keypath + '._isActive', !event.context._isActive);
   });
+  */
 
   /*
     UI -> UI
   */
-  ui.on('settings-button', utils.createPanelToggleHandler('settings'));
-  ui.on('avoid-settings', utils.createPanelToggleHandler('avoiderSettings'));
+  //ui.on('settings-button', utils.createPanelToggleHandler('settings'));
+  //ui.on('avoid-settings', utils.createPanelToggleHandler('avoiderSettings'));
 
   /*
     Create magic buttons
   */
-  ui.set('ui.magic.avoider', {});
-  ui.set('ui.magic.announcer', {});
+  //ui.set('ui.magic.avoider', {});
+  //ui.set('ui.magic.announcer', {});
 
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 

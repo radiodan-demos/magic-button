@@ -1,7 +1,10 @@
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
+var _ = require('underscore');
+
 module.exports = {
+  clone: _.clone,
   extractActiveServices: function extractActiveServices(services) {
     return services.map(function (service) { 
       return service._isActive ? service.id : undefined;
