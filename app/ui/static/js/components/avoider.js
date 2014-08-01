@@ -36,7 +36,7 @@ module.exports = Ractive.extend({
         percentThrough = 100;
       }
 
-      console.log('percentThrough', percentThrough, start, end, now);
+      // console.log('percentThrough', percentThrough, start, end, now);
 
       return percentThrough;
     },
