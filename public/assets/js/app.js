@@ -357,7 +357,6 @@ module.exports = Ractive.extend({
   template: '#avoiderTmpl',
   isolated: true,
   data: {
-    isActive: true,
     state: null
   },
   components: {
@@ -366,13 +365,15 @@ module.exports = Ractive.extend({
   computed: {
     percentThrough: function () {
       var start = this.get('state.start'),
-          end   = start - this.get('state.end'),
-          now   = start - this.get('now'),
+          end   = this.get('state.end'),
+          now   = this.get('now'),
           percentThrough;
 
       if (start && end && now) {
         percentThrough = (start - (start-now)) / (start- (start-end));
         percentThrough = percentThrough.toFixed(2) * 100;
+      } else if ( this.get('state.isAvoiding') ) {
+        percentThrough = 100;
       }
 
       if (percentThrough < 0) {
@@ -383,6 +384,8 @@ module.exports = Ractive.extend({
         percentThrough = 100;
       }
 
+      console.log('percentThrough', percentThrough, start, end, now);
+
       return percentThrough;
     },
     timeLeft: function () {
@@ -392,7 +395,7 @@ module.exports = Ractive.extend({
           left = null;
 
       if (end && now && isInFuture) {
-        left = Math.round( (end - now) / 1000);
+        left = this.formatTimeDiff( Math.round( (end - now) ) );
       }
 
       return left;
@@ -409,6 +412,16 @@ module.exports = Ractive.extend({
         this.countdownTimerId = null;
       }
     });
+  },
+  formatTimeDiff: function (diffInMs) {
+    var diffSecs = diffInMs / 1000;
+    var mins = diffSecs / 60;
+    var secsLeft = Math.abs(Math.floor(mins) - mins);
+    secsLeft = Math.floor(secsLeft * 60);
+    if (secsLeft < 10) {
+      secsLeft = '0' + secsLeft;
+    }
+    return Math.floor(mins) + 'm ' + secsLeft;
   }
 });
 },{"./circular-progress":6,"ractive":36}],6:[function(require,module,exports){
