@@ -200,6 +200,16 @@ function initUi() {
     radioModel.togglePower();
   });
 
+  ui.on('avoid', function (evt) {
+    evt.original.preventDefault();
+    if (radioModel.get('magic').avoider.isStarted()) {
+      radioModel.get('magic').avoider.end();
+    } else {
+      radioModel.get('magic').avoider.start();
+    }
+  });
+
+
   // To be removed
   var uiToAction = utils.uiToAction;
 
@@ -9834,12 +9844,11 @@ module.exports = function (selector) {
 }();
 },{}],12:[function(require,module,exports){
 var Backbone = require('backbone'),
+    xhr = require('../xhr'),
     clone = require('../utils').clone;
 
 module.exports = Backbone.Model.extend({
   isAvoiding: false,
-  start: null,
-  end: null,
   initialize: function () {
     /*
       Listen for remote service change events
@@ -9858,10 +9867,19 @@ module.exports = Backbone.Model.extend({
           break;
       }
     }.bind(this));
+  },
+  isStarted: function () {
+    return this.get('isAvoiding');
+  },
+  start: function () {
+    xhr.post('/avoider');
+  },
+  end: function () {
+    xhr.delete('/avoider');
   }
 });
 
-},{"../utils":16,"backbone":19}],13:[function(require,module,exports){
+},{"../utils":16,"../xhr":17,"backbone":19}],13:[function(require,module,exports){
 var Backbone = require('backbone'),
     xhr = require('../xhr'),
     Service = require('./service'),

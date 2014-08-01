@@ -172,6 +172,16 @@ function initUi() {
     radioModel.togglePower();
   });
 
+  ui.on('avoid', function (evt) {
+    evt.original.preventDefault();
+    if (radioModel.get('magic').avoider.isStarted()) {
+      radioModel.get('magic').avoider.end();
+    } else {
+      radioModel.get('magic').avoider.start();
+    }
+  });
+
+
   // To be removed
   var uiToAction = utils.uiToAction;
 

@@ -1,10 +1,9 @@
 var Backbone = require('backbone'),
+    xhr = require('../xhr'),
     clone = require('../utils').clone;
 
 module.exports = Backbone.Model.extend({
   isAvoiding: false,
-  start: null,
-  end: null,
   initialize: function () {
     /*
       Listen for remote service change events
@@ -23,5 +22,14 @@ module.exports = Backbone.Model.extend({
           break;
       }
     }.bind(this));
+  },
+  isStarted: function () {
+    return this.get('isAvoiding');
+  },
+  start: function () {
+    xhr.post('/avoider');
+  },
+  end: function () {
+    xhr.delete('/avoider');
   }
 });
