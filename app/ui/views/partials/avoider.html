@@ -1,6 +1,5 @@
 <script id="avoiderTmpl" data-ui-template type="text/ractive">
 {% raw %}
-Timlife {{timeLeft}}
 <li class="mg-item avoider {{ state.isAvoiding ? 'is-active' : 'is-inactive' }}">
   <div>
     <h2 class="mg-name">
@@ -9,24 +8,22 @@ Timlife {{timeLeft}}
     </h2>
 
     <div class="mg-button" on-tap="avoid">
-      {{#ui.magic.avoider}}
-        <CircularProgress>
-      {{/ui.magic.avoider}}
+      <CircularProgress percentThrough={{percentThrough}} />
 
       <div class="mg-label">
         {{^timeLeft}}<i class="mg-icon"></i>{{/timeLeft}}
-        {{#timeLeft}}<span>{{ . }}</span>{{/timeLeft}}
+        {{#timeLeft}}<span>{{ timeLeft }}</span>{{/timeLeft}}
       </div>
     </div>
   </div>
 
   <div on-tap="avoid-settings">
-    {{^isAvoiding}}
+    {{^state.isAvoiding}}
     <div class="settings">
       <i></i>
       <span>Avoid settings</span>
     </div>
-    {{/isAvoiding}}
+    {{/state.isAvoiding}}
   </div>
 </li>
 {% endraw %}

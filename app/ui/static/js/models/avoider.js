@@ -13,12 +13,9 @@ module.exports = Backbone.Model.extend({
       var content = JSON.parse(evt.data);
       switch(content.topic) {
         case 'avoider':
-          console.log('avoider event', content.data);
           var data = clone(content.data);
           data.start = data.start ? new Date(data.start) : null;
           data.end   = data.end   ? new Date(data.end)   : null;
-          console.log('avoider event - set ', data);
-
           this.set(data);
           break;
         case 'settings.avoider':

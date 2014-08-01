@@ -2,7 +2,8 @@ var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
 var activeArc,
-    inactiveArc;
+    inactiveArc,
+    percentToAngle;
 
 /*
   The arcs
@@ -17,6 +18,14 @@ inactiveArc = d3.svg.arc()
                 .outerRadius(50)
                 .startAngle(0);
 
+/*
+  Helper to convert from 0-100 to 0-2Pi radians
+*/
+percentToAngle = d3.scale.linear()
+                         .domain([0, 100])
+                         .range([0, 2 * Math.PI])
+                         .clamp([true]);
+
 var initialState = {
   outerArcPath: inactiveArc({ endAngle: Math.PI * 2 }),
   progressArcPath: activeArc({ endAngle: 0 })
@@ -25,6 +34,12 @@ var initialState = {
 var CircularProgress = Ractive.extend({
   template: '#progressTempl',
   isolated: true,
+  computed: {
+    angle: function () {
+      var percentThrough = this.get('percentThrough');
+      return percentThrough ? percentToAngle(percentThrough) : 0;
+    }
+  },
   init: function () {
     this.set(initialState);
 
