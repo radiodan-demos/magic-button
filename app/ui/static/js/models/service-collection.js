@@ -23,11 +23,15 @@ module.exports = Backbone.Collection.extend({
   },
   updateNowPlayingDataForId: function (id, data) {
     var service = this.findWhere({ id: id });
-    service.set({ nowPlaying: data });
+    if (service) {
+      service.set({ nowPlaying: data });
+    }
   },
   updateNowAndNextDataForId: function (id, data) {
     var service = this.findWhere({ id: id });
-    service.set({ nowAndNext: data });
+    if (service) {
+      service.set({ nowAndNext: data });
+    }
   },
   updateServiceDataForId: function (id, data) {
     var service = this.findWhere({ id: id });
