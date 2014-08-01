@@ -14,10 +14,15 @@ module.exports = Ractive.extend({
       var start = this.get('state.start'),
           end   = this.get('state.end'),
           now   = this.get('now'),
+          duration,
+          current,
           percentThrough;
 
       if (start && end && now) {
-        percentThrough = (start - (start-now)) / (start- (start-end));
+        duration = end - start;
+        current  = now - start;
+
+        percentThrough = current / duration;
         percentThrough = percentThrough.toFixed(2) * 100;
       } else if ( this.get('state.isAvoiding') ) {
         percentThrough = 100;
