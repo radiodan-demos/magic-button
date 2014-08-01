@@ -5,6 +5,11 @@ var Backbone = require('backbone'),
 module.exports = Backbone.Model.extend({
   isAvoiding: false,
   initialize: function () {
+    xhr.get('/avoider/state.json')
+       .then(function (state) {
+          console.log('AvoiderModel initial state', state);
+          this.set( JSON.parse(state) );
+       }.bind(this));
     /*
       Listen for remote service change events
     */
