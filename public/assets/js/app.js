@@ -357,10 +357,12 @@ module.exports = Ractive.extend({
   template: '#avoiderTmpl',
   isolated: true,
   data: {
+    settingsOpen: false,
     state: null
   },
   components: {
-    CircularProgress: require('./circular-progress')
+    CircularProgress: require('./circular-progress'),
+    ServicesList: require('./services-list')
   },
   computed: {
     percentThrough: function () {
@@ -375,7 +377,6 @@ module.exports = Ractive.extend({
         duration = end - start;
         current  = now - start;
 
-        // percentThrough = (start - (start-now)) / (start- (start-end));
         percentThrough = current / duration;
         percentThrough = percentThrough.toFixed(2) * 100;
       } else if ( this.get('state.isAvoiding') ) {
@@ -390,7 +391,7 @@ module.exports = Ractive.extend({
         percentThrough = 100;
       }
 
-      console.log('percentThrough', percentThrough, start, end, now);
+      // console.log('percentThrough', percentThrough, start, end, now);
 
       return percentThrough;
     },
@@ -418,6 +419,10 @@ module.exports = Ractive.extend({
         this.countdownTimerId = null;
       }
     });
+
+    this.on('settings', function () {
+      this.set('settingsOpen', !this.get('settingsOpen'));
+    });
   },
   formatTimeDiff: function (diffInMs) {
     var diffSecs = diffInMs / 1000;
@@ -430,7 +435,7 @@ module.exports = Ractive.extend({
     return Math.floor(mins) + 'm ' + secsLeft;
   }
 });
-},{"./circular-progress":6,"ractive":36}],6:[function(require,module,exports){
+},{"./circular-progress":6,"./services-list":9,"ractive":36}],6:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -9874,6 +9879,12 @@ module.exports = Backbone.Model.extend({
           console.log('AvoiderModel initial state', state);
           this.set( JSON.parse(state) );
        }.bind(this));
+
+    xhr.get('/avoider/settings.json')
+       .then(function (settings) {
+          this.set( { settings: JSON.parse(settings) } );
+       }.bind(this));
+    
     /*
       Listen for remote service change events
     */

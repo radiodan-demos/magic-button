@@ -17,7 +17,7 @@
     </div>
   </div>
 
-  <div on-tap="avoid-settings">
+  <div on-tap="settings">
     {{^state.isAvoiding}}
     <div class="settings">
       <i></i>
@@ -25,6 +25,28 @@
     </div>
     {{/state.isAvoiding}}
   </div>
+
+  {{#settingsOpen}}
+    <div class="mg-settings">
+      <h2>What would you like to avoid?</h2>
+      <p>
+        <label>
+          <input type='radio' name='{{state.settings.avoidType}}' value='tracks'>
+          The current track
+        </label>
+      </p>
+      <p>
+        <label>
+          <input type='radio' name='{{state.settings.avoidType}}' value='programmes'>
+          The entire programme
+        </label>
+      </p>
+      <h3>Avoid with</h3>
+      <ServicesList 
+        services="{{ services }}"
+        on-selected="service-selected" />
+    </div>
+  {{/settingsOpen}}
 </li>
 {% endraw %}
 </script>

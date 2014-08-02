@@ -4,10 +4,12 @@ module.exports = Ractive.extend({
   template: '#avoiderTmpl',
   isolated: true,
   data: {
+    settingsOpen: false,
     state: null
   },
   components: {
-    CircularProgress: require('./circular-progress')
+    CircularProgress: require('./circular-progress'),
+    ServicesList: require('./services-list')
   },
   computed: {
     percentThrough: function () {
@@ -63,6 +65,10 @@ module.exports = Ractive.extend({
         window.clearInterval(this.countdownTimerId);
         this.countdownTimerId = null;
       }
+    });
+
+    this.on('settings', function () {
+      this.set('settingsOpen', !this.get('settingsOpen'));
     });
   },
   formatTimeDiff: function (diffInMs) {

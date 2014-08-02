@@ -10,6 +10,12 @@ module.exports = Backbone.Model.extend({
           console.log('AvoiderModel initial state', state);
           this.set( JSON.parse(state) );
        }.bind(this));
+
+    xhr.get('/avoider/settings.json')
+       .then(function (settings) {
+          this.set( { settings: JSON.parse(settings) } );
+       }.bind(this));
+    
     /*
       Listen for remote service change events
     */
