@@ -9909,7 +9909,7 @@ module.exports = Backbone.Model.extend({
     xhr.get('/avoider/state.json')
        .then(function (state) {
           console.log('AvoiderModel initial state', state);
-          this.set( JSON.parse(state) );
+          this.setState( JSON.parse(state) );
        }.bind(this));
 
     xhr.get('/avoider/settings.json')
@@ -9925,10 +9925,7 @@ module.exports = Backbone.Model.extend({
       var content = JSON.parse(evt.data);
       switch(content.topic) {
         case 'avoider':
-          var data = clone(content.data);
-          data.start = data.start ? new Date(data.start) : null;
-          data.end   = data.end   ? new Date(data.end)   : null;
-          this.set(data);
+          this.setState(content.data);
           break;
         case 'settings.avoider':
           console.log('settings.avoider', content.data);
@@ -9936,6 +9933,12 @@ module.exports = Backbone.Model.extend({
           break;
       }
     }.bind(this));
+  },
+  setState: function (state) {
+    var data = clone(state);
+    data.start = data.start ? new Date(data.start) : null;
+    data.end   = data.end   ? new Date(data.end)   : null;
+    this.set(data);
   },
   updateSettings: function (settings) {
     var merged = merge(this.get('settings'), settings);
