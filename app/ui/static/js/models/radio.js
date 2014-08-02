@@ -2,6 +2,7 @@ var Backbone = require('backbone'),
     xhr = require('../xhr'),
     Service = require('./service'),
     ServiceCollection = require('./service-collection'),
+    TunableServices = require('./tunable-services'),
     utils = require('../utils'),
     actions = {
       volume : require('../actions/volume'),
@@ -83,8 +84,10 @@ var Radio = Backbone.Model.extend({
     console.log('RadioModel.parse', state);
 
     /*
-      Services available
-      Construct a ServiceCollection of available radio stations
+      Construct a ServiceCollection of available radio stations.
+      This is used by other models to allow selection of services
+      for things like tuning the radio or choosing which service
+      to avoid with.
     */
     var services = new ServiceCollection(state.services || []);
     if (state.current) {
@@ -99,6 +102,12 @@ var Radio = Backbone.Model.extend({
     services.on('change', function (model, value, options) {
       this.trigger('change:services', model, value, options);
     }.bind(this));
+
+    // Tunable Services
+    var tunableServices = new TunableServices({
+      services: services
+    });
+    this.set('tunableServices', tunableServices);
 
 
     if (state.current) {
@@ -118,28 +127,16 @@ var Radio = Backbone.Model.extend({
     this.set({ isOn: isOn });
   },
   setCurrentServiceById: function (id, opts) {
-    var services = this.get('services');
-
-    var oldCurrent = services.findWhere({ isActive: true }),
-        newCurrent = services.findWhere({ id: id });
-
-    if (oldCurrent) {
-      oldCurrent.set({ isActive: false });
-    }
-
-    if (newCurrent) {
-      newCurrent.set({ isActive: true  });
-    }
-
-    console.log('setCurrentServiceById: old %o, new %o', oldCurrent, newCurrent);
+    console.log('setCurrentServiceById', id, opts);
+    
+    var tunableServices = this.get('tunableServices');
+    tunableServices.tuneToId(id);
 
     try {
-      this.set({ current: newCurrent }, opts);
+      this.set({ current: tunableServices.get('current') }, opts);
     } catch (e) {
       console.error('e', e);
     }
-
-    console.log('set({ current: newCurrent })')
   }
 });
 

@@ -154,17 +154,19 @@ function initUi() {
   // 
   radioModel.on('change:current', function () {
     ui.update();
+    console.log('Force UI update (change:current)');
   });
   // And also when the services collection changes
   radioModel.on('change:services', function () {
     ui.update();
+    console.log('Force UI update (change:services)');
   });
 
 
   /*
     UI actions -> Radio State
   */
-  ui.on('service-selected', function (serviceId) {
+  ui.on('tune-service', function (serviceId) {
     radioModel.setCurrentServiceById(serviceId);
   });
   ui.on('power', function (evt) {
