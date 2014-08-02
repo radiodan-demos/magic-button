@@ -1,6 +1,8 @@
 var Backbone = require('backbone'),
     xhr = require('../xhr'),
-    clone = require('../utils').clone;
+    merge = require('../utils').merge,
+    clone = require('../utils').clone,
+    avoiderAction = require('../actions/avoid');
 
 module.exports = Backbone.Model.extend({
   isAvoiding: false,
@@ -13,6 +15,7 @@ module.exports = Backbone.Model.extend({
 
     xhr.get('/avoider/settings.json')
        .then(function (settings) {
+          console.log('Avoider.settings', JSON.parse(settings));
           this.set( { settings: JSON.parse(settings) } );
        }.bind(this));
     
@@ -30,9 +33,14 @@ module.exports = Backbone.Model.extend({
           break;
         case 'settings.avoider':
           console.log('settings.avoider', content.data);
+          this.set( { settings: content.data } );
           break;
       }
     }.bind(this));
+  },
+  updateSettings: function (settings) {
+    var merged = merge(this.get('settings'), settings);
+    avoiderAction.settings(merged);
   },
   isStarted: function () {
     return this.get('isAvoiding');

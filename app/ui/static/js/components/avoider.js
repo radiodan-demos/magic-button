@@ -70,6 +70,15 @@ module.exports = Ractive.extend({
     this.on('settings', function () {
       this.set('settingsOpen', !this.get('settingsOpen'));
     });
+
+    this.on('avoid-service-setting', function (serviceId) {
+      this.set('state.settings.serviceId', serviceId);
+    });
+
+    this.observe('state.settings', function (newValue, oldValue) {
+      this.get('state')
+          .updateSettings(newValue);
+    });
   },
   formatTimeDiff: function (diffInMs) {
     var diffSecs = diffInMs / 1000;

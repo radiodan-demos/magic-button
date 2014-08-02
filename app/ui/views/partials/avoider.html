@@ -43,8 +43,9 @@
       </p>
       <h3>Avoid with</h3>
       <ServicesList 
+        activeServiceId="{{ state.settings.serviceId }}"
         services="{{ services }}"
-        on-selected="service-selected" />
+        on-selected="avoid-service-setting" />
     </div>
   {{/settingsOpen}}
 </li>

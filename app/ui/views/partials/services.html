@@ -3,9 +3,9 @@
 <ul class="service-list">
 {{#services}}
   <li on-tap="services-partial"
-      class="service-item {{ id == activeService.id ? 'is-active' : '' }}">
+      class="service-item {{ id == activeServiceId ? 'is-active' : '' }}">
     <a  href="/radio/service/{{ id }}">
-      <img src="{{ id == activeService.id ? logos.active : logos.inactive }}" alt="{{ title }}" />
+      <img src="{{ id == activeServiceId ? logos.active : logos.inactive }}" alt="{{ title }}" />
     </a>
   </li>
 {{/services}}

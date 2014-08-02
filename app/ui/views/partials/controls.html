@@ -11,7 +11,7 @@
   <section id="services"
            class="layout panel services {{ services.isOpen ? '' : 'is-closed' }}">
     <ServicesList 
-        activeService="{{ radio.tunableServices.current }}"
+        activeServiceId="{{ radio.tunableServices.current.id }}"
         services="{{ radio.tunableServices.services }}"
         on-selected="tune-service" />
   </section>
@@ -31,7 +31,7 @@
     <ul class="magic">
       <Avoider 
         state="{{radio.magic.avoider}}"
-        services="{{radio.services}}"
+        services="{{ radio.services }}"
         on-avoid="avoid" />
     </ul>
   </section>

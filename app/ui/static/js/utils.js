@@ -4,6 +4,7 @@
 var _ = require('underscore');
 
 module.exports = {
+  merge: _.extend,
   clone: _.clone,
   extractActiveServices: function extractActiveServices(services) {
     return services.map(function (service) { 

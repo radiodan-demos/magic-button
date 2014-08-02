@@ -3,11 +3,30 @@ var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
 
+module.exports.set = function (isAvoiding) {
+  var method = isAvoiding ? 'DELETE' : 'POST';
+  xhr(method, '/avoider');
+}
+
+module.exports.settings = function (data) {
+  var payload = JSON.stringify(data),
+      opts = {
+        headers: { 'Content-type': 'application/json' },
+        data: payload
+      };
+  console.log('Avoid settings changed', opts);
+  xhr.post('/avoider/settings.json', opts);
+}
+},{"../utils":18,"../xhr":19}],2:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
 module.exports = function (turnOn) {
   var method = turnOn ? 'PUT' : 'DELETE';
   xhr(method, '/radio/power');
 }
-},{"../utils":17,"../xhr":18}],2:[function(require,module,exports){
+},{"../utils":18,"../xhr":19}],3:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -16,7 +35,7 @@ module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":17,"../xhr":18}],3:[function(require,module,exports){
+},{"../utils":18,"../xhr":19}],4:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -25,7 +44,7 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":17,"../xhr":18}],4:[function(require,module,exports){
+},{"../utils":18,"../xhr":19}],5:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 /* global EventSource */
 'use strict';
@@ -352,7 +371,7 @@ function getEventStream() {
   return new EventSource('/events');
 }
 
-},{"../lib/owl-carousel/owl.carousel":19,"./components/controls":7,"./components/simple":10,"./lib/d3":11,"./models/avoider":12,"./models/radio":13,"./utils":17,"./xhr":18,"es6-promise":23,"jquery":34,"ractive":37,"ractive-backbone/Ractive-Backbone":35,"ractive-events-tap":36}],5:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":20,"./components/controls":8,"./components/simple":11,"./lib/d3":12,"./models/avoider":13,"./models/radio":14,"./utils":18,"./xhr":19,"es6-promise":24,"jquery":35,"ractive":38,"ractive-backbone/Ractive-Backbone":36,"ractive-events-tap":37}],6:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -425,6 +444,15 @@ module.exports = Ractive.extend({
     this.on('settings', function () {
       this.set('settingsOpen', !this.get('settingsOpen'));
     });
+
+    this.on('avoid-service-setting', function (serviceId) {
+      this.set('state.settings.serviceId', serviceId);
+    });
+
+    this.observe('state.settings', function (newValue, oldValue) {
+      this.get('state')
+          .updateSettings(newValue);
+    });
   },
   formatTimeDiff: function (diffInMs) {
     var diffSecs = diffInMs / 1000;
@@ -437,7 +465,7 @@ module.exports = Ractive.extend({
     return Math.floor(mins) + 'm ' + secsLeft;
   }
 });
-},{"./circular-progress":6,"./services-list":9,"ractive":37}],6:[function(require,module,exports){
+},{"./circular-progress":7,"./services-list":10,"ractive":38}],7:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -493,7 +521,7 @@ var CircularProgress = Ractive.extend({
 });
 
 module.exports = CircularProgress;
-},{"../lib/d3":11,"ractive":37}],7:[function(require,module,exports){
+},{"../lib/d3":12,"ractive":38}],8:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -524,7 +552,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./avoider":5,"./metadata":8,"./services-list":9,"./simple":10,"ractive":37}],8:[function(require,module,exports){
+},{"./avoider":6,"./metadata":9,"./services-list":10,"./simple":11,"ractive":38}],9:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -547,7 +575,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":37}],9:[function(require,module,exports){
+},{"ractive":38}],10:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -564,7 +592,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":37}],10:[function(require,module,exports){
+},{"ractive":38}],11:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = function (selector) {
@@ -573,7 +601,7 @@ module.exports = function (selector) {
     isolated: true
   });
 };
-},{"ractive":37}],11:[function(require,module,exports){
+},{"ractive":38}],12:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9868,10 +9896,12 @@ module.exports = function (selector) {
     this.d3 = d3;
   }
 }();
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var Backbone = require('backbone'),
     xhr = require('../xhr'),
-    clone = require('../utils').clone;
+    merge = require('../utils').merge,
+    clone = require('../utils').clone,
+    avoiderAction = require('../actions/avoid');
 
 module.exports = Backbone.Model.extend({
   isAvoiding: false,
@@ -9884,6 +9914,7 @@ module.exports = Backbone.Model.extend({
 
     xhr.get('/avoider/settings.json')
        .then(function (settings) {
+          console.log('Avoider.settings', JSON.parse(settings));
           this.set( { settings: JSON.parse(settings) } );
        }.bind(this));
     
@@ -9901,9 +9932,14 @@ module.exports = Backbone.Model.extend({
           break;
         case 'settings.avoider':
           console.log('settings.avoider', content.data);
+          this.set( { settings: content.data } );
           break;
       }
     }.bind(this));
+  },
+  updateSettings: function (settings) {
+    var merged = merge(this.get('settings'), settings);
+    avoiderAction.settings(merged);
   },
   isStarted: function () {
     return this.get('isAvoiding');
@@ -9916,7 +9952,7 @@ module.exports = Backbone.Model.extend({
   }
 });
 
-},{"../utils":17,"../xhr":18,"backbone":20}],13:[function(require,module,exports){
+},{"../actions/avoid":1,"../utils":18,"../xhr":19,"backbone":21}],14:[function(require,module,exports){
 var Backbone = require('backbone'),
     xhr = require('../xhr'),
     Service = require('./service'),
@@ -10061,7 +10097,7 @@ var Radio = Backbone.Model.extend({
 
 
 module.exports = Radio;
-},{"../actions/power":1,"../actions/service":2,"../actions/volume":3,"../utils":17,"../xhr":18,"./service":15,"./service-collection":14,"./tunable-services":16,"backbone":20}],14:[function(require,module,exports){
+},{"../actions/power":2,"../actions/service":3,"../actions/volume":4,"../utils":18,"../xhr":19,"./service":16,"./service-collection":15,"./tunable-services":17,"backbone":21}],15:[function(require,module,exports){
 var Backbone = require('backbone'),
     Service  = require('./service.js');
 
@@ -10111,7 +10147,7 @@ module.exports = Backbone.Collection.extend({
     }
   }
 });
-},{"./service.js":15,"backbone":20}],15:[function(require,module,exports){
+},{"./service.js":16,"backbone":21}],16:[function(require,module,exports){
 var Backbone = require('backbone');
 
 var Service = Backbone.Model.extend({
@@ -10119,7 +10155,7 @@ var Service = Backbone.Model.extend({
 });
 
 module.exports = Service;
-},{"backbone":20}],16:[function(require,module,exports){
+},{"backbone":21}],17:[function(require,module,exports){
 var Backbone = require('backbone');
 
 /*
@@ -10146,13 +10182,14 @@ module.exports = Backbone.Model.extend({
     this.set('current', current);
   }
 });
-},{"backbone":20}],17:[function(require,module,exports){
+},{"backbone":21}],18:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
 var _ = require('underscore');
 
 module.exports = {
+  merge: _.extend,
   clone: _.clone,
   extractActiveServices: function extractActiveServices(services) {
     return services.map(function (service) { 
@@ -10251,7 +10288,7 @@ module.exports = {
   }
 };
 
-},{"underscore":38}],18:[function(require,module,exports){
+},{"underscore":39}],19:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10313,7 +10350,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":23}],19:[function(require,module,exports){
+},{"es6-promise":24}],20:[function(require,module,exports){
 /*
  *  jQuery OwlCarousel v1.3.2
  *
@@ -11826,7 +11863,7 @@ if (typeof Object.create !== "function") {
         afterLazyLoad: false
     };
 }(jQuery, window, document));
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 //     Backbone.js 1.1.2
 
 //     (c) 2010-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -13436,7 +13473,7 @@ if (typeof Object.create !== "function") {
 
 }));
 
-},{"underscore":21}],21:[function(require,module,exports){
+},{"underscore":22}],22:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -14781,7 +14818,7 @@ if (typeof Object.create !== "function") {
   }
 }).call(this);
 
-},{}],22:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -14836,13 +14873,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":28,"./promise/promise":29}],24:[function(require,module,exports){
+},{"./promise/polyfill":29,"./promise/promise":30}],25:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -14936,7 +14973,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":33}],25:[function(require,module,exports){
+},{"./utils":34}],26:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -15000,7 +15037,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":22}],26:[function(require,module,exports){
+},{"/Users/andrew/Projects/oss/radiodan/magic-button/node_modules/browserify/node_modules/insert-module-globals/node_modules/process/browser.js":23}],27:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -15068,7 +15105,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -15084,7 +15121,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 "use strict";
 var RSVPPromise = require("./promise").Promise;
 var isFunction = require("./utils").isFunction;
@@ -15113,7 +15150,7 @@ function polyfill() {
 }
 
 exports.polyfill = polyfill;
-},{"./promise":29,"./utils":33}],29:[function(require,module,exports){
+},{"./promise":30,"./utils":34}],30:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -15327,7 +15364,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":24,"./asap":25,"./cast":26,"./config":27,"./race":30,"./reject":31,"./resolve":32,"./utils":33}],30:[function(require,module,exports){
+},{"./all":25,"./asap":26,"./cast":27,"./config":28,"./race":31,"./reject":32,"./resolve":33,"./utils":34}],31:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -15417,7 +15454,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":33}],31:[function(require,module,exports){
+},{"./utils":34}],32:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -15465,7 +15502,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -15508,7 +15545,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -15531,7 +15568,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],34:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -24644,7 +24681,7 @@ return jQuery;
 
 }));
 
-},{}],35:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /*
 
 	Backbone adaptor plugin
@@ -24814,7 +24851,7 @@ return jQuery;
 	};
 
 }));
-},{"backbone":20,"ractive":37}],36:[function(require,module,exports){
+},{"backbone":21,"ractive":38}],37:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -25079,7 +25116,7 @@ return jQuery;
 
 }));
 
-},{"ractive":37}],37:[function(require,module,exports){
+},{"ractive":38}],38:[function(require,module,exports){
 /*
 	ractive.js v0.5.5
 	2014-07-13 - commit 8b1d34ef 
@@ -38240,6 +38277,6 @@ return jQuery;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}],38:[function(require,module,exports){
-module.exports=require(21)
-},{}]},{},[4]);
+},{}],39:[function(require,module,exports){
+module.exports=require(22)
+},{}]},{},[5]);
