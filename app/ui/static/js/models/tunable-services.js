@@ -10,7 +10,7 @@ var Backbone = require('backbone');
 module.exports = Backbone.Model.extend({
   tuneToId: function (id) {
     var services = this.get('services'),
-        current  = null;
+        current;
 
     console.log('tuneToId', id);
     console.log('services', services.length, services);
