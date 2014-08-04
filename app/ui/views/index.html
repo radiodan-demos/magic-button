@@ -15,13 +15,13 @@
 
   <body>
     <div id="viewporter">
-
-    <div data-ui-container>
-      <div class="splash">
-        <i></i>
-        <span>Loading&hellip;</span>
+      <div data-ui-container>
+        <div class="splash">
+          <i></i>
+          <span>Loading&hellip;</span>
+        </div>
       </div>
-    </div>
+    </div><!-- #viewporter -->
 
     <script>
       window.splashStartTime = Date.now();
@@ -60,59 +60,6 @@
         </div>
       {% endraw %}
     </script>
-
-    <script id="mainTmpl-old" type="text/ractive">
-      {% raw %}
-        <div class="{{radio.isOn ? 'is-on' : 'is-off' }} {{ ui.panels.settings.isOpen ? 'is-settings' : 'is-controls' }}">
-        <section id="masthead" class="layout panel masthead">
-          {{>mastheadTmpl}}
-        </section>
-
-        {{^radio.isOn}}
-          {{>standbyTmpl}}
-        {{/radio.isOn}}
-        
-        {{#ui.error}}
-        <section id="error" class="panel">
-          {{>errorTmpl}}
-        </section>
-        {{/ui.error}}
-
-        <div id="controls">
-          <section id="playout" class="layout panel">
-            {{>playoutTmpl}}
-          </section>
-
-          <section id="volume" class="layout panel {{ ui.panels.volume.isOpen ? '' : 'is-closed' }}">
-            {{>volumeTmpl}}
-          </section>
-
-          <section  id="services"
-                    class="layout panel services {{ ui.panels.services.isOpen ? '' : 'is-closed' }}">
-            {{>servicesTmpl}}
-          </section>
-
-          <section id="metadata" class="layout">
-            {{>metadataTmpl}}
-          </section>
-
-          <section id="magic">
-            <ul class="magic">
-              {{#radio.magic}}
-                {{>avoiderTempl}}
-                {{>announcerTempl}}
-              {{/radio.magic}}
-            </ul>
-          </section>
-        </div><!-- #controls -->
-
-        <section id="settings">
-          {{>settingsTmpl}}
-        </section>
-      {% endraw %}
-    </script>
-
-    </div><!-- #viewporter -->
     <script src="assets/js/app.{% if isDebug %}debug.{% endif %}js"></script>
   </body>
 </html>
