@@ -78,6 +78,7 @@ var Radio = Backbone.Model.extend({
     */
     this.get('eventSource').addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
+      console.log('Radio - message', content.topic);
       switch(content.topic) {
         case 'service.changed':
           this.setCurrentServiceById(

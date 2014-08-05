@@ -105,10 +105,11 @@ function init() {
     console.log('Force UI update (change:current)');
   });
   // And also when the services collection changes
-  radioModel.on('change:services', function () {
-    ui.update();
-    console.log('Force UI update (change:services)');
-  });
+  // Seems to work without forced updates
+  // radioModel.on('change:services', function () {
+  //   ui.update();
+  //   console.log('Force UI update (change:services)');
+  // });
   // And also when the radio settings change
   radioModel.on('change:settings', function () {
     ui.update();

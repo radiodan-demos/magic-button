@@ -177,10 +177,10 @@ function init() {
     console.log('Force UI update (change:current)');
   });
   // And also when the services collection changes
-  radioModel.on('change:services', function () {
-    ui.update();
-    console.log('Force UI update (change:services)');
-  });
+  // radioModel.on('change:services', function () {
+  //   ui.update();
+  //   console.log('Force UI update (change:services)');
+  // });
   // And also when the radio settings change
   radioModel.on('change:settings', function () {
     ui.update();
@@ -10018,6 +10018,7 @@ var Radio = Backbone.Model.extend({
     */
     this.get('eventSource').addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
+      console.log('Radio - message', content.topic);
       switch(content.topic) {
         case 'service.changed':
           this.setCurrentServiceById(
