@@ -6,11 +6,6 @@ var _ = require('underscore');
 module.exports = {
   merge: _.extend,
   clone: _.clone,
-  extractActiveServices: function extractActiveServices(services) {
-    return services.map(function (service) { 
-      return service._isActive ? service.id : undefined;
-    }).filter(function(item){return item}); ;
-  },
   /*
     Object comparison helpers
   */
@@ -22,28 +17,6 @@ module.exports = {
         return firstProp !== secondProp;
       }
     );
-  },
-  /*
-    Ractive-specific helpers
-  */
-  ractiveSetIfObjectPropertiesChanged: function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
-    var current = ractive.get(keypath);
-
-    if ( this.hasDifferentProperties(obj, current) ) {
-      ractive.set(keypath, obj);
-    }
-  },
-  /*
-    Creates a handler to bind a context[key] changes
-    to an action function.
-    Prevents default on the original event.
-  */
-  uiToAction: function uiToAction(key, action) {
-    return function (evt) {
-      evt.original.preventDefault();
-      var value = evt.context[key];
-      action(value);
-    };
   },
   /*
     Generic promise success or failure options

@@ -104,51 +104,17 @@ require('ractive-backbone/Ractive-Backbone');
 
 var container = document.querySelector('[data-ui-container]'),
     template  = document.querySelector('[data-ui-template]#mainTmpl').innerText,
-    state = {},
+    states = {},   
     radioModel,
-    defaults,
+    avoider,
+    announcer,
     ui;
 
-window.state = state;
+// Initialise application
+init();
 
-defaults = {
-  radio: {
-    power : { isOn: false },
-    audio : { volume: 0   },
-    magic : {
-      avoider  : { state: null, settings: null },
-      announcer: { state: null, settings: null }
-    },
-    settings: { services: [] },
-    current: null
-  },
-  ui: { panels: {} },
-  services: []
-};
-
-var initialStateData = Promise.all([
-  xhr.get('/radio/state.json'),
-  xhr.get('/avoider/state.json'),
-  xhr.get('/avoider/settings.json'),
-  xhr.get('/announcer/state.json'),
-  xhr.get('/announcer/settings.json'),
-  xhr.get('/radio/settings.json')
-]);
-
-initialStateData
-  .then(initWithData)
-  .then(null, utils.failure('state'));
-
-function initWithData(states) {
-  console.log('initWithData', states);
-  var radio    = JSON.parse(states[0]),
-      avoider  = JSON.parse(states[1]),
-      avoiderSettings = JSON.parse(states[2]),
-      announcer = JSON.parse(states[3]),
-      announcerSettings = JSON.parse(states[4]),
-      radioSettings = JSON.parse(states[5]);
-
-  var events = getEventStream();
+function init() {
+  var events = new EventSource('/events');
 
   var Avoider = require('./models/avoider');
   avoider = new Avoider({
@@ -170,38 +136,16 @@ function initWithData(states) {
     }
   });
   
-  radioModel.on('change:isLoaded', initUi);
-
-  state.radio = radioModel;
-  state.services = radioModel.get('services');
-
-  state.mainView = 'controls';
-
-  // Magic features
-  // state.radio.magic.avoider = {
-  //   state   : avoider, // current state of the feature
-  //   settings: avoiderSettings, // settings for the feature
-  //   action  : 'avoidSettingService',
-  //   isActive: function (id) {
-  //     return this.get('radio.magic.avoider.settings.serviceId') === id;
-  //   }
-  // };
-
-  // state.radio.magic.announcer = {
-  //   state   : announcer,
-  //   settings: announcerSettings
-  // };
-}
-
-function initUi() {
-  console.log('initUi');
-  
   window.ui = ui = new Ractive({
     el        : container,
     template  : template,
     adapt     : [ 'Backbone' ],
     debug     : true,
-    data      : state,
+    data      : {
+      radio: radioModel,
+      services: radioModel.get('services'),
+      mainView: 'controls'
+    },
     complete  : function () {
       console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
     },
@@ -214,8 +158,6 @@ function initUi() {
       Masthead: require('./components/simple')('#mastheadTmpl')
     }
   });
-
-  console.log('ui', ui);
 
   /*
     Logging
@@ -286,145 +228,9 @@ function initUi() {
     }
   });
 
-
-  // To be removed
-  var uiToAction = utils.uiToAction;
-
-  // ui.on('service',  uiToAction('id', require('./actions/service')));
-  // ui.on('power',    uiToAction('isOn', require('./actions/power')));
-  //ui.on('avoid',    uiToAction('isAvoiding', require('./actions/avoid').set));
-  //ui.on('announce', uiToAction('isAnnouncing', require('./actions/announce').set));
-  //ui.observe('radio.settings', require('./actions/radio-settings'), { init: false, debug: true });
-  //ui.observe('radio.magic.avoider.settings', require('./actions/avoid').settings, { init: false });
-
-  //ui.observe('radio.magic.avoider.state', uiAvoidState, { debug: true });
-  //ui.observe('radio.magic.announcer.state', uiAnnounceState, { debug: true });
-
-  /*
-  ui.on('avoidSettingService', function (event) {
-    ui.set('radio.magic.avoider.settings.serviceId', event.context.id);
-  });
-  ui.on('radioNextSettingService', function (event) {
-    ui.set(event.keypath + '._isActive', !event.context._isActive);
-  });
-  */
-
-  /*
-    UI -> UI
-  */
-  //ui.on('settings-button', utils.createPanelToggleHandler('settings'));
-  //ui.on('avoid-settings', utils.createPanelToggleHandler('avoiderSettings'));
-
-  /*
-    Create magic buttons
-  */
-  //ui.set('ui.magic.avoider', {});
-  //ui.set('ui.magic.announcer', {});
-
   var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
-  console.log('initialised with data', state);
-}
-
-function uiAvoidState(state) {
-  updateAvoidState();
-}
-
-function updateAvoidState() {
-  var state = ui.get('radio.magic.avoider.state');
-
-  if (state && state.isAvoiding) {
-    var now = Date.now();
-    var start = Date.parse(state.start);
-    var end = Date.parse(state.end);
-
-    if (isNaN(end.valueOf())) {
-      console.warn('No avoid end time');
-      return;
-    }
-
-    var diff = end - now;
-    var angle = Math.PI * 2;
-
-    // Handle negative time
-    if (diff >= 0) {
-      var formattedDiff = formatTimeDiff(diff);
-      ui.set('radio.magic.avoider.state.timeLeft', formattedDiff);
-      angle = angleForTimePeriod(start, end, now);
-    }
-
-    ui.set('ui.magic.avoider', {
-      angle: angle
-    });
-
-    window.setTimeout(updateAvoidState, 1000);
-  } else {
-    ui.set('ui.magic.avoider', {
-      angle: 0
-    });
-  }
-}
-
-function uiAnnounceState(state) {
-  ui.set('ui.magic.announcer', {
-    angle: 0
-  });
-}
-
-function angleForTimePeriod(start, end, now) {
-  var startTime = start.valueOf(),
-      endTime   = end.valueOf(),
-      nowTime   = now.valueOf();
-
-  var scale = d3.scale.linear()
-          .domain([startTime, endTime])
-          .range([0, Math.PI * 2]);
-
-  return scale(nowTime);
-}
-
-function formatTimeDiff(diffInMs) {
-  var diffSecs = diffInMs / 1000;
-  var mins = diffSecs / 60;
-  var secsLeft = Math.abs(Math.floor(mins) - mins);
-  secsLeft = Math.floor(secsLeft * 60);
-  if (secsLeft < 10) {
-    secsLeft = '0' + secsLeft;
-  }
-  return Math.floor(mins) + 'm ' + secsLeft;
-}
-
-/*
-  State -> UI
-*/
-var eventSource = new EventSource('/events');
-
-eventSource.addEventListener('message', function (evt) {
-  var content = JSON.parse(evt.data);
-
-  // console.group('New message:', content.topic, content);
-  console.log('New message:', content.topic, content);
-
-  switch(content.topic) {
-    case 'avoider':
-      ui.set('radio.magic.avoider.state', content.data);
-      break;
-    case 'settings.avoider':
-      utils.ractiveSetIfObjectPropertiesChanged(ui, 'radio.magic.avoider.settings', content.data);
-      break;
-    default:
-      // console.log('Unhandled topic', content.topic, content);
-  }
-
-  // console.groupEnd();
-});
-
-eventSource.addEventListener('error', function (evt) {
-  console.warn(evt);
-});
-
-function getEventStream() {
-  return new EventSource('/events');
+  console.log('initialised');
 }
 
 },{"../lib/owl-carousel/owl.carousel":24,"./components/controls":11,"./components/simple":14,"./lib/d3":15,"./models/announcer":16,"./models/avoider":17,"./models/radio":18,"./utils":22,"./xhr":23,"es6-promise":28,"jquery":39,"ractive":42,"ractive-backbone/Ractive-Backbone":40,"ractive-events-tap":41}],8:[function(require,module,exports){
@@ -10311,7 +10117,7 @@ var Radio = Backbone.Model.extend({
     try {
       this.set({ settings: settings });
       // WORKAROUND: Because preferredServices is an array
-      // Backbone won't fire a change event when it's length 
+      // Backbone won't fire a change event when its length 
       // changes
       this.trigger('change:settings', this, settings, opts || {});
     } catch (e) {
@@ -10416,11 +10222,6 @@ var _ = require('underscore');
 module.exports = {
   merge: _.extend,
   clone: _.clone,
-  extractActiveServices: function extractActiveServices(services) {
-    return services.map(function (service) { 
-      return service._isActive ? service.id : undefined;
-    }).filter(function(item){return item}); ;
-  },
   /*
     Object comparison helpers
   */
@@ -10432,28 +10233,6 @@ module.exports = {
         return firstProp !== secondProp;
       }
     );
-  },
-  /*
-    Ractive-specific helpers
-  */
-  ractiveSetIfObjectPropertiesChanged: function ractiveSetIfObjectPropertiesChanged(ractive, keypath, obj) {
-    var current = ractive.get(keypath);
-
-    if ( this.hasDifferentProperties(obj, current) ) {
-      ractive.set(keypath, obj);
-    }
-  },
-  /*
-    Creates a handler to bind a context[key] changes
-    to an action function.
-    Prevents default on the original event.
-  */
-  uiToAction: function uiToAction(key, action) {
-    return function (evt) {
-      evt.original.preventDefault();
-      var value = evt.context[key];
-      action(value);
-    };
   },
   /*
     Generic promise success or failure options
