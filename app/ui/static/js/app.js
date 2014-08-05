@@ -87,11 +87,14 @@ function initWithData(states) {
     console.log('avoider#change', arguments);
   });
 
+  var Announcer = require('./models/announcer');
+
   var Radio = require('./models/radio');
   radioModel = new Radio({
     eventSource: events,
     magic: {
-      avoider: avoider
+      avoider: avoider,
+      announcer: new Announcer({ eventSource: events })
     }
   });
   
@@ -180,6 +183,15 @@ function initUi() {
       radioModel.get('magic').avoider.end();
     } else {
       radioModel.get('magic').avoider.start();
+    }
+  });
+
+  ui.on('announce', function (evt) {
+    evt.original.preventDefault();
+    if (radioModel.get('magic').announcer.isStarted()) {
+      radioModel.get('magic').announcer.end();
+    } else {
+      radioModel.get('magic').announcer.start();
     }
   });
 

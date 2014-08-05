@@ -8,7 +8,8 @@ module.exports = Ractive.extend({
     ServicesList : require('./services-list'),
     Volume       : require('./simple')('#volumeTmpl'),
     Metadata     : require('./metadata'),
-    Avoider      : require('./avoider')
+    Avoider      : require('./avoider'),
+    Announcer    : require('./announcer')
   },
   data: {
     services: {
