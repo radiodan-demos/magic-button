@@ -11,7 +11,7 @@
   <section id="services"
            class="layout panel services {{ services.isOpen ? '' : 'is-closed' }}">
     <ServicesList 
-        activeServiceId="{{ radio.tunableServices.current.id }}"
+        activeServiceIds="{{ [radio.tunableServices.current.id] }}"
         services="{{ radio.tunableServices.services }}"
         on-selected="tune-service" />
   </section>

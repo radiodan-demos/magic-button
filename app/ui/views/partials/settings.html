@@ -1,5 +1,6 @@
 <script id="settingsTmpl" data-ui-template type="text/ractive">
 {% raw %}
+<section id="settings">
   <div class="settings-panel">
     <div class="st-hd">
       <h2>Radiodan settings</h2>
@@ -10,9 +11,10 @@
         <p class="st-hlp">Pressing the <em>next button</em> moves to the next station</p>
         <div class="st-st">
           <h4 class="st-st-hd">Choose stations</h4>
-          {{#radio.settings}}
-            {{>servicesTmpl}}
-          {{/radio.settings}}
+          <ServicesList 
+            activeServiceIds="{{ radio.settings.preferredServices }}"
+            services="{{ radio.services }}"
+            on-selected="preferred-service" />
         </div>
       </div>
       <div class="st-item panel">
@@ -38,5 +40,6 @@
       </div>
     </div>
   </div>
+</section>
 {% endraw %}
 </script>

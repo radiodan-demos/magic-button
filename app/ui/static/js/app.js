@@ -103,6 +103,8 @@ function initWithData(states) {
   state.radio = radioModel;
   state.services = radioModel.get('services');
 
+  state.mainView = 'controls';
+
   // Magic features
   // state.radio.magic.avoider = {
   //   state   : avoider, // current state of the feature
@@ -135,6 +137,7 @@ function initUi() {
       // Main Views
       Standby : require('./components/simple')('#standbyTmpl'),
       Controls: require('./components/controls'),
+      RadioSettings: require('./components/simple')('#settingsTmpl'),
       // Components
       Masthead: require('./components/simple')('#mastheadTmpl')
     }
@@ -164,7 +167,11 @@ function initUi() {
     ui.update();
     console.log('Force UI update (change:services)');
   });
-
+  // And also when the radio settings change
+  radioModel.on('change:settings', function () {
+    ui.update();
+    console.log('Force UI update (change:settings)');
+  });
 
   /*
     UI actions -> Radio State
@@ -175,6 +182,18 @@ function initUi() {
   ui.on('power', function (evt) {
     evt.original.preventDefault();
     radioModel.togglePower();
+  });
+
+  ui.on('settings', function (evt) {
+    evt.original.preventDefault();
+    var view = this.get('mainView'),
+        newView = view === 'controls' ? 'settings' : 'controls';
+
+    this.set('mainView', newView);
+  });
+
+  ui.on('preferred-service', function (serviceId) {
+    radioModel.togglePreferredServiceById(serviceId);
   });
 
   ui.on('avoid', function (evt) {

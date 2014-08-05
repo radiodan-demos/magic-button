@@ -5,10 +5,7 @@ var xhr = require('../xhr'),
 
 module.exports = function (data) {
   console.warn('data', data);
-  var settings = {
-        preferredServices: utils.extractActiveServices(data.services)
-      },
-      payload = JSON.stringify(settings),
+  var payload = JSON.stringify(data),
       opts = {
         headers: { 'Content-type': 'application/json' },
         data: payload

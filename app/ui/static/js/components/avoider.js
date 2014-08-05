@@ -76,6 +76,7 @@ module.exports = Ractive.extend({
     });
 
     this.observe('state.settings', function (newValue, oldValue) {
+      console.log('state.settings', newValue, this.get('state'));
       this.get('state')
           .updateSettings(newValue);
     });

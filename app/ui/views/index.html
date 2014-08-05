@@ -43,9 +43,12 @@
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
-        <div class="{{radio.isOn ? 'is-on' : 'is-off' }}">
+        <div class="{{radio.isOn ? 'is-on' : 'is-off' }} is-{{ mainView }}">
           <!-- App masthead -->
-          <Masthead on-power="power" isOn="{{radio.isOn}}" />
+          <Masthead 
+            on-power="power" 
+            on-settings="settings"
+            isOn="{{radio.isOn}}" />
 
           <!-- Main app views -->
           {{#radio.isOn}}
@@ -56,8 +59,13 @@
               on-tune-service="tune-service" />
           {{/radio.isOn}}
           {{^radio.isOn}}
-            <Standby />
+            <Standby 
+              radio="{{radio}}" />
           {{/radio.isOn}}
+
+          <RadioSettings 
+            radio="{{ radio }}"
+            on-preferred-service="preferred-service" />
         </div>
       {% endraw %}
     </script>

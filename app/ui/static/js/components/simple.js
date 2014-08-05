@@ -3,6 +3,9 @@ var Ractive = require('ractive');
 module.exports = function (selector) {
   return Ractive.extend({
     template: selector,
-    isolated: true
+    isolated: true,
+    components: {
+      ServicesList: require('./services-list')
+    }
   });
 };

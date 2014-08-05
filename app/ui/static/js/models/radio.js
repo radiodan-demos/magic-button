@@ -1,4 +1,5 @@
 var Backbone = require('backbone'),
+    _ = require('underscore'),
     xhr = require('../xhr'),
     Service = require('./service'),
     ServiceCollection = require('./service-collection'),
@@ -7,7 +8,8 @@ var Backbone = require('backbone'),
     actions = {
       volume : require('../actions/volume'),
       service: require('../actions/service'),
-      power  : require('../actions/power')
+      power  : require('../actions/power'),
+      radioSettings  : require('../actions/radio-settings')
     };
 
 var Radio = Backbone.Model.extend({
@@ -15,6 +17,12 @@ var Radio = Backbone.Model.extend({
 
     this.initialState = xhr.get('/radio/state.json')
                            .then(function (json) { return JSON.parse(json); });
+
+    xhr.get('/radio/settings.json')
+       .then(function (settings) {
+          console.log('Radio.settings', JSON.parse(settings));
+          this.set( { settings: JSON.parse(settings) } );
+       }.bind(this));
 
     this.set({ isLoaded: false });
 
@@ -55,6 +63,17 @@ var Radio = Backbone.Model.extend({
     });
 
     /*
+      Set settings of remote radio
+    */
+    this.on('change:settings', function (model, value, options) {
+      console.log('change:settings', options);
+      if ( options.type !== 'info' ) {
+        console.log('change:settings - action');
+        actions.radioSettings(value);
+      }
+    });
+
+    /*
       Listen for remote service change events
     */
     this.get('eventSource').addEventListener('message', function (evt) {
@@ -70,6 +89,9 @@ var Radio = Backbone.Model.extend({
           break;
         case 'audio.volume':
           this.set({ volume: content.data.volume }, { type: 'info' });
+          break;
+        case 'settings.radio':
+          this.set({ settings: content.data }, { type: 'info' });
           break;
       }
     }.bind(this));
@@ -136,6 +158,30 @@ var Radio = Backbone.Model.extend({
       this.set({ current: tunableServices.get('current') }, opts);
     } catch (e) {
       console.error('e', e);
+    }
+  },
+  togglePreferredServiceById: function (serviceId, opts) {
+    var settings = this.get('settings'),
+        serviceIndex = settings.preferredServices.indexOf(serviceId);
+
+    if (serviceIndex > -1) {
+      console.log('remove');
+      settings.preferredServices.splice(serviceIndex, 1);
+    } else {
+      console.log('add');
+      settings.preferredServices.push(serviceId);
+    }
+
+    console.log('changed', settings.preferredServices);
+
+    try {
+      this.set({ settings: settings });
+      // WORKAROUND: Because preferredServices is an array
+      // Backbone won't fire a change event when its length 
+      // changes
+      this.trigger('change:settings', this, settings, opts || {});
+    } catch (e) {
+      console.error(e.stack);
     }
   }
 });
