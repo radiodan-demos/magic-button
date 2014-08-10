@@ -1,6 +1,14 @@
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    copy: {
+      main: {
+        expand: true,
+        cwd: 'app/ui/static/',
+        src: ['**', '!css/**', '!js/**'],
+        dest: 'public/assets/',
+      }
+    },
     browserify: {
       debug: {
         files: {
@@ -65,6 +73,9 @@ module.exports = function(grunt) {
   // Dev
   grunt.loadNpmTasks('grunt-contrib-watch');
 
+  // General
+  grunt.loadNpmTasks('grunt-contrib-copy');
+
   grunt.registerTask('css', [ 'less', 'autoprefixer' ]);
-  grunt.registerTask('default', [ 'browserify', /*'uglify:js',*/ 'css' ]);
+  grunt.registerTask('default', [ 'copy', 'browserify', 'uglify:js', 'css' ]);
 }

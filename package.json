@@ -47,7 +47,7 @@
     "chai": "^1.9.0",
     "sinon": "^1.9.0",
     "supertest": "^0.9.0",
-    "grunt": "~0.4.2",
+    "grunt": "~0.4.5",
     "grunt-browserify": "~2.0.1",
     "grunt-contrib-watch": "~0.5.3",
     "grunt-contrib-uglify": "~0.4.0",
@@ -55,10 +55,10 @@
     "jquery": "~2.1.0",
     "grunt-autoprefixer": "~0.7.2",
     "grunt-contrib-less": "~0.11.0",
+    "grunt-contrib-copy": "~0.5.0",
     "ractive": "~0.5.5",
-    "ractive-events-tap": "https://github.com/ractivejs/ractive-events-tap/archive/master.tar.gz",
     "backbone": "~1.1.2",
-    "ractive-backbone": "ractivejs/ractive-adaptors-backbone",
+    "ractive-backbone": "0.1.0",
     "underscore": "~1.6.0"
   }
 }

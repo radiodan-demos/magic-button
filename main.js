@@ -35,7 +35,7 @@ app.use(require('errorhandler')({
 
 app.use(require('body-parser')());
 app.use(require('method-override')())
-app.use(require('serve-static')('public'));
+app.use(require('serve-static')(__dirname + '/public'));
 app.use(require('morgan')('dev'));
 
 app.use('/announcer',

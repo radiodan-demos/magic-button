@@ -5,7 +5,6 @@ module.exports = routes;
 
 function routes(app, radiodan, services) {
   
-  app.use("/assets", require("serve-static")(__dirname + "/static/"));
   app.get("/", showIndex);
 
   // Route implementations

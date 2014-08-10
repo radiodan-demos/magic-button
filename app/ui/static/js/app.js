@@ -23,7 +23,7 @@ window.d3 = d3;
 /*
   Ractive plugins
 */
-require('ractive-events-tap');
+require('./lib/ractive-events-tap');
 
 /*
   Ractive-Backbone adaptor
