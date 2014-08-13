@@ -11,6 +11,10 @@
   "magic-button": {
     "action": null
   },
+  "radiotag": {
+    "accessToken": "IGxIeOeOC1g4gVbl0VSIbbkXrFpzJ9eUKTY9SslDKK5",
+    "tagServer"  : "radiotag.test.api.bbci.co.uk"
+  },
   "radio": {
     "serviceId": "radio4",
     "playing":   true,

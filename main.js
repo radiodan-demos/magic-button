@@ -62,6 +62,12 @@ app.use('/magic-button',
   )
 );
 
+app.use('/radiotag',
+  require('./app/radiotag/routes')(
+    express.Router(), states, services, Settings.get('radiotag'), eventBus
+  )
+);
+
 app.use('/radio',
   require('./app/radio/routes')(
     express.Router(), eventBus, radiodan,

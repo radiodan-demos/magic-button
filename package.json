@@ -37,7 +37,8 @@
     "request": "~2.34.0",
     "express-eventsource": "0.0.3",
     "deepequal": "0.0.1",
-    "machina": "^0.3.6"
+    "machina": "^0.3.6",
+    "radiotag.js": "git://github.com/radiodan/radiotag.js#nodeify"
   },
   "devDependencies": {
     "nodemon": "^1.0.15",
