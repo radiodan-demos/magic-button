@@ -13,7 +13,7 @@
       "id": "magic",
       "pins": [
         {
-          "pin": 3,
+          "pin": 7,
           "pull": "down",
           "pressedIsHigh": true
         }
@@ -23,7 +23,7 @@
       "id": "power",
       "pins": [
         {
-          "pin": 7,
+          "pin": 3,
           "pull": "down",
           "pressedIsHigh": true
         }
@@ -35,19 +35,6 @@
       "id": "magic",
       "pins": [
         {
-          "pin": 4,
-          "pull": "up"
-        },
-        {
-          "pin": 5,
-          "pull": "up"
-        }
-      ]
-    },
-    {
-      "id": "volume",
-      "pins": [
-        {
           "pin": 8,
           "pull": "up"
         },
@@ -56,17 +43,30 @@
           "pull": "up"
         }
       ]
+    },
+    {
+      "id": "volume",
+      "pins": [
+        {
+          "pin": 5,
+          "pull": "up"
+        },
+        {
+          "pin": 4,
+          "pull": "up"
+        }
+      ]
     }
   ],
   "RGBLEDs": [
     {
       "id": "magic",
-      "pins": [6,10,11],
-      "colour": [0,0,255]
+      "pins": [12,13,14],
+      "colour": [0,0,0]
     },
     {
       "id": "power",
-      "pins": [12,13,14],
+      "pins": [6,10,11],
       "colour": [255,0,0]
     }
   ]
