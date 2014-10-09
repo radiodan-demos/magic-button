@@ -6,7 +6,8 @@ module.exports = routes;
 
 function routes(app, eventBus, radiodan, states, services, settings) {
 
-  var audio    = radiodan.audio.get('default');
+  var audio       = radiodan.audio.get('default'),
+      devicePower = radiodan.device.get();
 
   app.get('/next', function(req, res) {
     states.handle('playNextService');
@@ -58,6 +59,20 @@ function routes(app, eventBus, radiodan, states, services, settings) {
   app.put('/power', start); // tee hee
   app.post('/power', start);
   app.delete('/power', standby);
+
+  app.post('/shutdown', function (req, res) {
+    devicePower.shutdown()
+      .then(function() {
+        res.json({ shutdown: true });
+      });
+  });
+
+  app.post('/restart', function (req, res) {
+    devicePower.restart()
+      .then(function() {
+        res.json({ restart: true });
+      });
+  });
 
   function getState(req, res) {
     var current, state;
