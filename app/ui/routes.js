@@ -4,7 +4,7 @@ var utils  = require("radiodan-client").utils,
 module.exports = routes;
 
 function routes(app, radiodan, services) {
-  
+
   app.get("/", showIndex);
 
   // Route implementations
