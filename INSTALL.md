@@ -53,7 +53,16 @@ You should be able to see the magic button web interface running on port 5000 at
 
 Use Ctl-C to kill these processes. 
 
-The magic button must be quit first otherwise it will hang waiting for the radiodan server to reply to its messages.
+The Magic Button app will attempt to stop any active players in the radio before
+it shuts down. If this is not possible, it will exit with a non-zero code.
+
+### Exit Code guide:
+
+| Code | Description |
+| ---  | --- |
+| 0 | Success |
+| 1 | Promises Failed (could not clear all the players) |
+| 2 | Exited on Timeout |
 
 ## Development
 
