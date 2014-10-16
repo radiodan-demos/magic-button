@@ -70,9 +70,13 @@
     {
       "id": "power",
       "pins": [6,10,11],
-      "colour": [255, 255, 255],
+      "colour": [200, 200, 200],
       "transitions": {
         "duration": 750
+      },
+      "initialTransition": {
+        "duration": 5000,
+        "yoyo": true
       }
     }
   ]
