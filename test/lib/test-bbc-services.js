@@ -1,16 +1,3 @@
-/* globals describe, it, before */
-"use strict";
-
-var chai = require("chai"),
-    assert = chai.assert,
-    chaiAsPromised = require("chai-as-promised"),
-    sinon  = require("sinon"),
-    EventEmitter = require('events').EventEmitter;
-
-var utils = require("radiodan-client").utils;
-
-chai.use(chaiAsPromised);
-
 var BBCServices = require("../../lib/services/bbc-services");
 
 describe("cache", function(){

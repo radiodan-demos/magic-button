@@ -1,9 +1,4 @@
-/* globals describe, it, before */
-"use strict";
-
-var chai     = require("chai"),
-    assert   = chai.assert,
-    swig     = require("swig"),
+var swig     = require("swig"),
     sinon    = require("sinon"),
     request  = require("supertest"),
     express  = require("express"),
