@@ -44,7 +44,7 @@ describe('ServicesRegister', function(){
       secondRegister = subject.register(source);
 
       return assert.isRejected(secondRegister,
-        'Provider testService already registered').notify(done);
+        /Provider testSource already registered/).notify(done);
     });
   });
 
