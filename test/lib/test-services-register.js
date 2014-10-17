@@ -1,4 +1,4 @@
-var ServicesRegister = require('../../lib/services-register');
+var ServicesRegister = require('../../lib/services/register');
 
 describe('ServicesRegister', function(){
   it('registers a service provider', function(done){
@@ -83,5 +83,17 @@ describe('ServicesRegister', function(){
       subject.metadata('testService');
       assert.equal(metadataSpy.callCount, 1);
     }).then(done,done);
+  });
+
+  it('collects all station metadata from providers', function(done) {
+    var subject = ServicesRegister.create(),
+    radio1 = {stations: function() { return utils.promise.resolve(['radio1'])}},
+    radio2 = {stations: function() { return utils.promise.resolve(['radio2', 'radio3'])}};
+
+    subject._providers = {radio1: radio1, radio2: radio2};
+
+    assert.eventually.deepEqual(
+      subject.stations(), ['radio1', 'radio2', 'radio3'])
+      .notify(done);
   });
 });

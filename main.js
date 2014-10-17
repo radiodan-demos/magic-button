@@ -9,7 +9,7 @@ var express        = require('express'),
     eventBus       = require('./lib/event-bus').create(),
     Settings       = require('./lib/settings').create(eventBus),
     services       = require('./lib/services').create(
-                       eventBus, radiodan, Settings.get('radio')
+                       eventBus, Settings.get('radio')
                      ),
     states         = require('./lib/states').create(radiodan, services, eventBus, Settings);
 
