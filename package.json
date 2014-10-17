@@ -5,8 +5,8 @@
   "main": "main.js",
   "scripts": {
     "postinstall": "cp -n config/radiodan-config.json.example config/radiodan-config.json; cp -n config/physical-ui-config.json.example config/physical-ui-config.json; exit 0",
-    "test": "node_modules/mocha/bin/mocha --recursive --reporter=spec",
-    "coverage": "node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha test/**/test*.js -- --ui bdd -R spec -t 5000",
+    "test": "LOG_LEVEL=fatal node_modules/mocha/bin/mocha --recursive --require test/helper",
+    "coverage": "LOG_LEVEL=fatal node_modules/istanbul/lib/cli.js cover _mocha -- --require test/helper --recursive --ui bdd -R spec -t 5000",
     "coveralls": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "dev": "NODE_ENV=development nodemon main.js",
     "start": "node main.js"
