@@ -5,7 +5,11 @@
   <li on-tap="services-partial"
       class="service-item {{ activeServiceIds.indexOf(id) > -1 ? 'is-active' : '' }}">
     <a  href="/radio/service/{{ id }}">
-      <img src="{{ activeServiceIds.indexOf(id) > -1 ? logos.active : logos.inactive }}" alt="{{ title }}" />
+      {{#if activeServiceIds.indexOf(id) > -1}}
+        <img src="{{logos.active}}" alt="{{ title }}" />
+      {{else}}
+        <img src="{{logos.inactive}}" alt="{{ title }}" />
+      {{/if}}
     </a>
   </li>
 {{/services}}
