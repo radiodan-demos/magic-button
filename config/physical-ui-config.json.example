@@ -5,7 +5,8 @@
       "pins": [
         {
           "pin": 2,
-          "pull": "up"
+          "pull": "up",
+          "pressedIsHigh": false
         }
       ]
     },
