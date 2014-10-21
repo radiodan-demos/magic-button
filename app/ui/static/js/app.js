@@ -22,7 +22,7 @@ function initState() {
   });
 
   ServicesStore.addChangeListener(function () {
-    AppView.set('services', ServicesStore.getAllServices());
+    AppView.set('services', ServicesStore.getAllServicesAsArray());
   });
 
   CurrentServiceStore.addChangeListener(function () {

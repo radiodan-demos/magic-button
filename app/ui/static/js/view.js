@@ -37,7 +37,10 @@ module.exports = {
             'volume-slider-changed': throttle(function (evt) {
               var value = evt.node.value;
               StateActionCreators.changeVolume(value);
-            }, 1000)
+            }, 1000),
+            'tune-service': function (serviceId) {
+              StateActionCreators.changeService(serviceId);
+            },
           });
 
           console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));

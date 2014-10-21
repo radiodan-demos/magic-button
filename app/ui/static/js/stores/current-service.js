@@ -34,7 +34,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       console.log('CurrentService: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION && action.state.topic === 'service.changed') {
         console.log('CurrentService: SERVER', action.type, action.state);
-        currentServiceId = action.state.data.id;
+        currentServiceId = action.state.data ? action.state.data.id : null;
       } else {
         console.log('CurrentService: CHANGE', action.type, action.state);
         // state.volume = action.state.volume;

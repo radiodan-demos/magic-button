@@ -3,11 +3,19 @@
 <div id="controls">
   <section id="playout" class="layout panel">
     <Playout volume="{{ audio.volume }}"
-             current="{{current}}"
+             current="{{ current }}"
              radio="{{ radio }}" 
              on-services-panel-toggle="services-panel-toggle"
              on-volume-panel-toggle="volume-panel-toggle"
              services="{{ services }}" />
+  </section>
+
+  <section id="services"
+           class="layout panel services {{ servicesPanel.isOpen ? '' : 'is-closed' }}">
+    <ServicesList
+        activeServiceIds="{{ [current.id] }}"
+        services="{{ services }}"
+        on-selected="tune-service" />
   </section>
 
   <section id="volume" class="layout panel {{ volume.isOpen ? '' : 'is-closed' }}">

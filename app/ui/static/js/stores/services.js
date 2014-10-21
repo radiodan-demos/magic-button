@@ -13,6 +13,9 @@ function addService(data) {
 }
 
 var Store = extend(new EventEmitter(), {
+  getAllServicesAsArray: function () {
+    return Object.keys(services).map(Store.getService);
+  },
   getAllServices: function () {
     return clone(services);
   },

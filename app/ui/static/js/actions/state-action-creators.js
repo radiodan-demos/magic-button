@@ -19,5 +19,13 @@ module.exports = {
        state: { volume: vol }
     });
     require('../api/volume')(vol);
+  },
+  changeService: function (serviceId) {
+    console.log('changeService', serviceId);
+    // AppDispatcher.handleViewAction({
+    //    type: ActionTypes.SERVICE,
+    //    state: { id: serviceId }
+    // });
+    require('../api/service')(serviceId);
   }
 };
