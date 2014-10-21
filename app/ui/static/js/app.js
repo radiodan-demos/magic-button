@@ -4,7 +4,9 @@ var PowerStore = require('./stores/power'),
     AudioStore = require('./stores/audio'),
     ServicesStore = require('./stores/services'),
     NowAndNextStore = require('./stores/now-and-next'),
-    CurrentServiceStore = require('./stores/current-service');
+    NowPlayingStore = require('./stores/now-playing'),
+    CurrentServiceStore = require('./stores/current-service'),
+    AvoiderStore = require('./stores/avoider');
 
 var AppView = require('./view');
 
@@ -26,14 +28,29 @@ function initState() {
     AppView.set('services', ServicesStore.getAllServicesAsArray());
   });
 
-  NowAndNextStore.addChangeListener(function () {
-    AppView.set('nowAndNext', NowAndNextStore.get(CurrentServiceStore.getCurrentId()));
+  NowAndNextStore.addChangeListener(function (id) {
+    var currentId = CurrentServiceStore.getCurrentId();
+    if (currentId === id) {
+      AppView.set('nowAndNext', NowAndNextStore.get(currentId));
+    }
+  });
+
+  NowPlayingStore.addChangeListener(function (id) {
+    var currentId = CurrentServiceStore.getCurrentId();
+    if (currentId === id) {
+      AppView.set('nowPlaying', NowPlayingStore.get(currentId));
+    }
   });
 
   CurrentServiceStore.addChangeListener(function () {
     AppView.set('current', CurrentServiceStore.getCurrent());
   });
 
+  AvoiderStore.addChangeListener(function () {
+    AppView.set('avoider', AvoiderStore.getState());
+  });
+
   api.connectEventStream();
   api.getInitialState();
+  // require('./api/avoid').settings();
 }

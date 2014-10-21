@@ -20,12 +20,20 @@ module.exports = {
        type: topic,
        state: state
     });
+  },
+  receiveAvoiderSettings: function (state) {
+    console.log('receiveAvoiderSettings', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.RECEIVE_AVOIDER_SETTINGS,
+       state: state
+    });
   }
 };
-},{"../constants/constants":14,"../dispatcher/dispatcher":15}],2:[function(require,module,exports){
+},{"../constants/constants":15,"../dispatcher/dispatcher":16}],2:[function(require,module,exports){
 var AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes,
-    PowerStore  = require('../stores/power');
+    PowerStore  = require('../stores/power'),
+    AvoiderStore = require('../stores/avoider');
 
 module.exports = {
   togglePower: function () {
@@ -47,14 +55,49 @@ module.exports = {
   },
   changeService: function (serviceId) {
     console.log('changeService', serviceId);
-    // AppDispatcher.handleViewAction({
-    //    type: ActionTypes.SERVICE,
-    //    state: { id: serviceId }
-    // });
     require('../api/service')(serviceId);
+  },
+  toggleAvoider: function () {
+    var isAvoiding = AvoiderStore.getState().isAvoiding;
+    console.log('toggleAvoider - current state', isAvoiding);
+    require('../api/avoid').set(isAvoiding);
+  },
+  requestAvoiderSettings: function () {
+    require('../api/avoid').settings();
+  },
+  avoiderSettings: function (params) {
+    require('../api/avoid').settings(params);
   }
 };
-},{"../api/power":3,"../api/service":4,"../api/volume":5,"../constants/constants":14,"../dispatcher/dispatcher":15,"../stores/power":21}],3:[function(require,module,exports){
+},{"../api/avoid":3,"../api/power":4,"../api/service":5,"../api/volume":6,"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/avoider":20,"../stores/power":24}],3:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure,
+    ServerActionCreators = require('../actions/server-action-creators');
+
+module.exports.set = function (isAvoiding) {
+  var method = isAvoiding ? 'DELETE' : 'POST';
+  xhr(method, '/avoider');
+}
+
+module.exports.settings = function (data) {
+  if (!data) {
+    xhr.get('/avoider/settings.json')
+       .then(function (data) {
+        return JSON.parse(data);
+       })
+       .then(ServerActionCreators.receiveAvoiderSettings);
+  } else {
+    var payload = JSON.stringify(data),
+        opts = {
+          headers: { 'Content-type': 'application/json' },
+          data: payload
+        };
+    console.log('Avoid settings changed', opts);
+    xhr.post('/avoider/settings.json', opts);
+  }
+}
+},{"../actions/server-action-creators":1,"../utils":26,"../xhr":29}],4:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -63,7 +106,7 @@ module.exports = function (turnOn) {
   var method = turnOn ? 'PUT' : 'DELETE';
   xhr(method, '/radio/power');
 }
-},{"../utils":23,"../xhr":26}],4:[function(require,module,exports){
+},{"../utils":26,"../xhr":29}],5:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -72,7 +115,7 @@ module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":23,"../xhr":26}],5:[function(require,module,exports){
+},{"../utils":26,"../xhr":29}],6:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -81,14 +124,16 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":23,"../xhr":26}],6:[function(require,module,exports){
+},{"../utils":26,"../xhr":29}],7:[function(require,module,exports){
 var api = require('./utils/api');
 
 var PowerStore = require('./stores/power'),
     AudioStore = require('./stores/audio'),
     ServicesStore = require('./stores/services'),
     NowAndNextStore = require('./stores/now-and-next'),
-    CurrentServiceStore = require('./stores/current-service');
+    NowPlayingStore = require('./stores/now-playing'),
+    CurrentServiceStore = require('./stores/current-service'),
+    AvoiderStore = require('./stores/avoider');
 
 var AppView = require('./view');
 
@@ -110,18 +155,33 @@ function initState() {
     AppView.set('services', ServicesStore.getAllServicesAsArray());
   });
 
-  NowAndNextStore.addChangeListener(function () {
-    AppView.set('nowAndNext', NowAndNextStore.get(CurrentServiceStore.getCurrentId()));
+  NowAndNextStore.addChangeListener(function (id) {
+    var currentId = CurrentServiceStore.getCurrentId();
+    if (currentId === id) {
+      AppView.set('nowAndNext', NowAndNextStore.get(currentId));
+    }
+  });
+
+  NowPlayingStore.addChangeListener(function (id) {
+    var currentId = CurrentServiceStore.getCurrentId();
+    if (currentId === id) {
+      AppView.set('nowPlaying', NowPlayingStore.get(currentId));
+    }
   });
 
   CurrentServiceStore.addChangeListener(function () {
     AppView.set('current', CurrentServiceStore.getCurrent());
   });
 
+  AvoiderStore.addChangeListener(function () {
+    AppView.set('avoider', AvoiderStore.getState());
+  });
+
   api.connectEventStream();
   api.getInitialState();
+  // require('./api/avoid').settings();
 }
-},{"./stores/audio":18,"./stores/current-service":19,"./stores/now-and-next":20,"./stores/power":21,"./stores/services":22,"./utils/api":24,"./view":25}],7:[function(require,module,exports){
+},{"./stores/audio":19,"./stores/avoider":20,"./stores/current-service":21,"./stores/now-and-next":22,"./stores/now-playing":23,"./stores/power":24,"./stores/services":25,"./utils/api":27,"./view":28}],8:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -191,12 +251,14 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./circular-progress":9,"ractive":43}],8:[function(require,module,exports){
+},{"./circular-progress":10,"ractive":46}],9:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
   template: '#avoiderTmpl',
   isolated: true,
+  twoway: true,
+  debug: true,
   data: {
     settingsOpen: false,
     state: null
@@ -207,8 +269,8 @@ module.exports = Ractive.extend({
   },
   computed: {
     percentThrough: function () {
-      var start = this.get('state.start'),
-          end   = this.get('state.end'),
+      var start = this.get('start'),
+          end   = this.get('end'),
           now   = this.get('now'),
           duration,
           current,
@@ -262,18 +324,26 @@ module.exports = Ractive.extend({
     });
 
     this.on('settings', function () {
+      if (!this.get('settingsOpen')) {
+        this.fire('settings-requested');
+      }
       this.set('settingsOpen', !this.get('settingsOpen'));
     });
 
     this.on('avoid-service-setting', function (serviceId) {
       this.set('state.settings.serviceId', serviceId);
+      this.fire('settings-changed', this.get('state.settings'));
     });
 
-    this.observe('state.settings', function (newValue, oldValue) {
-      console.log('state.settings', newValue, this.get('state'));
-      this.get('state')
-          .updateSettings(newValue);
+    this.on('state-settings-avoid-type', function (evt) {
+      this.set('state.settings.avoidType', evt.node.value);
+      this.fire('settings-changed', this.get('state.settings'));
     });
+
+    // this.observe('state.settings', function (newValue, oldValue) {
+    //   console.log('state.settings', newValue, this.get('state'));
+    //   StateActionCreators.avoiderSettings(newValue);
+    // });
   },
   formatTimeDiff: function (diffInMs) {
     var diffSecs = diffInMs / 1000;
@@ -286,7 +356,7 @@ module.exports = Ractive.extend({
     return Math.floor(mins) + 'm ' + secsLeft;
   }
 });
-},{"./circular-progress":9,"./services-list":12,"ractive":43}],9:[function(require,module,exports){
+},{"./circular-progress":10,"./services-list":13,"ractive":46}],10:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -342,10 +412,8 @@ var CircularProgress = Ractive.extend({
 });
 
 module.exports = CircularProgress;
-},{"../lib/d3":16,"ractive":43}],10:[function(require,module,exports){
+},{"../lib/d3":17,"ractive":46}],11:[function(require,module,exports){
 var Ractive = require('ractive');
-
-var StateAction
 
 module.exports = Ractive.extend({
   template: '#controlsTmpl',
@@ -378,7 +446,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./announcer":7,"./avoider":8,"./metadata":11,"./services-list":12,"./simple":13,"ractive":43}],11:[function(require,module,exports){
+},{"./announcer":8,"./avoider":9,"./metadata":12,"./services-list":13,"./simple":14,"ractive":46}],12:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -402,7 +470,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":43}],12:[function(require,module,exports){
+},{"ractive":46}],13:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -420,7 +488,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":43}],13:[function(require,module,exports){
+},{"ractive":46}],14:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = function (selector) {
@@ -434,21 +502,26 @@ module.exports = function (selector) {
     }
   });
 };
-},{"./services-list":12,"ractive":43}],14:[function(require,module,exports){
+},{"./services-list":13,"ractive":46}],15:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     RECEIVE_INITIAL_STATE: 'RECEIVE_INITIAL_STATE',
     RECEIVE_STATE_UPDATE : 'RECEIVE_STATE_UPDATE',
+    RECEIVE_AVOIDER_SETTINGS : 'RECEIVE_AVOIDER_SETTINGS',
     POWER : 'power',
     AUDIO : 'audio',
-    SERVICE : 'service'
+    SERVICE : 'service',
+    SETTINGS : 'settings',
+    NOW_AND_NEXT : 'nowAndNext',
+    NOW_PLAYING : 'nowPlaying',
+    AVOIDER : 'avoider'
   },
   Payload: {
     SERVER_ACTION: 'SERVER_ACTION',
     VIEW_ACTION  : 'VIEW_ACTION'
   }
 };
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 
 var _ = require('underscore'),
     Dispatcher = require('flux').Dispatcher,
@@ -470,7 +543,7 @@ module.exports = _.extend(new Dispatcher(), {
     this.dispatch(payload);
   }
 });
-},{"../constants/constants":14,"flux":40,"underscore":44}],16:[function(require,module,exports){
+},{"../constants/constants":15,"flux":43,"underscore":47}],17:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9765,7 +9838,7 @@ module.exports = _.extend(new Dispatcher(), {
     this.d3 = d3;
   }
 }();
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -10042,7 +10115,7 @@ module.exports = _.extend(new Dispatcher(), {
 	Ractive.events.tap = tap;
 
 }));
-},{"ractive":43}],18:[function(require,module,exports){
+},{"ractive":46}],19:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10089,7 +10162,78 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":14,"../dispatcher/dispatcher":15,"events":27,"underscore":44}],19:[function(require,module,exports){
+},{"../constants/constants":15,"../dispatcher/dispatcher":16,"events":30,"underscore":47}],20:[function(require,module,exports){
+var extend = require('underscore').extend,
+    clone = require('underscore').clone,
+    EventEmitter  = require('events').EventEmitter,
+    AppDispatcher = require('../dispatcher/dispatcher'),
+    Payload       = require('../constants/constants').Payload,
+    ActionTypes   = require('../constants/constants').ActionTypes,
+    ServicesStore = require('../stores/services');
+
+var state = {};
+
+function set(data) {
+  state = clone(data);
+  if (data.start) { state.start = new Date(data.start); }
+  if (data.end)   { state.end   = new Date(data.end);   }
+}
+
+var Store = extend(new EventEmitter(), {
+  getState: function () {
+    return clone(state);
+  },
+  emitChange: function () {
+    this.emit('change');
+  },
+  addChangeListener: function (callback) {
+    this.on('change', callback);
+  }
+});
+
+Store.dispatchToken = AppDispatcher.register(function (payload) {
+  var source = payload.source,
+      action = payload.action;
+
+  switch(action.type) {
+    case ActionTypes.RECEIVE_INITIAL_STATE:
+      console.log('Avoider: ', action.type, action.state);
+      set(action.state.avoider);
+      Store.emitChange();
+      break;
+    case ActionTypes.AVOIDER:
+      console.log('Avoider: ', action.type, action.state);
+      if (source === Payload.SERVER_ACTION) {
+        console.log('Avoider: SERVER', action.type, action.state);
+        set(action.state.data);
+        Store.emitChange();
+      } else {
+        console.log('Avoider: VIEW ACTION pre', state.isAvoiding);
+        state.isAvoiding = !state.isAvoiding;
+        console.log('Avoider: VIEW ACTION post', state.isAvoiding);
+        Store.emitChange();
+      }
+      break;
+    case ActionTypes.RECEIVE_AVOIDER_SETTINGS:
+      console.log('Avoider Settings: ', action.type, action.state);
+      if (source === Payload.SERVER_ACTION) {
+        console.log('Avoider: SERVER', action.type, action.state);
+        state.settings = clone(action.state);
+        Store.emitChange();
+      }
+      break;
+    case ActionTypes.SETTINGS:
+      if (source === Payload.SERVER_ACTION && action.state.topic === 'settings.avoider') {
+        console.log('Avoider: SERVER', action.type, action.state);
+        state.settings = clone(action.state.data);
+        Store.emitChange();
+      }
+      break;
+  }
+});
+
+module.exports = Store;
+},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/services":25,"events":30,"underscore":47}],21:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10140,7 +10284,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":14,"../dispatcher/dispatcher":15,"../stores/services":22,"events":27,"underscore":44}],20:[function(require,module,exports){
+},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/services":25,"events":30,"underscore":47}],22:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10162,8 +10306,8 @@ var Store = extend(new EventEmitter(), {
       return clone(state[id]);
     }
   },
-  emitChange: function () {
-    this.emit('change');
+  emitChange: function (id) {
+    this.emit('change', id);
   },
   addChangeListener: function (callback) {
     this.on('change', callback);
@@ -10180,28 +10324,103 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       console.log('NowAndNext', action.type, action.state);
       if (action.state.current && action.state.current.nowAndNext) {
         update(action.state.current.id, action.state.current.nowAndNext);
-        Store.emitChange();
+        Store.emitChange(action.state.current.id);
       }
       break;
     case ActionTypes.SERVICE:
       console.log('NowAndNext: ', action.type, action.state);
-      if (source === Payload.SERVER_ACTION && action.state.topic === 'service.changed') {
+      if (source === Payload.SERVER_ACTION) {
         AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
         console.log('NowAndNext: SERVER', action.type, action.state);
         if (action.state.data && action.state.data.nowAndNext) {
           update(action.state.data.id, action.state.data.nowAndNext);
+          Store.emitChange(action.state.data.id);
         }
-      } else {
-        console.log('NowAndNext: CHANGE', action.type, action.state);
-        // state.volume = action.state.volume;
       }
-      Store.emitChange();
+      break;
+    case ActionTypes.NOW_AND_NEXT:
+      console.log('NowAndNext: ', action.type, action.state);
+      if (source === Payload.SERVER_ACTION) {
+        console.log('NowAndNext: SERVER', action.type, action.state);
+        if (action.state.service && action.state.data) {
+          update(action.state.service, action.state.data);
+          Store.emitChange(action.state.service);
+        }
+      }
       break;
   }
 });
 
 module.exports = Store;
-},{"../constants/constants":14,"../dispatcher/dispatcher":15,"../stores/current-service":19,"events":27,"underscore":44}],21:[function(require,module,exports){
+},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/current-service":21,"events":30,"underscore":47}],23:[function(require,module,exports){
+var extend = require('underscore').extend,
+    clone  = require('underscore').clone,
+    EventEmitter  = require('events').EventEmitter,
+    AppDispatcher = require('../dispatcher/dispatcher'),
+    CurrentServiceStore = require('../stores/current-service'),
+    Payload   = require('../constants/constants').Payload,
+    ActionTypes   = require('../constants/constants').ActionTypes;
+
+var state = {};
+
+function update(id, data) {
+  console.log('NowPlaying update', id, data)
+  state[id] = data;
+}
+
+var Store = extend(new EventEmitter(), {
+  get: function (id) {
+    if (state[id]) {
+      return clone(state[id]);
+    }
+  },
+  emitChange: function (id) {
+    this.emit('change', id);
+  },
+  addChangeListener: function (callback) {
+    this.on('change', callback);
+  }
+});
+
+Store.dispatchToken = AppDispatcher.register(function (payload) {
+  var source = payload.source,
+      action = payload.action;
+
+  switch(action.type) {
+    case ActionTypes.RECEIVE_INITIAL_STATE:
+      AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
+      console.log('NowPlaying', action.type, action.state);
+      if (action.state.current && action.state.current.nowPlaying) {
+        update(action.state.current.id, action.state.current.nowPlaying);
+        Store.emitChange(action.state.current.id);
+      }
+      break;
+    case ActionTypes.SERVICE:
+      console.log('NowPlaying: ', action.type, action.state);
+      if (source === Payload.SERVER_ACTION && action.state.topic === 'service.changed') {
+        AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
+        console.log('NowPlaying: SERVER', action.type, action.state);
+        if (action.state.data && action.state.data.nowPlaying) {
+          update(action.state.data.id, action.state.data.nowPlaying);
+          Store.emitChange(action.state.data.id);
+        }
+      }
+      break;
+    case ActionTypes.NOW_PLAYING:
+      console.log('NowPlaying: ', action.type, action.state);
+      if (source === Payload.SERVER_ACTION) {
+        console.log('NowPlaying: SERVER', action.type, action.state);
+        if (action.state.service && action.state.data) {
+          update(action.state.service, action.state.data);
+          Store.emitChange(action.state.service);
+        }
+      }
+      break;
+  }
+});
+
+module.exports = Store;
+},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/current-service":21,"events":30,"underscore":47}],24:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10248,7 +10467,7 @@ Power.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Power;
-},{"../constants/constants":14,"../dispatcher/dispatcher":15,"events":27,"underscore":44}],22:[function(require,module,exports){
+},{"../constants/constants":15,"../dispatcher/dispatcher":16,"events":30,"underscore":47}],25:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10296,7 +10515,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":14,"../dispatcher/dispatcher":15,"events":27,"underscore":44}],23:[function(require,module,exports){
+},{"../constants/constants":15,"../dispatcher/dispatcher":16,"events":30,"underscore":47}],26:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10375,7 +10594,7 @@ module.exports = {
   }
 };
 
-},{"underscore":44}],24:[function(require,module,exports){
+},{"underscore":47}],27:[function(require,module,exports){
 var ServerActionCreators = require('../actions/server-action-creators'),
     xhr = require('../xhr');
 
@@ -10400,7 +10619,7 @@ module.exports = {
     });
   }
 }
-},{"../actions/server-action-creators":1,"../xhr":26}],25:[function(require,module,exports){
+},{"../actions/server-action-creators":1,"../xhr":29}],28:[function(require,module,exports){
 var Ractive = require('ractive'),
     Promise = require('es6-promise').Promise,
     throttle = require('./utils').throttle;
@@ -10444,6 +10663,15 @@ module.exports = {
             'tune-service': function (serviceId) {
               StateActionCreators.changeService(serviceId);
             },
+            'avoid': function () {
+              StateActionCreators.toggleAvoider();
+            },
+            'avoider-settings-requested': function () {
+              StateActionCreators.requestAvoiderSettings();
+            },
+            'avoider-settings-changed': function (newValue) {
+              StateActionCreators.avoiderSettings(newValue);
+            },
           });
 
           console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
@@ -10465,7 +10693,7 @@ module.exports = {
     ractive.set(keypath, payload);
   }
 }
-},{"./actions/state-action-creators":2,"./components/controls":10,"./components/simple":13,"./lib/ractive-events-tap":17,"./utils":23,"es6-promise":29,"ractive":43}],26:[function(require,module,exports){
+},{"./actions/state-action-creators":2,"./components/controls":11,"./components/simple":14,"./lib/ractive-events-tap":18,"./utils":26,"es6-promise":32,"ractive":46}],29:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10527,7 +10755,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":29}],27:[function(require,module,exports){
+},{"es6-promise":32}],30:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10832,7 +11060,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -10897,13 +11125,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":34,"./promise/promise":35}],30:[function(require,module,exports){
+},{"./promise/polyfill":37,"./promise/promise":38}],33:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -10997,7 +11225,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":39}],31:[function(require,module,exports){
+},{"./utils":42}],34:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -11061,7 +11289,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"FWaASH":28}],32:[function(require,module,exports){
+},{"FWaASH":31}],35:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -11129,7 +11357,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],33:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -11145,7 +11373,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],34:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 (function (global){
 "use strict";
 /*global self*/
@@ -11187,7 +11415,7 @@ function polyfill() {
 
 exports.polyfill = polyfill;
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./promise":35,"./utils":39}],35:[function(require,module,exports){
+},{"./promise":38,"./utils":42}],38:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -11401,7 +11629,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":30,"./asap":31,"./cast":32,"./config":33,"./race":36,"./reject":37,"./resolve":38,"./utils":39}],36:[function(require,module,exports){
+},{"./all":33,"./asap":34,"./cast":35,"./config":36,"./race":39,"./reject":40,"./resolve":41,"./utils":42}],39:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -11491,7 +11719,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":39}],37:[function(require,module,exports){
+},{"./utils":42}],40:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -11539,7 +11767,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],38:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -11582,7 +11810,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],39:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -11605,7 +11833,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],40:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11617,7 +11845,7 @@ exports.now = now;
 
 module.exports.Dispatcher = require('./lib/Dispatcher')
 
-},{"./lib/Dispatcher":41}],41:[function(require,module,exports){
+},{"./lib/Dispatcher":44}],44:[function(require,module,exports){
 /*
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11869,7 +12097,7 @@ var _prefix = 'ID_';
 
 module.exports = Dispatcher;
 
-},{"./invariant":42}],42:[function(require,module,exports){
+},{"./invariant":45}],45:[function(require,module,exports){
 /**
  * Copyright (c) 2014, Facebook, Inc.
  * All rights reserved.
@@ -11924,7 +12152,7 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 
-},{}],43:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /*
 	ractive.js v0.5.5
 	2014-07-13 - commit 8b1d34ef 
@@ -25085,7 +25313,7 @@ module.exports = invariant;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}],44:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -26430,4 +26658,4 @@ module.exports = invariant;
   }
 }).call(this);
 
-},{}]},{},[6])
+},{}]},{},[7])

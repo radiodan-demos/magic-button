@@ -19,5 +19,12 @@ module.exports = {
        type: topic,
        state: state
     });
+  },
+  receiveAvoiderSettings: function (state) {
+    console.log('receiveAvoiderSettings', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.RECEIVE_AVOIDER_SETTINGS,
+       state: state
+    });
   }
 };

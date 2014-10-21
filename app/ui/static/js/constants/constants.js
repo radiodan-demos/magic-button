@@ -2,9 +2,14 @@ module.exports = {
   ActionTypes: {
     RECEIVE_INITIAL_STATE: 'RECEIVE_INITIAL_STATE',
     RECEIVE_STATE_UPDATE : 'RECEIVE_STATE_UPDATE',
+    RECEIVE_AVOIDER_SETTINGS : 'RECEIVE_AVOIDER_SETTINGS',
     POWER : 'power',
     AUDIO : 'audio',
-    SERVICE : 'service'
+    SERVICE : 'service',
+    SETTINGS : 'settings',
+    NOW_AND_NEXT : 'nowAndNext',
+    NOW_PLAYING : 'nowPlaying',
+    AVOIDER : 'avoider'
   },
   Payload: {
     SERVER_ACTION: 'SERVER_ACTION',

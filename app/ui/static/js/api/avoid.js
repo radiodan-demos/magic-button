@@ -1,6 +1,7 @@
 var xhr = require('../xhr'),
     success = require('../utils').success,
-    failure = require('../utils').failure;
+    failure = require('../utils').failure,
+    ServerActionCreators = require('../actions/server-action-creators');
 
 module.exports.set = function (isAvoiding) {
   var method = isAvoiding ? 'DELETE' : 'POST';
@@ -8,11 +9,19 @@ module.exports.set = function (isAvoiding) {
 }
 
 module.exports.settings = function (data) {
-  var payload = JSON.stringify(data),
-      opts = {
-        headers: { 'Content-type': 'application/json' },
-        data: payload
-      };
-  console.log('Avoid settings changed', opts);
-  xhr.post('/avoider/settings.json', opts);
+  if (!data) {
+    xhr.get('/avoider/settings.json')
+       .then(function (data) {
+        return JSON.parse(data);
+       })
+       .then(ServerActionCreators.receiveAvoiderSettings);
+  } else {
+    var payload = JSON.stringify(data),
+        opts = {
+          headers: { 'Content-type': 'application/json' },
+          data: payload
+        };
+    console.log('Avoid settings changed', opts);
+    xhr.post('/avoider/settings.json', opts);
+  }
 }

@@ -1,6 +1,7 @@
 var AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes,
-    PowerStore  = require('../stores/power');
+    PowerStore  = require('../stores/power'),
+    AvoiderStore = require('../stores/avoider');
 
 module.exports = {
   togglePower: function () {
@@ -22,10 +23,17 @@ module.exports = {
   },
   changeService: function (serviceId) {
     console.log('changeService', serviceId);
-    // AppDispatcher.handleViewAction({
-    //    type: ActionTypes.SERVICE,
-    //    state: { id: serviceId }
-    // });
     require('../api/service')(serviceId);
+  },
+  toggleAvoider: function () {
+    var isAvoiding = AvoiderStore.getState().isAvoiding;
+    console.log('toggleAvoider - current state', isAvoiding);
+    require('../api/avoid').set(isAvoiding);
+  },
+  requestAvoiderSettings: function () {
+    require('../api/avoid').settings();
+  },
+  avoiderSettings: function (params) {
+    require('../api/avoid').settings(params);
   }
 };

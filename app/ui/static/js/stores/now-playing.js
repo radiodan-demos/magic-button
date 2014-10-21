@@ -9,7 +9,7 @@ var extend = require('underscore').extend,
 var state = {};
 
 function update(id, data) {
-  console.log('NowAndNext update', id, data)
+  console.log('NowPlaying update', id, data)
   state[id] = data;
 }
 
@@ -34,27 +34,27 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
       AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-      console.log('NowAndNext', action.type, action.state);
-      if (action.state.current && action.state.current.nowAndNext) {
-        update(action.state.current.id, action.state.current.nowAndNext);
+      console.log('NowPlaying', action.type, action.state);
+      if (action.state.current && action.state.current.nowPlaying) {
+        update(action.state.current.id, action.state.current.nowPlaying);
         Store.emitChange(action.state.current.id);
       }
       break;
     case ActionTypes.SERVICE:
-      console.log('NowAndNext: ', action.type, action.state);
-      if (source === Payload.SERVER_ACTION) {
+      console.log('NowPlaying: ', action.type, action.state);
+      if (source === Payload.SERVER_ACTION && action.state.topic === 'service.changed') {
         AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-        console.log('NowAndNext: SERVER', action.type, action.state);
-        if (action.state.data && action.state.data.nowAndNext) {
-          update(action.state.data.id, action.state.data.nowAndNext);
+        console.log('NowPlaying: SERVER', action.type, action.state);
+        if (action.state.data && action.state.data.nowPlaying) {
+          update(action.state.data.id, action.state.data.nowPlaying);
           Store.emitChange(action.state.data.id);
         }
       }
       break;
-    case ActionTypes.NOW_AND_NEXT:
-      console.log('NowAndNext: ', action.type, action.state);
+    case ActionTypes.NOW_PLAYING:
+      console.log('NowPlaying: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('NowAndNext: SERVER', action.type, action.state);
+        console.log('NowPlaying: SERVER', action.type, action.state);
         if (action.state.service && action.state.data) {
           update(action.state.service, action.state.data);
           Store.emitChange(action.state.service);

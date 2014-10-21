@@ -29,9 +29,20 @@
   </section>
 
   <section id="metadata" class="layout">
-    <Metadata 
+    <Metadata
       nowAndNext="{{nowAndNext}}"
-      nowPlaying="{{radio.current.nowPlaying}}" />
+      nowPlaying="{{nowPlaying}}" />
+  </section>
+
+  <section id="magic">
+    <ul class="magic">
+      <Avoider
+        state="{{avoider}}"
+        services="{{ services }}"
+        on-avoid="avoid"
+        on-settings-requested="avoider-settings-requested"
+        on-settings-changed="avoider-settings-changed" />
+    </ul>
   </section>
 </div><!-- #controls -->
 {% endraw %}

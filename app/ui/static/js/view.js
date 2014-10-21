@@ -41,6 +41,15 @@ module.exports = {
             'tune-service': function (serviceId) {
               StateActionCreators.changeService(serviceId);
             },
+            'avoid': function () {
+              StateActionCreators.toggleAvoider();
+            },
+            'avoider-settings-requested': function () {
+              StateActionCreators.requestAvoiderSettings();
+            },
+            'avoider-settings-changed': function (newValue) {
+              StateActionCreators.avoiderSettings(newValue);
+            },
           });
 
           console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
