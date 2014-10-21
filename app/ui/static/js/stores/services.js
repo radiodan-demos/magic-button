@@ -32,12 +32,10 @@ var Store = extend(new EventEmitter(), {
 Store.dispatchToken = AppDispatcher.register(function (payload) {
   var action = payload.action;
 
-  console.log('Services', action.type);
-
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
       console.log('Services', action.type, action.state.services);
-
+      action.state.services.forEach(addService);
       Store.emitChange();
       break;
   }

@@ -3,7 +3,8 @@ module.exports = {
     RECEIVE_INITIAL_STATE: 'RECEIVE_INITIAL_STATE',
     RECEIVE_STATE_UPDATE : 'RECEIVE_STATE_UPDATE',
     POWER : 'power',
-    AUDIO : 'audio'
+    AUDIO : 'audio',
+    SERVICE : 'service'
   },
   Payload: {
     SERVER_ACTION: 'SERVER_ACTION',
