@@ -3,6 +3,7 @@ var Ractive = require('ractive');
 module.exports = Ractive.extend({
   template: '#servicesTmpl',
   isolated: true,
+  debug: true,
   init: function () {
     var self = this;
     this.on({

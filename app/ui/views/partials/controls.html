@@ -2,41 +2,21 @@
 {% raw %}
 <div id="controls">
   <section id="playout" class="layout panel">
-    <Playout radio="{{ radio }}" 
+    <Playout volume="{{ audio.volume }}"
+             radio="{{ radio }}" 
              on-services-panel-toggle="services-panel-toggle"
              on-volume-panel-toggle="volume-panel-toggle"
              services="{{ services }}" />
   </section>
 
-  <section id="services"
-           class="layout panel services {{ services.isOpen ? '' : 'is-closed' }}">
-    <ServicesList 
-        activeServiceIds="{{ [radio.tunableServices.current.id] }}"
-        services="{{ radio.tunableServices.services }}"
-        on-selected="tune-service" />
-  </section>
-
   <section id="volume" class="layout panel {{ volume.isOpen ? '' : 'is-closed' }}">
-    <Volume
-      volume="{{ radio.volume }}" />
-  </section>
-
-  <section id="metadata" class="layout">
-    <Metadata 
-      nowAndNext="{{radio.current.nowAndNext}}"
-      nowPlaying="{{radio.current.nowPlaying}}" />
-  </section>
-
-  <section id="magic">
-    <ul class="magic">
-      <Avoider 
-        state="{{radio.magic.avoider}}"
-        services="{{ radio.services }}"
-        on-avoid="avoid" />
-      <Announcer 
-        state="{{radio.magic.announcer}}"
-        on-announce="announce" />
-    </ul>
+    <div class="lo-center">
+      {{#audio}}
+      <input type="range"
+             on-change="volume-slider-changed"
+             min="0" max="100" value="{{volume}}" />
+      {{/audio}}
+    </div>
   </section>
 </div><!-- #controls -->
 {% endraw %}
