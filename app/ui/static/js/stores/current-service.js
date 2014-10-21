@@ -9,6 +9,9 @@ var extend = require('underscore').extend,
 var currentServiceId = null;
 
 var Store = extend(new EventEmitter(), {
+  getCurrentId: function () {
+    return currentServiceId;
+  },
   getCurrent: function () {
     return ServicesStore.getService(currentServiceId);
   },

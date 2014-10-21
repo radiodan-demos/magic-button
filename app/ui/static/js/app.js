@@ -3,6 +3,7 @@ var api = require('./utils/api');
 var PowerStore = require('./stores/power'),
     AudioStore = require('./stores/audio'),
     ServicesStore = require('./stores/services'),
+    NowAndNextStore = require('./stores/now-and-next'),
     CurrentServiceStore = require('./stores/current-service');
 
 var AppView = require('./view');
@@ -23,6 +24,10 @@ function initState() {
 
   ServicesStore.addChangeListener(function () {
     AppView.set('services', ServicesStore.getAllServicesAsArray());
+  });
+
+  NowAndNextStore.addChangeListener(function () {
+    AppView.set('nowAndNext', NowAndNextStore.get(CurrentServiceStore.getCurrentId()));
   });
 
   CurrentServiceStore.addChangeListener(function () {
