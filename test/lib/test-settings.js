@@ -1,16 +1,4 @@
-/* globals describe, it, before */
-'use strict';
-
-var chai = require('chai'),
-    assert = chai.assert,
-    chaiAsPromised = require('chai-as-promised'),
-    sinon  = require('sinon');
-
-var utils = require('radiodan-client').utils;
-
 var Settings = require('../../lib/settings');
-
-chai.use(chaiAsPromised);
 
 beforeEach(function() {
   this.options  = { inMemoryOnly: true };

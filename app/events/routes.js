@@ -8,11 +8,7 @@ module.exports = function (app, eventBus, services) {
   // To send data call: eventStream.send(dataObj, 'eventName');
   app.use('/', eventStream.middleware());
 
-  services.myMusic.on('*', function (data) {
-    eventStream.send(data);
-  });
-
-  services.bbc.on('*', function (data) {
+  services.events.on('*', function (data) {
     eventStream.send(data);
   });
 
