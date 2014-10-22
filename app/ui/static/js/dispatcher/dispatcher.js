@@ -1,6 +1,6 @@
 
 var _ = require('underscore'),
-    Dispatcher = require('flux').Dispatcher,
+    Dispatcher = require('../lib/flux').Dispatcher,
     Constants  = require('../constants/constants');
 
 module.exports = _.extend(new Dispatcher(), {
