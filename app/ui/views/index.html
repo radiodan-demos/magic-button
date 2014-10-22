@@ -58,22 +58,20 @@
               services="{{services}}"
               nowAndNext="{{nowAndNext}}"
               nowPlaying="{{nowPlaying}}"
+
               avoider="{{avoider}}"
-              announcer="{{announcer}}"
-
-              radio="{{radio}}"
-
               on-avoid="avoid"
               on-avoider-settings-requested="avoider-settings-requested"
               on-avoider-settings-changed="avoider-settings-changed"
 
+              announcer="{{announcer}}"
               on-announce="announce"
+
               on-tune-service="tune-service"
               on-volume-slider-changed="volume-slider-changed" />
           {{/power.isOn}}
           {{^power.isOn}}
-            <Standby 
-              radio="{{radio}}" />
+            <Standby />
           {{/power.isOn}}
 
           <RadioSettings 
