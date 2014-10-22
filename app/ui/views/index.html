@@ -47,7 +47,7 @@
           <!-- App masthead -->
           <Masthead 
             on-power="power" 
-            on-settings="settings"
+            on-settings="settings-panel-requested"
             isOn="{{power.isOn}}" />
 
           <!-- Main app views -->
@@ -77,8 +77,9 @@
           {{/power.isOn}}
 
           <RadioSettings 
-            radio="{{ radio }}"
-            on-preferred-service="preferred-service" />
+            settings="{{ settings }}"
+            services="{{ services }}"
+            on-preferred-service="preferred-service-changed" />
         </div>
       {% endraw %}
     </script>

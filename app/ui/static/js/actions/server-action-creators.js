@@ -35,5 +35,12 @@ module.exports = {
        type: ActionTypes.RECEIVE_AVOIDER_SETTINGS,
        state: state
     });
+  },
+  receiveRadioSettings: function (state) {
+    console.log('receiveRadioSettings', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.RECEIVE_RADIO_SETTINGS,
+       state: state
+    });
   }
 };

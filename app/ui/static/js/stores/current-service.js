@@ -30,7 +30,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
       console.log('CurrentService: ', action.type, action.state);
-      currentServiceId = action.state.current.id;
+      currentServiceId = action.state.current ? action.state.current.id : null;
       Store.emitChange();
       break;
     case ActionTypes.SERVICE:

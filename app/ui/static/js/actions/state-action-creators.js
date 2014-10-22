@@ -2,7 +2,8 @@ var AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes,
     PowerStore  = require('../stores/power'),
     AvoiderStore = require('../stores/avoider'),
-    AnnouncerStore = require('../stores/announcer');
+    AnnouncerStore = require('../stores/announcer'),
+    RadioSettingsStore = require('../stores/radio-settings');
 
 module.exports = {
   togglePower: function () {
@@ -34,6 +35,9 @@ module.exports = {
   requestAvoiderSettings: function () {
     require('../api/avoid').settings();
   },
+  requestRadioSettings: function () {
+    require('../api/radio-settings')();
+  },
   avoiderSettings: function (params) {
     require('../api/avoid').settings(params);
   },
@@ -42,4 +46,12 @@ module.exports = {
     console.log('toggleAnnouncer - current state', isAnnouncing);
     require('../api/announce')(isAnnouncing);
   },
+  toggleRadioSettingPreferredServer: function (serviceId) {
+    RadioSettingsStore.togglePreferredService(serviceId);
+    AppDispatcher.handleViewAction({
+       type: ActionTypes.SETTINGS,
+       state: RadioSettingsStore.getState()
+    });
+    require('../api/radio-settings')(RadioSettingsStore.getState());
+  }
 };

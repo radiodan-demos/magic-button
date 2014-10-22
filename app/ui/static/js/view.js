@@ -53,6 +53,15 @@ module.exports = {
             'announce': function () {
               StateActionCreators.toggleAnnouncer();
             },
+            'settings-panel-requested': function () {
+              console.log('settings-panel-requested');
+              StateActionCreators.requestRadioSettings();
+              this.set('mainView', (this.get('mainView') === 'settings') ? 'controls' : 'settings');
+            },
+            'preferred-service-changed': function (serviceId) {
+              console.log('preferred-service-changed', serviceId);
+              StateActionCreators.toggleRadioSettingPreferredServer(serviceId);
+            }
           });
 
           console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
@@ -62,7 +71,7 @@ module.exports = {
           // Main Views
           Standby : require('./components/simple')('#standbyTmpl'),
           Controls: require('./components/controls'),
-          // RadioSettings: require('./components/simple')('#settingsTmpl'),
+          RadioSettings: require('./components/simple')('#settingsTmpl'),
           // Components
           Masthead: require('./components/simple')('#mastheadTmpl')
         }

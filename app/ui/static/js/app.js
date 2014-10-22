@@ -7,7 +7,8 @@ var PowerStore = require('./stores/power'),
     NowPlayingStore = require('./stores/now-playing'),
     CurrentServiceStore = require('./stores/current-service'),
     AvoiderStore = require('./stores/avoider'),
-    AnnouncerStore = require('./stores/announcer');
+    AnnouncerStore = require('./stores/announcer'),
+    RadioSettingsStore = require('./stores/radio-settings');
 
 var AppView = require('./view');
 
@@ -54,6 +55,11 @@ function initState() {
   AnnouncerStore.addChangeListener(function () {
     AppView.set('announcer', AnnouncerStore.getState());
   });
+
+  RadioSettingsStore.addChangeListener(function () {
+    AppView.set('settings', RadioSettingsStore.getState());
+  });
+
 
   api.connectEventStream();
   api.getInitialState();
