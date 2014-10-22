@@ -4,6 +4,7 @@ module.exports = Ractive.extend({
   template: '#metadataTmpl',
   isolated: true,
   debug: true,
+  twoway: false,
   data: {
     view: 'prog',
     first: function (array) {

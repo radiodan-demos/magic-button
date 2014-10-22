@@ -9,7 +9,8 @@ module.exports = {
     SETTINGS : 'settings',
     NOW_AND_NEXT : 'nowAndNext',
     NOW_PLAYING : 'nowPlaying',
-    AVOIDER : 'avoider'
+    AVOIDER : 'avoider',
+    ANNOUNCER : 'announcer'
   },
   Payload: {
     SERVER_ACTION: 'SERVER_ACTION',

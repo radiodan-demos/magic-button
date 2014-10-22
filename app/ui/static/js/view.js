@@ -50,6 +50,9 @@ module.exports = {
             'avoider-settings-changed': function (newValue) {
               StateActionCreators.avoiderSettings(newValue);
             },
+            'announce': function () {
+              StateActionCreators.toggleAnnouncer();
+            },
           });
 
           console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));

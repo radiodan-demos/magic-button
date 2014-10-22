@@ -1,3 +1,5 @@
+'use strict';
+
 var AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes;
 
@@ -17,6 +19,13 @@ module.exports = {
 
     AppDispatcher.handleServerAction({
        type: topic,
+       state: state
+    });
+  },
+  receiveAnnouncerState: function (state) {
+    console.log('receiveAnnouncerState', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.ANNOUNCER,
        state: state
     });
   },

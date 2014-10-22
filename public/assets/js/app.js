@@ -1,4 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
 var AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes;
 
@@ -21,6 +23,13 @@ module.exports = {
        state: state
     });
   },
+  receiveAnnouncerState: function (state) {
+    console.log('receiveAnnouncerState', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.ANNOUNCER,
+       state: state
+    });
+  },
   receiveAvoiderSettings: function (state) {
     console.log('receiveAvoiderSettings', state);
     AppDispatcher.handleServerAction({
@@ -29,11 +38,12 @@ module.exports = {
     });
   }
 };
-},{"../constants/constants":15,"../dispatcher/dispatcher":16}],2:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17}],2:[function(require,module,exports){
 var AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes,
     PowerStore  = require('../stores/power'),
-    AvoiderStore = require('../stores/avoider');
+    AvoiderStore = require('../stores/avoider'),
+    AnnouncerStore = require('../stores/announcer');
 
 module.exports = {
   togglePower: function () {
@@ -67,9 +77,35 @@ module.exports = {
   },
   avoiderSettings: function (params) {
     require('../api/avoid').settings(params);
-  }
+  },
+  toggleAnnouncer: function () {
+    var isAnnouncing = AnnouncerStore.getState().isAnnouncing;
+    console.log('toggleAnnouncer - current state', isAnnouncing);
+    require('../api/announce')(isAnnouncing);
+  },
 };
-},{"../api/avoid":3,"../api/power":4,"../api/service":5,"../api/volume":6,"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/avoider":20,"../stores/power":24}],3:[function(require,module,exports){
+},{"../api/announce":3,"../api/avoid":4,"../api/power":5,"../api/service":6,"../api/volume":7,"../constants/constants":16,"../dispatcher/dispatcher":17,"../stores/announcer":23,"../stores/avoider":25,"../stores/power":29}],3:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure,
+    ServerActionCreators = require('../actions/server-action-creators');
+
+module.exports = function (isAnnouncing) {
+  console.log('api - isAnnouncing', isAnnouncing, isAnnouncing == null);
+
+  if (isAnnouncing == null) {
+    xhr.get('/announcer/state.json')
+       .then(function (data) {
+          console.log('/announcer/state.json', data);
+          return JSON.parse(data);
+       })
+       .then(ServerActionCreators.receiveAnnouncerState, failure);
+  }
+  var method = isAnnouncing ? 'DELETE' : 'POST';
+  console.log('api - isAnnouncing', method);
+  xhr(method, '/announcer').catch(failure);
+}
+},{"../actions/server-action-creators":1,"../utils":31,"../xhr":34}],4:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure,
@@ -97,7 +133,7 @@ module.exports.settings = function (data) {
     xhr.post('/avoider/settings.json', opts);
   }
 }
-},{"../actions/server-action-creators":1,"../utils":26,"../xhr":29}],4:[function(require,module,exports){
+},{"../actions/server-action-creators":1,"../utils":31,"../xhr":34}],5:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -106,7 +142,7 @@ module.exports = function (turnOn) {
   var method = turnOn ? 'PUT' : 'DELETE';
   xhr(method, '/radio/power');
 }
-},{"../utils":26,"../xhr":29}],5:[function(require,module,exports){
+},{"../utils":31,"../xhr":34}],6:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -115,7 +151,7 @@ module.exports = function (value) {
   xhr.post('/radio/service/' + value )
      .then(success('service'), failure('service'));
 }
-},{"../utils":26,"../xhr":29}],6:[function(require,module,exports){
+},{"../utils":31,"../xhr":34}],7:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure;
@@ -124,7 +160,7 @@ module.exports = function (value) {
   xhr.post('/radio/volume/value/' + value )
      .then(success('volume'), failure('volume'));
 }
-},{"../utils":26,"../xhr":29}],7:[function(require,module,exports){
+},{"../utils":31,"../xhr":34}],8:[function(require,module,exports){
 var api = require('./utils/api');
 
 var PowerStore = require('./stores/power'),
@@ -133,7 +169,8 @@ var PowerStore = require('./stores/power'),
     NowAndNextStore = require('./stores/now-and-next'),
     NowPlayingStore = require('./stores/now-playing'),
     CurrentServiceStore = require('./stores/current-service'),
-    AvoiderStore = require('./stores/avoider');
+    AvoiderStore = require('./stores/avoider'),
+    AnnouncerStore = require('./stores/announcer');
 
 var AppView = require('./view');
 
@@ -177,16 +214,24 @@ function initState() {
     AppView.set('avoider', AvoiderStore.getState());
   });
 
+  AnnouncerStore.addChangeListener(function () {
+    AppView.set('announcer', AnnouncerStore.getState());
+  });
+
   api.connectEventStream();
   api.getInitialState();
-  // require('./api/avoid').settings();
+
+  // Read announcer current state
+  require('./api/announce')();
 }
-},{"./stores/audio":19,"./stores/avoider":20,"./stores/current-service":21,"./stores/now-and-next":22,"./stores/now-playing":23,"./stores/power":24,"./stores/services":25,"./utils/api":27,"./view":28}],8:[function(require,module,exports){
+},{"./api/announce":3,"./stores/announcer":23,"./stores/audio":24,"./stores/avoider":25,"./stores/current-service":26,"./stores/now-and-next":27,"./stores/now-playing":28,"./stores/power":29,"./stores/services":30,"./utils/api":32,"./view":33}],9:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
   template: '#announcerTmpl',
   isolated: true,
+  twoway: false,
+  debug: true,
   data: {
     settingsOpen: false,
     state: null
@@ -251,7 +296,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./circular-progress":10,"ractive":46}],9:[function(require,module,exports){
+},{"./circular-progress":11,"ractive":48}],10:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -356,7 +401,7 @@ module.exports = Ractive.extend({
     return Math.floor(mins) + 'm ' + secsLeft;
   }
 });
-},{"./circular-progress":10,"./services-list":13,"ractive":46}],10:[function(require,module,exports){
+},{"./circular-progress":11,"./services-list":14,"ractive":48}],11:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -393,6 +438,8 @@ var initialState = {
 var CircularProgress = Ractive.extend({
   template: '#progressTempl',
   isolated: true,
+  twoway: false,
+  debug: true,
   computed: {
     angle: function () {
       var percentThrough = this.get('percentThrough');
@@ -412,7 +459,7 @@ var CircularProgress = Ractive.extend({
 });
 
 module.exports = CircularProgress;
-},{"../lib/d3":17,"ractive":46}],11:[function(require,module,exports){
+},{"../lib/d3":18,"ractive":48}],12:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -446,13 +493,14 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./announcer":8,"./avoider":9,"./metadata":12,"./services-list":13,"./simple":14,"ractive":46}],12:[function(require,module,exports){
+},{"./announcer":9,"./avoider":10,"./metadata":13,"./services-list":14,"./simple":15,"ractive":48}],13:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
   template: '#metadataTmpl',
   isolated: true,
   debug: true,
+  twoway: false,
   data: {
     view: 'prog',
     first: function (array) {
@@ -470,12 +518,13 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":46}],13:[function(require,module,exports){
+},{"ractive":48}],14:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
   template: '#servicesTmpl',
   isolated: true,
+  twoway: false,
   debug: true,
   init: function () {
     var self = this;
@@ -488,7 +537,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":46}],14:[function(require,module,exports){
+},{"ractive":48}],15:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = function (selector) {
@@ -502,7 +551,7 @@ module.exports = function (selector) {
     }
   });
 };
-},{"./services-list":13,"ractive":46}],15:[function(require,module,exports){
+},{"./services-list":14,"ractive":48}],16:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     RECEIVE_INITIAL_STATE: 'RECEIVE_INITIAL_STATE',
@@ -514,17 +563,18 @@ module.exports = {
     SETTINGS : 'settings',
     NOW_AND_NEXT : 'nowAndNext',
     NOW_PLAYING : 'nowPlaying',
-    AVOIDER : 'avoider'
+    AVOIDER : 'avoider',
+    ANNOUNCER : 'announcer'
   },
   Payload: {
     SERVER_ACTION: 'SERVER_ACTION',
     VIEW_ACTION  : 'VIEW_ACTION'
   }
 };
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 
 var _ = require('underscore'),
-    Dispatcher = require('flux').Dispatcher,
+    Dispatcher = require('../lib/flux').Dispatcher,
     Constants  = require('../constants/constants');
 
 module.exports = _.extend(new Dispatcher(), {
@@ -543,7 +593,7 @@ module.exports = _.extend(new Dispatcher(), {
     this.dispatch(payload);
   }
 });
-},{"../constants/constants":15,"flux":43,"underscore":47}],17:[function(require,module,exports){
+},{"../constants/constants":16,"../lib/flux":19,"underscore":49}],18:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -9838,7 +9888,328 @@ module.exports = _.extend(new Dispatcher(), {
     this.d3 = d3;
   }
 }();
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
+/**
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ */
+
+module.exports.Dispatcher = require('./lib/Dispatcher')
+
+},{"./lib/Dispatcher":20}],20:[function(require,module,exports){
+/*
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule Dispatcher
+ * @typechecks
+ */
+
+"use strict";
+
+var invariant = require('./invariant');
+
+var _lastID = 1;
+var _prefix = 'ID_';
+
+/**
+ * Dispatcher is used to broadcast payloads to registered callbacks. This is
+ * different from generic pub-sub systems in two ways:
+ *
+ *   1) Callbacks are not subscribed to particular events. Every payload is
+ *      dispatched to every registered callback.
+ *   2) Callbacks can be deferred in whole or part until other callbacks have
+ *      been executed.
+ *
+ * For example, consider this hypothetical flight destination form, which
+ * selects a default city when a country is selected:
+ *
+ *   var flightDispatcher = new Dispatcher();
+ *
+ *   // Keeps track of which country is selected
+ *   var CountryStore = {country: null};
+ *
+ *   // Keeps track of which city is selected
+ *   var CityStore = {city: null};
+ *
+ *   // Keeps track of the base flight price of the selected city
+ *   var FlightPriceStore = {price: null}
+ *
+ * When a user changes the selected city, we dispatch the payload:
+ *
+ *   flightDispatcher.dispatch({
+ *     actionType: 'city-update',
+ *     selectedCity: 'paris'
+ *   });
+ *
+ * This payload is digested by `CityStore`:
+ *
+ *   flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'city-update') {
+ *       CityStore.city = payload.selectedCity;
+ *     }
+ *   });
+ *
+ * When the user selects a country, we dispatch the payload:
+ *
+ *   flightDispatcher.dispatch({
+ *     actionType: 'country-update',
+ *     selectedCountry: 'australia'
+ *   });
+ *
+ * This payload is digested by both stores:
+ *
+ *    CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'country-update') {
+ *       CountryStore.country = payload.selectedCountry;
+ *     }
+ *   });
+ *
+ * When the callback to update `CountryStore` is registered, we save a reference
+ * to the returned token. Using this token with `waitFor()`, we can guarantee
+ * that `CountryStore` is updated before the callback that updates `CityStore`
+ * needs to query its data.
+ *
+ *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
+ *     if (payload.actionType === 'country-update') {
+ *       // `CountryStore.country` may not be updated.
+ *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
+ *       // `CountryStore.country` is now guaranteed to be updated.
+ *
+ *       // Select the default city for the new country
+ *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
+ *     }
+ *   });
+ *
+ * The usage of `waitFor()` can be chained, for example:
+ *
+ *   FlightPriceStore.dispatchToken =
+ *     flightDispatcher.register(function(payload) {
+ *       switch (payload.actionType) {
+ *         case 'country-update':
+ *           flightDispatcher.waitFor([CityStore.dispatchToken]);
+ *           FlightPriceStore.price =
+ *             getFlightPriceStore(CountryStore.country, CityStore.city);
+ *           break;
+ *
+ *         case 'city-update':
+ *           FlightPriceStore.price =
+ *             FlightPriceStore(CountryStore.country, CityStore.city);
+ *           break;
+ *     }
+ *   });
+ *
+ * The `country-update` payload will be guaranteed to invoke the stores'
+ * registered callbacks in order: `CountryStore`, `CityStore`, then
+ * `FlightPriceStore`.
+ */
+
+  function Dispatcher() {
+    this.$Dispatcher_callbacks = {};
+    this.$Dispatcher_isPending = {};
+    this.$Dispatcher_isHandled = {};
+    this.$Dispatcher_isDispatching = false;
+    this.$Dispatcher_pendingPayload = null;
+  }
+
+  /**
+   * Registers a callback to be invoked with every dispatched payload. Returns
+   * a token that can be used with `waitFor()`.
+   *
+   * @param {function} callback
+   * @return {string}
+   */
+  Dispatcher.prototype.register=function(callback) {
+    var id = _prefix + _lastID++;
+    this.$Dispatcher_callbacks[id] = callback;
+    return id;
+  };
+
+  /**
+   * Removes a callback based on its token.
+   *
+   * @param {string} id
+   */
+  Dispatcher.prototype.unregister=function(id) {
+    invariant(
+      this.$Dispatcher_callbacks[id],
+      'Dispatcher.unregister(...): `%s` does not map to a registered callback.',
+      id
+    );
+    delete this.$Dispatcher_callbacks[id];
+  };
+
+  /**
+   * Waits for the callbacks specified to be invoked before continuing execution
+   * of the current callback. This method should only be used by a callback in
+   * response to a dispatched payload.
+   *
+   * @param {array<string>} ids
+   */
+  Dispatcher.prototype.waitFor=function(ids) {
+    invariant(
+      this.$Dispatcher_isDispatching,
+      'Dispatcher.waitFor(...): Must be invoked while dispatching.'
+    );
+    for (var ii = 0; ii < ids.length; ii++) {
+      var id = ids[ii];
+      if (this.$Dispatcher_isPending[id]) {
+        invariant(
+          this.$Dispatcher_isHandled[id],
+          'Dispatcher.waitFor(...): Circular dependency detected while ' +
+          'waiting for `%s`.',
+          id
+        );
+        continue;
+      }
+      invariant(
+        this.$Dispatcher_callbacks[id],
+        'Dispatcher.waitFor(...): `%s` does not map to a registered callback.',
+        id
+      );
+      this.$Dispatcher_invokeCallback(id);
+    }
+  };
+
+  /**
+   * Dispatches a payload to all registered callbacks.
+   *
+   * @param {object} payload
+   */
+  Dispatcher.prototype.dispatch=function(payload) {
+    invariant(
+      !this.$Dispatcher_isDispatching,
+      'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.'
+    );
+    this.$Dispatcher_startDispatching(payload);
+    try {
+      for (var id in this.$Dispatcher_callbacks) {
+        if (this.$Dispatcher_isPending[id]) {
+          continue;
+        }
+        this.$Dispatcher_invokeCallback(id);
+      }
+    } catch (e) {
+      console.error(e.stack);
+    } finally {
+      this.$Dispatcher_stopDispatching();
+    }
+  };
+
+  /**
+   * Is this Dispatcher currently dispatching.
+   *
+   * @return {boolean}
+   */
+  Dispatcher.prototype.isDispatching=function() {
+    return this.$Dispatcher_isDispatching;
+  };
+
+  /**
+   * Call the callback stored with the given id. Also do some internal
+   * bookkeeping.
+   *
+   * @param {string} id
+   * @internal
+   */
+  Dispatcher.prototype.$Dispatcher_invokeCallback=function(id) {
+    this.$Dispatcher_isPending[id] = true;
+    this.$Dispatcher_callbacks[id](this.$Dispatcher_pendingPayload);
+    this.$Dispatcher_isHandled[id] = true;
+  };
+
+  /**
+   * Set up bookkeeping needed when dispatching.
+   *
+   * @param {object} payload
+   * @internal
+   */
+  Dispatcher.prototype.$Dispatcher_startDispatching=function(payload) {
+    for (var id in this.$Dispatcher_callbacks) {
+      this.$Dispatcher_isPending[id] = false;
+      this.$Dispatcher_isHandled[id] = false;
+    }
+    this.$Dispatcher_pendingPayload = payload;
+    this.$Dispatcher_isDispatching = true;
+  };
+
+  /**
+   * Clear bookkeeping used for dispatching.
+   *
+   * @internal
+   */
+  Dispatcher.prototype.$Dispatcher_stopDispatching=function() {
+    this.$Dispatcher_pendingPayload = null;
+    this.$Dispatcher_isDispatching = false;
+  };
+
+
+module.exports = Dispatcher;
+
+},{"./invariant":21}],21:[function(require,module,exports){
+/**
+ * Copyright (c) 2014, Facebook, Inc.
+ * All rights reserved.
+ *
+ * This source code is licensed under the BSD-style license found in the
+ * LICENSE file in the root directory of this source tree. An additional grant
+ * of patent rights can be found in the PATENTS file in the same directory.
+ *
+ * @providesModule invariant
+ */
+
+"use strict";
+
+/**
+ * Use invariant() to assert state which your program assumes to be true.
+ *
+ * Provide sprintf-style format (only %s is supported) and arguments
+ * to provide information about what broke and what you were
+ * expecting.
+ *
+ * The invariant message will be stripped in production, but the invariant
+ * will remain to ensure logic does not differ in production.
+ */
+
+var invariant = function(condition, format, a, b, c, d, e, f) {
+  if (false) {
+    if (format === undefined) {
+      throw new Error('invariant requires an error message argument');
+    }
+  }
+
+  if (!condition) {
+    var error;
+    if (format === undefined) {
+      error = new Error(
+        'Minified exception occurred; use the non-minified dev environment ' +
+        'for the full error message and additional helpful warnings.'
+      );
+    } else {
+      var args = [a, b, c, d, e, f];
+      var argIndex = 0;
+      error = new Error(
+        'Invariant Violation: ' +
+        format.replace(/%s/g, function() { return args[argIndex++]; })
+      );
+    }
+
+    error.framesToPop = 1; // we don't care about invariant's own frame
+    throw error;
+  }
+};
+
+module.exports = invariant;
+
+},{}],22:[function(require,module,exports){
 /*
 
 	ractive-events-tap
@@ -10115,7 +10486,64 @@ module.exports = _.extend(new Dispatcher(), {
 	Ractive.events.tap = tap;
 
 }));
-},{"ractive":46}],19:[function(require,module,exports){
+},{"ractive":48}],23:[function(require,module,exports){
+var extend = require('underscore').extend,
+    clone = require('underscore').clone,
+    EventEmitter  = require('events').EventEmitter,
+    AppDispatcher = require('../dispatcher/dispatcher'),
+    Payload       = require('../constants/constants').Payload,
+    ActionTypes   = require('../constants/constants').ActionTypes,
+    ServicesStore = require('../stores/services');
+
+var state = {};
+
+function set(data) {
+  data = data || {};
+  state = clone(data);
+  if (data.start) { state.start = new Date(data.start); }
+  if (data.end)   { state.end   = new Date(data.end);   }
+}
+
+var Store = extend(new EventEmitter(), {
+  getState: function () {
+    return clone(state);
+  },
+  emitChange: function () {
+    this.emit('change');
+  },
+  addChangeListener: function (callback) {
+    this.on('change', callback);
+  }
+});
+
+Store.dispatchToken = AppDispatcher.register(function (payload) {
+  var source = payload.source,
+      action = payload.action;
+
+  switch(action.type) {
+    case ActionTypes.RECEIVE_INITIAL_STATE:
+      console.log('Announcer: ', action.type, action.state);
+      set(action.state.announcer);
+      Store.emitChange();
+      break;
+    case ActionTypes.ANNOUNCER:
+      console.log('Announcer: ', action.type, action.state);
+      if (source === Payload.SERVER_ACTION) {
+        console.log('Announcer: SERVER', action.type, action.state);
+        set(action.state.data);
+        Store.emitChange();
+      } else {
+        console.log('Announcer: VIEW ACTION pre', state.isAnnouncing);
+        state.isAnnouncing = !state.isAnnouncing;
+        console.log('Announcer: VIEW ACTION post', state.isAnnouncing);
+        Store.emitChange();
+      }
+      break;
+  }
+});
+
+module.exports = Store;
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"../stores/services":30,"events":35,"underscore":49}],24:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10162,7 +10590,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":15,"../dispatcher/dispatcher":16,"events":30,"underscore":47}],20:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"events":35,"underscore":49}],25:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10233,7 +10661,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/services":25,"events":30,"underscore":47}],21:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"../stores/services":30,"events":35,"underscore":49}],26:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10284,7 +10712,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/services":25,"events":30,"underscore":47}],22:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"../stores/services":30,"events":35,"underscore":49}],27:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10352,7 +10780,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/current-service":21,"events":30,"underscore":47}],23:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"../stores/current-service":26,"events":35,"underscore":49}],28:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10420,7 +10848,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":15,"../dispatcher/dispatcher":16,"../stores/current-service":21,"events":30,"underscore":47}],24:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"../stores/current-service":26,"events":35,"underscore":49}],29:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10467,7 +10895,7 @@ Power.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Power;
-},{"../constants/constants":15,"../dispatcher/dispatcher":16,"events":30,"underscore":47}],25:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"events":35,"underscore":49}],30:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
@@ -10515,7 +10943,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":15,"../dispatcher/dispatcher":16,"events":30,"underscore":47}],26:[function(require,module,exports){
+},{"../constants/constants":16,"../dispatcher/dispatcher":17,"events":35,"underscore":49}],31:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10594,7 +11022,7 @@ module.exports = {
   }
 };
 
-},{"underscore":47}],27:[function(require,module,exports){
+},{"underscore":49}],32:[function(require,module,exports){
 var ServerActionCreators = require('../actions/server-action-creators'),
     xhr = require('../xhr');
 
@@ -10619,7 +11047,7 @@ module.exports = {
     });
   }
 }
-},{"../actions/server-action-creators":1,"../xhr":29}],28:[function(require,module,exports){
+},{"../actions/server-action-creators":1,"../xhr":34}],33:[function(require,module,exports){
 var Ractive = require('ractive'),
     Promise = require('es6-promise').Promise,
     throttle = require('./utils').throttle;
@@ -10672,6 +11100,9 @@ module.exports = {
             'avoider-settings-changed': function (newValue) {
               StateActionCreators.avoiderSettings(newValue);
             },
+            'announce': function () {
+              StateActionCreators.toggleAnnouncer();
+            },
           });
 
           console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
@@ -10693,7 +11124,7 @@ module.exports = {
     ractive.set(keypath, payload);
   }
 }
-},{"./actions/state-action-creators":2,"./components/controls":11,"./components/simple":14,"./lib/ractive-events-tap":18,"./utils":26,"es6-promise":32,"ractive":46}],29:[function(require,module,exports){
+},{"./actions/state-action-creators":2,"./components/controls":12,"./components/simple":15,"./lib/ractive-events-tap":22,"./utils":31,"es6-promise":37,"ractive":48}],34:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -10755,7 +11186,7 @@ function xhr(method, url, opts) {
   });
 }
 
-},{"es6-promise":32}],30:[function(require,module,exports){
+},{"es6-promise":37}],35:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11060,7 +11491,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],31:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -11125,13 +11556,13 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],32:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 "use strict";
 var Promise = require("./promise/promise").Promise;
 var polyfill = require("./promise/polyfill").polyfill;
 exports.Promise = Promise;
 exports.polyfill = polyfill;
-},{"./promise/polyfill":37,"./promise/promise":38}],33:[function(require,module,exports){
+},{"./promise/polyfill":42,"./promise/promise":43}],38:[function(require,module,exports){
 "use strict";
 /* global toString */
 
@@ -11225,7 +11656,7 @@ function all(promises) {
 }
 
 exports.all = all;
-},{"./utils":42}],34:[function(require,module,exports){
+},{"./utils":47}],39:[function(require,module,exports){
 (function (process,global){
 "use strict";
 var browserGlobal = (typeof window !== 'undefined') ? window : {};
@@ -11289,7 +11720,7 @@ function asap(callback, arg) {
 
 exports.asap = asap;
 }).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"FWaASH":31}],35:[function(require,module,exports){
+},{"FWaASH":36}],40:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
@@ -11357,7 +11788,7 @@ function cast(object) {
 }
 
 exports.cast = cast;
-},{}],36:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 "use strict";
 var config = {
   instrument: false
@@ -11373,7 +11804,7 @@ function configure(name, value) {
 
 exports.config = config;
 exports.configure = configure;
-},{}],37:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 (function (global){
 "use strict";
 /*global self*/
@@ -11415,7 +11846,7 @@ function polyfill() {
 
 exports.polyfill = polyfill;
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./promise":38,"./utils":42}],38:[function(require,module,exports){
+},{"./promise":43,"./utils":47}],43:[function(require,module,exports){
 "use strict";
 var config = require("./config").config;
 var configure = require("./config").configure;
@@ -11629,7 +12060,7 @@ function publishRejection(promise) {
 }
 
 exports.Promise = Promise;
-},{"./all":33,"./asap":34,"./cast":35,"./config":36,"./race":39,"./reject":40,"./resolve":41,"./utils":42}],39:[function(require,module,exports){
+},{"./all":38,"./asap":39,"./cast":40,"./config":41,"./race":44,"./reject":45,"./resolve":46,"./utils":47}],44:[function(require,module,exports){
 "use strict";
 /* global toString */
 var isArray = require("./utils").isArray;
@@ -11719,7 +12150,7 @@ function race(promises) {
 }
 
 exports.race = race;
-},{"./utils":42}],40:[function(require,module,exports){
+},{"./utils":47}],45:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.reject` returns a promise that will become rejected with the passed
@@ -11767,7 +12198,7 @@ function reject(reason) {
 }
 
 exports.reject = reject;
-},{}],41:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 "use strict";
 /**
   `RSVP.resolve` returns a promise that will become fulfilled with the passed
@@ -11810,7 +12241,7 @@ function resolve(value) {
 }
 
 exports.resolve = resolve;
-},{}],42:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 "use strict";
 function objectOrFunction(x) {
   return isFunction(x) || (typeof x === "object" && x !== null);
@@ -11833,326 +12264,7 @@ exports.objectOrFunction = objectOrFunction;
 exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
-},{}],43:[function(require,module,exports){
-/**
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- */
-
-module.exports.Dispatcher = require('./lib/Dispatcher')
-
-},{"./lib/Dispatcher":44}],44:[function(require,module,exports){
-/*
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule Dispatcher
- * @typechecks
- */
-
-"use strict";
-
-var invariant = require('./invariant');
-
-var _lastID = 1;
-var _prefix = 'ID_';
-
-/**
- * Dispatcher is used to broadcast payloads to registered callbacks. This is
- * different from generic pub-sub systems in two ways:
- *
- *   1) Callbacks are not subscribed to particular events. Every payload is
- *      dispatched to every registered callback.
- *   2) Callbacks can be deferred in whole or part until other callbacks have
- *      been executed.
- *
- * For example, consider this hypothetical flight destination form, which
- * selects a default city when a country is selected:
- *
- *   var flightDispatcher = new Dispatcher();
- *
- *   // Keeps track of which country is selected
- *   var CountryStore = {country: null};
- *
- *   // Keeps track of which city is selected
- *   var CityStore = {city: null};
- *
- *   // Keeps track of the base flight price of the selected city
- *   var FlightPriceStore = {price: null}
- *
- * When a user changes the selected city, we dispatch the payload:
- *
- *   flightDispatcher.dispatch({
- *     actionType: 'city-update',
- *     selectedCity: 'paris'
- *   });
- *
- * This payload is digested by `CityStore`:
- *
- *   flightDispatcher.register(function(payload) {
- *     if (payload.actionType === 'city-update') {
- *       CityStore.city = payload.selectedCity;
- *     }
- *   });
- *
- * When the user selects a country, we dispatch the payload:
- *
- *   flightDispatcher.dispatch({
- *     actionType: 'country-update',
- *     selectedCountry: 'australia'
- *   });
- *
- * This payload is digested by both stores:
- *
- *    CountryStore.dispatchToken = flightDispatcher.register(function(payload) {
- *     if (payload.actionType === 'country-update') {
- *       CountryStore.country = payload.selectedCountry;
- *     }
- *   });
- *
- * When the callback to update `CountryStore` is registered, we save a reference
- * to the returned token. Using this token with `waitFor()`, we can guarantee
- * that `CountryStore` is updated before the callback that updates `CityStore`
- * needs to query its data.
- *
- *   CityStore.dispatchToken = flightDispatcher.register(function(payload) {
- *     if (payload.actionType === 'country-update') {
- *       // `CountryStore.country` may not be updated.
- *       flightDispatcher.waitFor([CountryStore.dispatchToken]);
- *       // `CountryStore.country` is now guaranteed to be updated.
- *
- *       // Select the default city for the new country
- *       CityStore.city = getDefaultCityForCountry(CountryStore.country);
- *     }
- *   });
- *
- * The usage of `waitFor()` can be chained, for example:
- *
- *   FlightPriceStore.dispatchToken =
- *     flightDispatcher.register(function(payload) {
- *       switch (payload.actionType) {
- *         case 'country-update':
- *           flightDispatcher.waitFor([CityStore.dispatchToken]);
- *           FlightPriceStore.price =
- *             getFlightPriceStore(CountryStore.country, CityStore.city);
- *           break;
- *
- *         case 'city-update':
- *           FlightPriceStore.price =
- *             FlightPriceStore(CountryStore.country, CityStore.city);
- *           break;
- *     }
- *   });
- *
- * The `country-update` payload will be guaranteed to invoke the stores'
- * registered callbacks in order: `CountryStore`, `CityStore`, then
- * `FlightPriceStore`.
- */
-
-  function Dispatcher() {
-    this.$Dispatcher_callbacks = {};
-    this.$Dispatcher_isPending = {};
-    this.$Dispatcher_isHandled = {};
-    this.$Dispatcher_isDispatching = false;
-    this.$Dispatcher_pendingPayload = null;
-  }
-
-  /**
-   * Registers a callback to be invoked with every dispatched payload. Returns
-   * a token that can be used with `waitFor()`.
-   *
-   * @param {function} callback
-   * @return {string}
-   */
-  Dispatcher.prototype.register=function(callback) {
-    var id = _prefix + _lastID++;
-    this.$Dispatcher_callbacks[id] = callback;
-    return id;
-  };
-
-  /**
-   * Removes a callback based on its token.
-   *
-   * @param {string} id
-   */
-  Dispatcher.prototype.unregister=function(id) {
-    invariant(
-      this.$Dispatcher_callbacks[id],
-      'Dispatcher.unregister(...): `%s` does not map to a registered callback.',
-      id
-    );
-    delete this.$Dispatcher_callbacks[id];
-  };
-
-  /**
-   * Waits for the callbacks specified to be invoked before continuing execution
-   * of the current callback. This method should only be used by a callback in
-   * response to a dispatched payload.
-   *
-   * @param {array<string>} ids
-   */
-  Dispatcher.prototype.waitFor=function(ids) {
-    invariant(
-      this.$Dispatcher_isDispatching,
-      'Dispatcher.waitFor(...): Must be invoked while dispatching.'
-    );
-    for (var ii = 0; ii < ids.length; ii++) {
-      var id = ids[ii];
-      if (this.$Dispatcher_isPending[id]) {
-        invariant(
-          this.$Dispatcher_isHandled[id],
-          'Dispatcher.waitFor(...): Circular dependency detected while ' +
-          'waiting for `%s`.',
-          id
-        );
-        continue;
-      }
-      invariant(
-        this.$Dispatcher_callbacks[id],
-        'Dispatcher.waitFor(...): `%s` does not map to a registered callback.',
-        id
-      );
-      this.$Dispatcher_invokeCallback(id);
-    }
-  };
-
-  /**
-   * Dispatches a payload to all registered callbacks.
-   *
-   * @param {object} payload
-   */
-  Dispatcher.prototype.dispatch=function(payload) {
-    invariant(
-      !this.$Dispatcher_isDispatching,
-      'Dispatch.dispatch(...): Cannot dispatch in the middle of a dispatch.'
-    );
-    this.$Dispatcher_startDispatching(payload);
-    try {
-      for (var id in this.$Dispatcher_callbacks) {
-        if (this.$Dispatcher_isPending[id]) {
-          continue;
-        }
-        this.$Dispatcher_invokeCallback(id);
-      }
-    } finally {
-      this.$Dispatcher_stopDispatching();
-    }
-  };
-
-  /**
-   * Is this Dispatcher currently dispatching.
-   *
-   * @return {boolean}
-   */
-  Dispatcher.prototype.isDispatching=function() {
-    return this.$Dispatcher_isDispatching;
-  };
-
-  /**
-   * Call the callback stored with the given id. Also do some internal
-   * bookkeeping.
-   *
-   * @param {string} id
-   * @internal
-   */
-  Dispatcher.prototype.$Dispatcher_invokeCallback=function(id) {
-    this.$Dispatcher_isPending[id] = true;
-    this.$Dispatcher_callbacks[id](this.$Dispatcher_pendingPayload);
-    this.$Dispatcher_isHandled[id] = true;
-  };
-
-  /**
-   * Set up bookkeeping needed when dispatching.
-   *
-   * @param {object} payload
-   * @internal
-   */
-  Dispatcher.prototype.$Dispatcher_startDispatching=function(payload) {
-    for (var id in this.$Dispatcher_callbacks) {
-      this.$Dispatcher_isPending[id] = false;
-      this.$Dispatcher_isHandled[id] = false;
-    }
-    this.$Dispatcher_pendingPayload = payload;
-    this.$Dispatcher_isDispatching = true;
-  };
-
-  /**
-   * Clear bookkeeping used for dispatching.
-   *
-   * @internal
-   */
-  Dispatcher.prototype.$Dispatcher_stopDispatching=function() {
-    this.$Dispatcher_pendingPayload = null;
-    this.$Dispatcher_isDispatching = false;
-  };
-
-
-module.exports = Dispatcher;
-
-},{"./invariant":45}],45:[function(require,module,exports){
-/**
- * Copyright (c) 2014, Facebook, Inc.
- * All rights reserved.
- *
- * This source code is licensed under the BSD-style license found in the
- * LICENSE file in the root directory of this source tree. An additional grant
- * of patent rights can be found in the PATENTS file in the same directory.
- *
- * @providesModule invariant
- */
-
-"use strict";
-
-/**
- * Use invariant() to assert state which your program assumes to be true.
- *
- * Provide sprintf-style format (only %s is supported) and arguments
- * to provide information about what broke and what you were
- * expecting.
- *
- * The invariant message will be stripped in production, but the invariant
- * will remain to ensure logic does not differ in production.
- */
-
-var invariant = function(condition, format, a, b, c, d, e, f) {
-  if (false) {
-    if (format === undefined) {
-      throw new Error('invariant requires an error message argument');
-    }
-  }
-
-  if (!condition) {
-    var error;
-    if (format === undefined) {
-      error = new Error(
-        'Minified exception occurred; use the non-minified dev environment ' +
-        'for the full error message and additional helpful warnings.'
-      );
-    } else {
-      var args = [a, b, c, d, e, f];
-      var argIndex = 0;
-      error = new Error(
-        'Invariant Violation: ' +
-        format.replace(/%s/g, function() { return args[argIndex++]; })
-      );
-    }
-
-    error.framesToPop = 1; // we don't care about invariant's own frame
-    throw error;
-  }
-};
-
-module.exports = invariant;
-
-},{}],46:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 /*
 	ractive.js v0.5.5
 	2014-07-13 - commit 8b1d34ef 
@@ -25313,7 +25425,7 @@ module.exports = invariant;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}],47:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -26658,4 +26770,4 @@ module.exports = invariant;
   }
 }).call(this);
 
-},{}]},{},[7])
+},{}]},{},[8])

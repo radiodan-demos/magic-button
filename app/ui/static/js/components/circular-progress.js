@@ -34,6 +34,8 @@ var initialState = {
 var CircularProgress = Ractive.extend({
   template: '#progressTempl',
   isolated: true,
+  twoway: false,
+  debug: true,
   computed: {
     angle: function () {
       var percentThrough = this.get('percentThrough');

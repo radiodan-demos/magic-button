@@ -6,7 +6,8 @@ var PowerStore = require('./stores/power'),
     NowAndNextStore = require('./stores/now-and-next'),
     NowPlayingStore = require('./stores/now-playing'),
     CurrentServiceStore = require('./stores/current-service'),
-    AvoiderStore = require('./stores/avoider');
+    AvoiderStore = require('./stores/avoider'),
+    AnnouncerStore = require('./stores/announcer');
 
 var AppView = require('./view');
 
@@ -50,7 +51,13 @@ function initState() {
     AppView.set('avoider', AvoiderStore.getState());
   });
 
+  AnnouncerStore.addChangeListener(function () {
+    AppView.set('announcer', AnnouncerStore.getState());
+  });
+
   api.connectEventStream();
   api.getInitialState();
-  // require('./api/avoid').settings();
+
+  // Read announcer current state
+  require('./api/announce')();
 }

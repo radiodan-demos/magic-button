@@ -1,7 +1,8 @@
 var AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes,
     PowerStore  = require('../stores/power'),
-    AvoiderStore = require('../stores/avoider');
+    AvoiderStore = require('../stores/avoider'),
+    AnnouncerStore = require('../stores/announcer');
 
 module.exports = {
   togglePower: function () {
@@ -35,5 +36,10 @@ module.exports = {
   },
   avoiderSettings: function (params) {
     require('../api/avoid').settings(params);
-  }
+  },
+  toggleAnnouncer: function () {
+    var isAnnouncing = AnnouncerStore.getState().isAnnouncing;
+    console.log('toggleAnnouncer - current state', isAnnouncing);
+    require('../api/announce')(isAnnouncing);
+  },
 };
