@@ -10950,7 +10950,7 @@ module.exports = Power;
 },{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":37,"underscore":51}],31:[function(require,module,exports){
 var extend = require('underscore').extend,
     clone = require('underscore').clone,
-    pull = require('underscore').without,
+    without = require('underscore').without,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
     Payload       = require('../constants/constants').Payload,
@@ -10962,7 +10962,7 @@ var state = {};
 var Store = extend(new EventEmitter(), {
   togglePreferredService: function (serviceId) {
     if (state.preferredServices && state.preferredServices.indexOf(serviceId) > -1) {
-      state.preferredServices = pull(state.preferredServices, serviceId);
+      state.preferredServices = without(state.preferredServices, serviceId);
     } else {
       state.preferredServices.push(serviceId);
     }
