@@ -3,7 +3,7 @@ var ServerActionCreators = require('../actions/server-action-creators'),
 
 module.exports = {
   getInitialState: function () {
-    xhr.get('/radio/state.json')
+    return xhr.get('/radio/state.json')
        .then(function (data) {
           try {
             var json = JSON.parse(data);
@@ -12,6 +12,8 @@ module.exports = {
           }
 
           ServerActionCreators.receiveInitialState(json);
+
+          return json;
        });
   },
   connectEventStream: function () {

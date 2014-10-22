@@ -1,4 +1,5 @@
-var AppDispatcher = require('../dispatcher/dispatcher'),
+var Logger = require('js-logger'),
+    AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes,
     PowerStore  = require('../stores/power'),
     AvoiderStore = require('../stores/avoider'),
@@ -8,7 +9,7 @@ var AppDispatcher = require('../dispatcher/dispatcher'),
 module.exports = {
   togglePower: function () {
     var newState;
-    console.log('togglePower');
+    Logger.debug('togglePower');
     AppDispatcher.handleViewAction({
        type: ActionTypes.POWER
     });
@@ -16,7 +17,7 @@ module.exports = {
     require('../api/power')(newState);
   },
   changeVolume: function (vol) {
-    console.log('changeVolume', vol);
+    Logger.debug('changeVolume', vol);
     AppDispatcher.handleViewAction({
        type: ActionTypes.VOLUME,
        state: { volume: vol }
@@ -24,12 +25,12 @@ module.exports = {
     require('../api/volume')(vol);
   },
   changeService: function (serviceId) {
-    console.log('changeService', serviceId);
+    Logger.debug('changeService', serviceId);
     require('../api/service')(serviceId);
   },
   toggleAvoider: function () {
     var isAvoiding = AvoiderStore.getState().isAvoiding;
-    console.log('toggleAvoider - current state', isAvoiding);
+    Logger.debug('toggleAvoider - current state', isAvoiding);
     require('../api/avoid').set(isAvoiding);
   },
   requestAvoiderSettings: function () {
@@ -43,7 +44,7 @@ module.exports = {
   },
   toggleAnnouncer: function () {
     var isAnnouncing = AnnouncerStore.getState().isAnnouncing;
-    console.log('toggleAnnouncer - current state', isAnnouncing);
+    Logger.debug('toggleAnnouncer - current state', isAnnouncing);
     require('../api/announce')(isAnnouncing);
   },
   toggleRadioSettingPreferredServer: function (serviceId) {

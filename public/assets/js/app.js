@@ -1,12 +1,13 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var AppDispatcher = require('../dispatcher/dispatcher'),
+var Logger = require('js-logger'),
+    AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes;
 
 module.exports = {
   receiveInitialState: function (state) {
-    console.log('receiveInitialState', state);
+    Logger.debug('receiveInitialState', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.RECEIVE_INITIAL_STATE,
        state: state
@@ -16,7 +17,7 @@ module.exports = {
     var topic = data.topic.split('.')[0],
         state = data;
 
-    console.log('receiveStateUpdate', topic, state);
+    Logger.debug('receiveStateUpdate', topic, state);
 
     AppDispatcher.handleServerAction({
        type: topic,
@@ -24,29 +25,30 @@ module.exports = {
     });
   },
   receiveAnnouncerState: function (state) {
-    console.log('receiveAnnouncerState', state);
+    Logger.debug('receiveAnnouncerState', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.ANNOUNCER,
        state: state
     });
   },
   receiveAvoiderSettings: function (state) {
-    console.log('receiveAvoiderSettings', state);
+    Logger.debug('receiveAvoiderSettings', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.RECEIVE_AVOIDER_SETTINGS,
        state: state
     });
   },
   receiveRadioSettings: function (state) {
-    console.log('receiveRadioSettings', state);
+    Logger.debug('receiveRadioSettings', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.RECEIVE_RADIO_SETTINGS,
        state: state
     });
   }
 };
-},{"../constants/constants":17,"../dispatcher/dispatcher":18}],2:[function(require,module,exports){
-var AppDispatcher = require('../dispatcher/dispatcher'),
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"js-logger":50}],2:[function(require,module,exports){
+var Logger = require('js-logger'),
+    AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes,
     PowerStore  = require('../stores/power'),
     AvoiderStore = require('../stores/avoider'),
@@ -56,7 +58,7 @@ var AppDispatcher = require('../dispatcher/dispatcher'),
 module.exports = {
   togglePower: function () {
     var newState;
-    console.log('togglePower');
+    Logger.debug('togglePower');
     AppDispatcher.handleViewAction({
        type: ActionTypes.POWER
     });
@@ -64,7 +66,7 @@ module.exports = {
     require('../api/power')(newState);
   },
   changeVolume: function (vol) {
-    console.log('changeVolume', vol);
+    Logger.debug('changeVolume', vol);
     AppDispatcher.handleViewAction({
        type: ActionTypes.VOLUME,
        state: { volume: vol }
@@ -72,12 +74,12 @@ module.exports = {
     require('../api/volume')(vol);
   },
   changeService: function (serviceId) {
-    console.log('changeService', serviceId);
+    Logger.debug('changeService', serviceId);
     require('../api/service')(serviceId);
   },
   toggleAvoider: function () {
     var isAvoiding = AvoiderStore.getState().isAvoiding;
-    console.log('toggleAvoider - current state', isAvoiding);
+    Logger.debug('toggleAvoider - current state', isAvoiding);
     require('../api/avoid').set(isAvoiding);
   },
   requestAvoiderSettings: function () {
@@ -91,7 +93,7 @@ module.exports = {
   },
   toggleAnnouncer: function () {
     var isAnnouncing = AnnouncerStore.getState().isAnnouncing;
-    console.log('toggleAnnouncer - current state', isAnnouncing);
+    Logger.debug('toggleAnnouncer - current state', isAnnouncing);
     require('../api/announce')(isAnnouncing);
   },
   toggleRadioSettingPreferredServer: function (serviceId) {
@@ -103,25 +105,21 @@ module.exports = {
     require('../api/radio-settings')(RadioSettingsStore.getState());
   }
 };
-},{"../api/announce":3,"../api/avoid":4,"../api/power":5,"../api/radio-settings":6,"../api/service":7,"../api/volume":8,"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/announcer":24,"../stores/avoider":26,"../stores/power":30,"../stores/radio-settings":31}],3:[function(require,module,exports){
+},{"../api/announce":3,"../api/avoid":4,"../api/power":5,"../api/radio-settings":6,"../api/service":7,"../api/volume":8,"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/announcer":24,"../stores/avoider":26,"../stores/power":30,"../stores/radio-settings":31,"js-logger":50}],3:[function(require,module,exports){
 var xhr = require('../xhr'),
     success = require('../utils').success,
     failure = require('../utils').failure,
     ServerActionCreators = require('../actions/server-action-creators');
 
 module.exports = function (isAnnouncing) {
-  console.log('api - isAnnouncing', isAnnouncing, isAnnouncing == null);
-
   if (isAnnouncing == null) {
     xhr.get('/announcer/state.json')
        .then(function (data) {
-          console.log('/announcer/state.json', data);
           return JSON.parse(data);
        })
        .then(ServerActionCreators.receiveAnnouncerState, failure);
   }
   var method = isAnnouncing ? 'DELETE' : 'POST';
-  console.log('api - isAnnouncing', method);
   xhr(method, '/announcer').catch(failure);
 }
 },{"../actions/server-action-creators":1,"../utils":33,"../xhr":36}],4:[function(require,module,exports){
@@ -148,7 +146,6 @@ module.exports.settings = function (data) {
           headers: { 'Content-type': 'application/json' },
           data: payload
         };
-    console.log('Avoid settings changed', opts);
     xhr.post('/avoider/settings.json', opts);
   }
 }
@@ -183,7 +180,6 @@ module.exports = function (data) {
           headers: { 'Content-type': 'application/json' },
           data: payload
         };
-    console.log('Radio settings changed', opts);
     xhr.post('/radio/settings.json', opts).catch(failure);
   }
 }
@@ -216,7 +212,8 @@ var PowerStore = require('./stores/power'),
     CurrentServiceStore = require('./stores/current-service'),
     AvoiderStore = require('./stores/avoider'),
     AnnouncerStore = require('./stores/announcer'),
-    RadioSettingsStore = require('./stores/radio-settings');
+    RadioSettingsStore = require('./stores/radio-settings'),
+    Logger = require('js-logger');
 
 var AppView = require('./view');
 
@@ -224,7 +221,7 @@ AppView.init()
        .then(initState);
 
 function initState() {
-  console.log('init');
+  Logger.info('init');
 
   PowerStore.addChangeListener(function () {
     AppView.set('power', PowerStore.getState());
@@ -270,12 +267,25 @@ function initState() {
 
 
   api.connectEventStream();
-  api.getInitialState();
+  api.getInitialState()
+     .then(function (state) {
+        if (state.debug && state.debug.logLevel) {
+          var level = state.debug.logLevel.toUpperCase();
+          console.log('Log level %o requested', level);
+          Logger.useDefaults();
+          if (Logger[level]) {
+            Logger.setLevel(Logger[level]);
+            console.log('Log level %o set', level);
+          } else {
+            console.warn('%o not available', level);
+          }
+        }
+     });
 
   // Read announcer current state
   require('./api/announce')();
 }
-},{"./api/announce":3,"./stores/announcer":24,"./stores/audio":25,"./stores/avoider":26,"./stores/current-service":27,"./stores/now-and-next":28,"./stores/now-playing":29,"./stores/power":30,"./stores/radio-settings":31,"./stores/services":32,"./utils/api":34,"./view":35}],10:[function(require,module,exports){
+},{"./api/announce":3,"./stores/announcer":24,"./stores/audio":25,"./stores/avoider":26,"./stores/current-service":27,"./stores/now-and-next":28,"./stores/now-playing":29,"./stores/power":30,"./stores/radio-settings":31,"./stores/services":32,"./utils/api":34,"./view":35,"js-logger":50}],10:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -347,7 +357,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./circular-progress":12,"ractive":50}],11:[function(require,module,exports){
+},{"./circular-progress":12,"ractive":51}],11:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -435,11 +445,6 @@ module.exports = Ractive.extend({
       this.set('state.settings.avoidType', evt.node.value);
       this.fire('settings-changed', this.get('state.settings'));
     });
-
-    // this.observe('state.settings', function (newValue, oldValue) {
-    //   console.log('state.settings', newValue, this.get('state'));
-    //   StateActionCreators.avoiderSettings(newValue);
-    // });
   },
   formatTimeDiff: function (diffInMs) {
     var diffSecs = diffInMs / 1000;
@@ -452,7 +457,7 @@ module.exports = Ractive.extend({
     return Math.floor(mins) + 'm ' + secsLeft;
   }
 });
-},{"./circular-progress":12,"./services-list":15,"ractive":50}],12:[function(require,module,exports){
+},{"./circular-progress":12,"./services-list":15,"ractive":51}],12:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -510,7 +515,7 @@ var CircularProgress = Ractive.extend({
 });
 
 module.exports = CircularProgress;
-},{"../lib/d3":19,"ractive":50}],13:[function(require,module,exports){
+},{"../lib/d3":19,"ractive":51}],13:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -544,7 +549,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./announcer":10,"./avoider":11,"./metadata":14,"./services-list":15,"./simple":16,"ractive":50}],14:[function(require,module,exports){
+},{"./announcer":10,"./avoider":11,"./metadata":14,"./services-list":15,"./simple":16,"ractive":51}],14:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -563,13 +568,12 @@ module.exports = Ractive.extend({
   },
   init: function () {
     this.on('track-display', function () {
-      console.log('track-display');
       var current = this.get('view');
       this.set('view', current === 'track' ? 'prog' : 'track');
     });
   }
 });
-},{"ractive":50}],15:[function(require,module,exports){
+},{"ractive":51}],15:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -588,7 +592,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":50}],16:[function(require,module,exports){
+},{"ractive":51}],16:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = function (selector) {
@@ -602,7 +606,7 @@ module.exports = function (selector) {
     }
   });
 };
-},{"./services-list":15,"ractive":50}],17:[function(require,module,exports){
+},{"./services-list":15,"ractive":51}],17:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     RECEIVE_INITIAL_STATE: 'RECEIVE_INITIAL_STATE',
@@ -645,7 +649,7 @@ module.exports = _.extend(new Dispatcher(), {
     this.dispatch(payload);
   }
 });
-},{"../constants/constants":17,"../lib/flux":20,"underscore":51}],19:[function(require,module,exports){
+},{"../constants/constants":17,"../lib/flux":20,"underscore":52}],19:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -10538,8 +10542,9 @@ module.exports = invariant;
 	Ractive.events.tap = tap;
 
 }));
-},{"ractive":50}],24:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"ractive":51}],24:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -10574,20 +10579,20 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('Announcer: ', action.type, action.state);
+      Logger.debug('Announcer: ', action.type, action.state);
       set(action.state.announcer);
       Store.emitChange();
       break;
     case ActionTypes.ANNOUNCER:
-      console.log('Announcer: ', action.type, action.state);
+      Logger.debug('Announcer: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('Announcer: SERVER', action.type, action.state);
+        Logger.debug('Announcer: SERVER', action.type, action.state);
         set(action.state.data);
         Store.emitChange();
       } else {
-        console.log('Announcer: VIEW ACTION pre', state.isAnnouncing);
+        Logger.debug('Announcer: VIEW ACTION pre', state.isAnnouncing);
         state.isAnnouncing = !state.isAnnouncing;
-        console.log('Announcer: VIEW ACTION post', state.isAnnouncing);
+        Logger.debug('Announcer: VIEW ACTION post', state.isAnnouncing);
         Store.emitChange();
       }
       break;
@@ -10595,8 +10600,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"underscore":51}],25:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"js-logger":50,"underscore":52}],25:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -10630,10 +10636,10 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       break;
     case ActionTypes.AUDIO:
       if (source === Payload.SERVER_ACTION) {
-        console.log('Audio: SERVER', action.type, action.state);
+        Logger.debug('Audio: SERVER', action.type, action.state);
         state = action.state.data;
       } else {
-        console.log('Audio: CHANGE', action.type, action.state);
+        Logger.debug('Audio: CHANGE', action.type, action.state);
         state.volume = action.state.volume;
       }
       Store.emitChange();
@@ -10642,8 +10648,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":37,"underscore":51}],26:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":37,"js-logger":50,"underscore":52}],26:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -10677,34 +10684,34 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('Avoider: ', action.type, action.state);
+      Logger.debug('Avoider: ', action.type, action.state);
       set(action.state.avoider);
       Store.emitChange();
       break;
     case ActionTypes.AVOIDER:
-      console.log('Avoider: ', action.type, action.state);
+      Logger.debug('Avoider: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('Avoider: SERVER', action.type, action.state);
+        Logger.debug('Avoider: SERVER', action.type, action.state);
         set(action.state.data);
         Store.emitChange();
       } else {
-        console.log('Avoider: VIEW ACTION pre', state.isAvoiding);
+        Logger.debug('Avoider: VIEW ACTION pre', state.isAvoiding);
         state.isAvoiding = !state.isAvoiding;
-        console.log('Avoider: VIEW ACTION post', state.isAvoiding);
+        Logger.debug('Avoider: VIEW ACTION post', state.isAvoiding);
         Store.emitChange();
       }
       break;
     case ActionTypes.RECEIVE_AVOIDER_SETTINGS:
-      console.log('Avoider Settings: ', action.type, action.state);
+      Logger.debug('Avoider Settings: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('Avoider: SERVER', action.type, action.state);
+        Logger.debug('Avoider: SERVER', action.type, action.state);
         state.settings = clone(action.state);
         Store.emitChange();
       }
       break;
     case ActionTypes.SETTINGS:
       if (source === Payload.SERVER_ACTION && action.state.topic === 'settings.avoider') {
-        console.log('Avoider: SERVER', action.type, action.state);
+        Logger.debug('Avoider: SERVER', action.type, action.state);
         state.settings = clone(action.state.data);
         Store.emitChange();
       }
@@ -10713,8 +10720,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"underscore":51}],27:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"js-logger":50,"underscore":52}],27:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -10745,17 +10753,17 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('CurrentService: ', action.type, action.state);
+      Logger.debug('CurrentService: ', action.type, action.state);
       currentServiceId = action.state.current ? action.state.current.id : null;
       Store.emitChange();
       break;
     case ActionTypes.SERVICE:
-      console.log('CurrentService: ', action.type, action.state);
+      Logger.debug('CurrentService: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION && action.state.topic === 'service.changed') {
-        console.log('CurrentService: SERVER', action.type, action.state);
+        Logger.debug('CurrentService: SERVER', action.type, action.state);
         currentServiceId = action.state.data ? action.state.data.id : null;
       } else {
-        console.log('CurrentService: CHANGE', action.type, action.state);
+        Logger.debug('CurrentService: CHANGE', action.type, action.state);
         // state.volume = action.state.volume;
       }
       Store.emitChange();
@@ -10764,8 +10772,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"underscore":51}],28:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"js-logger":50,"underscore":52}],28:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -10776,7 +10785,7 @@ var extend = require('underscore').extend,
 var state = {};
 
 function update(id, data) {
-  console.log('NowAndNext update', id, data)
+  Logger.debug('NowAndNext update', id, data)
   state[id] = data;
 }
 
@@ -10801,17 +10810,17 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
       AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-      console.log('NowAndNext', action.type, action.state);
+      Logger.debug('NowAndNext', action.type, action.state);
       if (action.state.current && action.state.current.nowAndNext) {
         update(action.state.current.id, action.state.current.nowAndNext);
         Store.emitChange(action.state.current.id);
       }
       break;
     case ActionTypes.SERVICE:
-      console.log('NowAndNext: ', action.type, action.state);
+      Logger.debug('NowAndNext: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
         AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-        console.log('NowAndNext: SERVER', action.type, action.state);
+        Logger.debug('NowAndNext: SERVER', action.type, action.state);
         if (action.state.data && action.state.data.nowAndNext) {
           update(action.state.data.id, action.state.data.nowAndNext);
           Store.emitChange(action.state.data.id);
@@ -10819,9 +10828,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       }
       break;
     case ActionTypes.NOW_AND_NEXT:
-      console.log('NowAndNext: ', action.type, action.state);
+      Logger.debug('NowAndNext: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('NowAndNext: SERVER', action.type, action.state);
+        Logger.debug('NowAndNext: SERVER', action.type, action.state);
         if (action.state.service && action.state.data) {
           update(action.state.service, action.state.data);
           Store.emitChange(action.state.service);
@@ -10832,8 +10841,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":37,"underscore":51}],29:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":37,"js-logger":50,"underscore":52}],29:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -10844,7 +10854,7 @@ var extend = require('underscore').extend,
 var state = {};
 
 function update(id, data) {
-  console.log('NowPlaying update', id, data)
+  Logger.debug('NowPlaying update', id, data)
   state[id] = data;
 }
 
@@ -10869,17 +10879,17 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
       AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-      console.log('NowPlaying', action.type, action.state);
+      Logger.debug('NowPlaying', action.type, action.state);
       if (action.state.current && action.state.current.nowPlaying) {
         update(action.state.current.id, action.state.current.nowPlaying);
         Store.emitChange(action.state.current.id);
       }
       break;
     case ActionTypes.SERVICE:
-      console.log('NowPlaying: ', action.type, action.state);
+      Logger.debug('NowPlaying: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION && action.state.topic === 'service.changed') {
         AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-        console.log('NowPlaying: SERVER', action.type, action.state);
+        Logger.debug('NowPlaying: SERVER', action.type, action.state);
         if (action.state.data && action.state.data.nowPlaying) {
           update(action.state.data.id, action.state.data.nowPlaying);
           Store.emitChange(action.state.data.id);
@@ -10887,9 +10897,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       }
       break;
     case ActionTypes.NOW_PLAYING:
-      console.log('NowPlaying: ', action.type, action.state);
+      Logger.debug('NowPlaying: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('NowPlaying: SERVER', action.type, action.state);
+        Logger.debug('NowPlaying: SERVER', action.type, action.state);
         if (action.state.service && action.state.data) {
           update(action.state.service, action.state.data);
           Store.emitChange(action.state.service);
@@ -10900,8 +10910,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":37,"underscore":51}],30:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":37,"js-logger":50,"underscore":52}],30:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -10930,13 +10941,13 @@ Power.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('Power: RECEIVE_INITIAL_STATE', action.type, action.state.power);
+      Logger.debug('Power: RECEIVE_INITIAL_STATE', action.type, action.state.power);
       state = action.state.power;
       Power.emitChange();
       break;
     case ActionTypes.POWER:
       if (source === Payload.SERVER_ACTION) {
-        console.log('Power: SERVER', action.type, action.state.data);
+        Logger.debug('Power: SERVER', action.type, action.state.data);
         state = action.state.data;
       } else {
         state.isOn = !state.isOn;
@@ -10947,8 +10958,9 @@ Power.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Power;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":37,"underscore":51}],31:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":37,"js-logger":50,"underscore":52}],31:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     without = require('underscore').without,
     EventEmitter  = require('events').EventEmitter,
@@ -10984,16 +10996,16 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_RADIO_SETTINGS:
-      console.log('Radio Settings: ', action.type, action.state);
+      Logger.debug('Radio Settings: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('Radio Settings: SERVER', action.type, action.state);
+        Logger.debug('Radio Settings: SERVER', action.type, action.state);
         state = clone(action.state);
         Store.emitChange();
       }
       break;
     case ActionTypes.SETTINGS:
       if (source === Payload.SERVER_ACTION && action.state.topic === 'settings.radio') {
-        console.log('Radio Settings: SERVER', action.type, action.state);
+        Logger.debug('Radio Settings: SERVER', action.type, action.state);
         state = clone(action.state.data);
         Store.emitChange();
       }
@@ -11002,8 +11014,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"underscore":51}],32:[function(require,module,exports){
-var extend = require('underscore').extend,
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":37,"js-logger":50,"underscore":52}],32:[function(require,module,exports){
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -11042,7 +11055,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('Services', action.type, action.state.services);
+      Logger.debug('Services', action.type, action.state.services);
       action.state.services.forEach(addService);
       Store.emitChange();
       break;
@@ -11050,11 +11063,12 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":37,"underscore":51}],33:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":37,"js-logger":50,"underscore":52}],33:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
-var _ = require('underscore');
+var _ = require('underscore'),
+    Logger = require('js-logger');
 
 module.exports = {
   merge: _.extend,
@@ -11076,12 +11090,12 @@ module.exports = {
   */
   success: function success(msg) {
     return function (content) {
-      console.log(msg, 'success', content);
+      Logger.debug(msg, 'success', content);
     };
   },
   failure: function failure(msg) {
     return function (err) {
-      console.warn(msg, 'failure', err.stack);
+      Logger.warn(msg, 'failure', err.stack);
     };
   },
   /*
@@ -11129,13 +11143,13 @@ module.exports = {
   }
 };
 
-},{"underscore":51}],34:[function(require,module,exports){
+},{"js-logger":50,"underscore":52}],34:[function(require,module,exports){
 var ServerActionCreators = require('../actions/server-action-creators'),
     xhr = require('../xhr');
 
 module.exports = {
   getInitialState: function () {
-    xhr.get('/radio/state.json')
+    return xhr.get('/radio/state.json')
        .then(function (data) {
           try {
             var json = JSON.parse(data);
@@ -11144,6 +11158,8 @@ module.exports = {
           }
 
           ServerActionCreators.receiveInitialState(json);
+
+          return json;
        });
   },
   connectEventStream: function () {
@@ -11155,7 +11171,8 @@ module.exports = {
   }
 }
 },{"../actions/server-action-creators":1,"../xhr":36}],35:[function(require,module,exports){
-var Ractive = require('ractive'),
+var Logger = require('js-logger'),
+    Ractive = require('ractive'),
     Promise = require('es6-promise').Promise,
     throttle = require('./utils').throttle;
 
@@ -11211,17 +11228,17 @@ module.exports = {
               StateActionCreators.toggleAnnouncer();
             },
             'settings-panel-requested': function () {
-              console.log('settings-panel-requested');
+              Logger.debug('settings-panel-requested');
               StateActionCreators.requestRadioSettings();
               this.set('mainView', (this.get('mainView') === 'settings') ? 'controls' : 'settings');
             },
             'preferred-service-changed': function (serviceId) {
-              console.log('preferred-service-changed', serviceId);
+              Logger.debug('preferred-service-changed', serviceId);
               StateActionCreators.toggleRadioSettingPreferredServer(serviceId);
             }
           });
 
-          console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
+          Logger.debug('splashStartTime - now = %oms', (Date.now() - splashStartTime));
           resolve();
         },
         components: {
@@ -11236,11 +11253,11 @@ module.exports = {
     });
   },
   set: function (keypath, payload) {
-    console.log('VIEW ', keypath, payload);
+    Logger.debug('VIEW ', keypath, payload);
     ractive.set(keypath, payload);
   }
 }
-},{"./actions/state-action-creators":2,"./components/controls":13,"./components/simple":16,"./lib/ractive-events-tap":23,"./utils":33,"es6-promise":39,"ractive":50}],36:[function(require,module,exports){
+},{"./actions/state-action-creators":2,"./components/controls":13,"./components/simple":16,"./lib/ractive-events-tap":23,"./utils":33,"es6-promise":39,"js-logger":50,"ractive":51}],36:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -12381,6 +12398,204 @@ exports.isFunction = isFunction;
 exports.isArray = isArray;
 exports.now = now;
 },{}],50:[function(require,module,exports){
+/*!
+ * js-logger - http://github.com/jonnyreeves/js-logger 
+ * Jonny Reeves, http://jonnyreeves.co.uk/
+ * js-logger may be freely distributed under the MIT license. 
+ */
+
+/*jshint sub:true*/
+/*global console:true,define:true, module:true*/
+(function (global) {
+	"use strict";
+
+	// Top level module for the global, static logger instance.
+	var Logger = { };
+	
+	// For those that are at home that are keeping score.
+	Logger.VERSION = "0.9.14";
+	
+	// Function which handles all incoming log messages.
+	var logHandler;
+	
+	// Map of ContextualLogger instances by name; used by Logger.get() to return the same named instance.
+	var contextualLoggersByNameMap = {};
+	
+	// Polyfill for ES5's Function.bind.
+	var bind = function(scope, func) {
+		return function() {
+			return func.apply(scope, arguments);
+		};
+	};
+
+	// Super exciting object merger-matron 9000 adding another 100 bytes to your download.
+	var merge = function () {
+		var args = arguments, target = args[0], key, i;
+		for (i = 1; i < args.length; i++) {
+			for (key in args[i]) {
+				if (!(key in target) && args[i].hasOwnProperty(key)) {
+					target[key] = args[i][key];
+				}
+			}
+		}
+		return target;
+	};
+
+	// Helper to define a logging level object; helps with optimisation.
+	var defineLogLevel = function(value, name) {
+		return { value: value, name: name };
+	};
+
+	// Predefined logging levels.
+	Logger.DEBUG = defineLogLevel(1, 'DEBUG');
+	Logger.INFO = defineLogLevel(2, 'INFO');
+	Logger.WARN = defineLogLevel(4, 'WARN');
+	Logger.ERROR = defineLogLevel(8, 'ERROR');
+	Logger.OFF = defineLogLevel(99, 'OFF');
+
+	// Inner class which performs the bulk of the work; ContextualLogger instances can be configured independently
+	// of each other.
+	var ContextualLogger = function(defaultContext) {
+		this.context = defaultContext;
+		this.setLevel(defaultContext.filterLevel);
+		this.log = this.info;  // Convenience alias.
+	};
+
+	ContextualLogger.prototype = {
+		// Changes the current logging level for the logging instance.
+		setLevel: function (newLevel) {
+			// Ensure the supplied Level object looks valid.
+			if (newLevel && "value" in newLevel) {
+				this.context.filterLevel = newLevel;
+			}
+		},
+
+		// Is the logger configured to output messages at the supplied level?
+		enabledFor: function (lvl) {
+			var filterLevel = this.context.filterLevel;
+			return lvl.value >= filterLevel.value;
+		},
+
+		debug: function () {
+			this.invoke(Logger.DEBUG, arguments);
+		},
+
+		info: function () {
+			this.invoke(Logger.INFO, arguments);
+		},
+
+		warn: function () {
+			this.invoke(Logger.WARN, arguments);
+		},
+
+		error: function () {
+			this.invoke(Logger.ERROR, arguments);
+		},
+
+		// Invokes the logger callback if it's not being filtered.
+		invoke: function (level, msgArgs) {
+			if (logHandler && this.enabledFor(level)) {
+				logHandler(msgArgs, merge({ level: level }, this.context));
+			}
+		}
+	};
+
+	// Protected instance which all calls to the to level `Logger` module will be routed through.
+	var globalLogger = new ContextualLogger({ filterLevel: Logger.OFF });
+
+	// Configure the global Logger instance.
+	(function() {
+		// Shortcut for optimisers.
+		var L = Logger;
+
+		L.enabledFor = bind(globalLogger, globalLogger.enabledFor);
+		L.debug = bind(globalLogger, globalLogger.debug);
+		L.info = bind(globalLogger, globalLogger.info);
+		L.warn = bind(globalLogger, globalLogger.warn);
+		L.error = bind(globalLogger, globalLogger.error);
+
+		// Don't forget the convenience alias!
+		L.log = L.info;
+	}());
+
+	// Set the global logging handler.  The supplied function should expect two arguments, the first being an arguments
+	// object with the supplied log messages and the second being a context object which contains a hash of stateful
+	// parameters which the logging function can consume.
+	Logger.setHandler = function (func) {
+		logHandler = func;
+	};
+
+	// Sets the global logging filter level which applies to *all* previously registered, and future Logger instances.
+	// (note that named loggers (retrieved via `Logger.get`) can be configured independently if required).
+	Logger.setLevel = function(level) {
+		// Set the globalLogger's level.
+		globalLogger.setLevel(level);
+
+		// Apply this level to all registered contextual loggers.
+		for (var key in contextualLoggersByNameMap) {
+			if (contextualLoggersByNameMap.hasOwnProperty(key)) {
+				contextualLoggersByNameMap[key].setLevel(level);
+			}
+		}
+	};
+
+	// Retrieve a ContextualLogger instance.  Note that named loggers automatically inherit the global logger's level,
+	// default context and log handler.
+	Logger.get = function (name) {
+		// All logger instances are cached so they can be configured ahead of use.
+		return contextualLoggersByNameMap[name] ||
+			(contextualLoggersByNameMap[name] = new ContextualLogger(merge({ name: name }, globalLogger.context)));
+	};
+
+	// Configure and example a Default implementation which writes to the `window.console` (if present).
+	Logger.useDefaults = function(defaultLevel) {
+		// Check for the presence of a logger.
+		if (typeof console === "undefined") {
+			return;
+		}
+
+		Logger.setLevel(defaultLevel || Logger.DEBUG);
+		Logger.setHandler(function(messages, context) {
+			var hdlr = console.log;
+
+			// Prepend the logger's name to the log message for easy identification.
+			if (context.name) {
+				messages[0] = "[" + context.name + "] " + messages[0];
+			}
+
+			// Delegate through to custom warn/error loggers if present on the console.
+			if (context.level === Logger.WARN && console.warn) {
+				hdlr = console.warn;
+			} else if (context.level === Logger.ERROR && console.error) {
+				hdlr = console.error;
+			} else if (context.level === Logger.INFO && console.info) {
+				hdlr = console.info;
+			}
+
+			// Support for IE8+ (and other, slightly more sane environments)
+			Function.prototype.apply.call(hdlr, console, messages);
+		});
+	};
+
+	// Export to popular environments boilerplate.
+	if (typeof define === 'function' && define.amd) {
+		define(Logger);
+	}
+	else if (typeof module !== 'undefined' && module.exports) {
+		module.exports = Logger;
+	}
+	else {
+		Logger._prevLogger = global.Logger;
+
+		Logger.noConflict = function () {
+			global.Logger = Logger._prevLogger;
+			return Logger;
+		};
+
+		global.Logger = Logger;
+    }
+}(this));
+},{}],51:[function(require,module,exports){
 /*
 	ractive.js v0.5.5
 	2014-07-13 - commit 8b1d34ef 
@@ -25541,7 +25756,7 @@ exports.now = now;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors

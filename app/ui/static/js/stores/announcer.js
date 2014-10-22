@@ -1,4 +1,5 @@
-var extend = require('underscore').extend,
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -33,20 +34,20 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('Announcer: ', action.type, action.state);
+      Logger.debug('Announcer: ', action.type, action.state);
       set(action.state.announcer);
       Store.emitChange();
       break;
     case ActionTypes.ANNOUNCER:
-      console.log('Announcer: ', action.type, action.state);
+      Logger.debug('Announcer: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('Announcer: SERVER', action.type, action.state);
+        Logger.debug('Announcer: SERVER', action.type, action.state);
         set(action.state.data);
         Store.emitChange();
       } else {
-        console.log('Announcer: VIEW ACTION pre', state.isAnnouncing);
+        Logger.debug('Announcer: VIEW ACTION pre', state.isAnnouncing);
         state.isAnnouncing = !state.isAnnouncing;
-        console.log('Announcer: VIEW ACTION post', state.isAnnouncing);
+        Logger.debug('Announcer: VIEW ACTION post', state.isAnnouncing);
         Store.emitChange();
       }
       break;

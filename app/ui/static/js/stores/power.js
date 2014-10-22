@@ -1,4 +1,5 @@
-var extend = require('underscore').extend,
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -27,13 +28,13 @@ Power.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('Power: RECEIVE_INITIAL_STATE', action.type, action.state.power);
+      Logger.debug('Power: RECEIVE_INITIAL_STATE', action.type, action.state.power);
       state = action.state.power;
       Power.emitChange();
       break;
     case ActionTypes.POWER:
       if (source === Payload.SERVER_ACTION) {
-        console.log('Power: SERVER', action.type, action.state.data);
+        Logger.debug('Power: SERVER', action.type, action.state.data);
         state = action.state.data;
       } else {
         state.isOn = !state.isOn;

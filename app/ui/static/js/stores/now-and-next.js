@@ -1,4 +1,5 @@
-var extend = require('underscore').extend,
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -9,7 +10,7 @@ var extend = require('underscore').extend,
 var state = {};
 
 function update(id, data) {
-  console.log('NowAndNext update', id, data)
+  Logger.debug('NowAndNext update', id, data)
   state[id] = data;
 }
 
@@ -34,17 +35,17 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
       AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-      console.log('NowAndNext', action.type, action.state);
+      Logger.debug('NowAndNext', action.type, action.state);
       if (action.state.current && action.state.current.nowAndNext) {
         update(action.state.current.id, action.state.current.nowAndNext);
         Store.emitChange(action.state.current.id);
       }
       break;
     case ActionTypes.SERVICE:
-      console.log('NowAndNext: ', action.type, action.state);
+      Logger.debug('NowAndNext: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
         AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
-        console.log('NowAndNext: SERVER', action.type, action.state);
+        Logger.debug('NowAndNext: SERVER', action.type, action.state);
         if (action.state.data && action.state.data.nowAndNext) {
           update(action.state.data.id, action.state.data.nowAndNext);
           Store.emitChange(action.state.data.id);
@@ -52,9 +53,9 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       }
       break;
     case ActionTypes.NOW_AND_NEXT:
-      console.log('NowAndNext: ', action.type, action.state);
+      Logger.debug('NowAndNext: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('NowAndNext: SERVER', action.type, action.state);
+        Logger.debug('NowAndNext: SERVER', action.type, action.state);
         if (action.state.service && action.state.data) {
           update(action.state.service, action.state.data);
           Store.emitChange(action.state.service);

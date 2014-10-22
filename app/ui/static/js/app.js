@@ -8,7 +8,8 @@ var PowerStore = require('./stores/power'),
     CurrentServiceStore = require('./stores/current-service'),
     AvoiderStore = require('./stores/avoider'),
     AnnouncerStore = require('./stores/announcer'),
-    RadioSettingsStore = require('./stores/radio-settings');
+    RadioSettingsStore = require('./stores/radio-settings'),
+    Logger = require('js-logger');
 
 var AppView = require('./view');
 
@@ -16,7 +17,7 @@ AppView.init()
        .then(initState);
 
 function initState() {
-  console.log('init');
+  Logger.info('init');
 
   PowerStore.addChangeListener(function () {
     AppView.set('power', PowerStore.getState());
@@ -62,7 +63,20 @@ function initState() {
 
 
   api.connectEventStream();
-  api.getInitialState();
+  api.getInitialState()
+     .then(function (state) {
+        if (state.debug && state.debug.logLevel) {
+          var level = state.debug.logLevel.toUpperCase();
+          console.log('Log level %o requested', level);
+          Logger.useDefaults();
+          if (Logger[level]) {
+            Logger.setLevel(Logger[level]);
+            console.log('Log level %o set', level);
+          } else {
+            console.warn('%o not available', level);
+          }
+        }
+     });
 
   // Read announcer current state
   require('./api/announce')();

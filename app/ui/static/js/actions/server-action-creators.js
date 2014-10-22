@@ -1,11 +1,12 @@
 'use strict';
 
-var AppDispatcher = require('../dispatcher/dispatcher'),
+var Logger = require('js-logger'),
+    AppDispatcher = require('../dispatcher/dispatcher'),
     ActionTypes = require('../constants/constants').ActionTypes;
 
 module.exports = {
   receiveInitialState: function (state) {
-    console.log('receiveInitialState', state);
+    Logger.debug('receiveInitialState', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.RECEIVE_INITIAL_STATE,
        state: state
@@ -15,7 +16,7 @@ module.exports = {
     var topic = data.topic.split('.')[0],
         state = data;
 
-    console.log('receiveStateUpdate', topic, state);
+    Logger.debug('receiveStateUpdate', topic, state);
 
     AppDispatcher.handleServerAction({
        type: topic,
@@ -23,21 +24,21 @@ module.exports = {
     });
   },
   receiveAnnouncerState: function (state) {
-    console.log('receiveAnnouncerState', state);
+    Logger.debug('receiveAnnouncerState', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.ANNOUNCER,
        state: state
     });
   },
   receiveAvoiderSettings: function (state) {
-    console.log('receiveAvoiderSettings', state);
+    Logger.debug('receiveAvoiderSettings', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.RECEIVE_AVOIDER_SETTINGS,
        state: state
     });
   },
   receiveRadioSettings: function (state) {
-    console.log('receiveRadioSettings', state);
+    Logger.debug('receiveRadioSettings', state);
     AppDispatcher.handleServerAction({
        type: ActionTypes.RECEIVE_RADIO_SETTINGS,
        state: state

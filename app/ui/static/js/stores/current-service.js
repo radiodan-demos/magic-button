@@ -1,4 +1,5 @@
-var extend = require('underscore').extend,
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -29,17 +30,17 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('CurrentService: ', action.type, action.state);
+      Logger.debug('CurrentService: ', action.type, action.state);
       currentServiceId = action.state.current ? action.state.current.id : null;
       Store.emitChange();
       break;
     case ActionTypes.SERVICE:
-      console.log('CurrentService: ', action.type, action.state);
+      Logger.debug('CurrentService: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION && action.state.topic === 'service.changed') {
-        console.log('CurrentService: SERVER', action.type, action.state);
+        Logger.debug('CurrentService: SERVER', action.type, action.state);
         currentServiceId = action.state.data ? action.state.data.id : null;
       } else {
-        console.log('CurrentService: CHANGE', action.type, action.state);
+        Logger.debug('CurrentService: CHANGE', action.type, action.state);
         // state.volume = action.state.volume;
       }
       Store.emitChange();

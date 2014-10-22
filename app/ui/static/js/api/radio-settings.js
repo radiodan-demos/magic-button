@@ -19,7 +19,6 @@ module.exports = function (data) {
           headers: { 'Content-type': 'application/json' },
           data: payload
         };
-    console.log('Radio settings changed', opts);
     xhr.post('/radio/settings.json', opts).catch(failure);
   }
 }

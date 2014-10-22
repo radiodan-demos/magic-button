@@ -1,4 +1,5 @@
-var extend = require('underscore').extend,
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     without = require('underscore').without,
     EventEmitter  = require('events').EventEmitter,
@@ -34,16 +35,16 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_RADIO_SETTINGS:
-      console.log('Radio Settings: ', action.type, action.state);
+      Logger.debug('Radio Settings: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
-        console.log('Radio Settings: SERVER', action.type, action.state);
+        Logger.debug('Radio Settings: SERVER', action.type, action.state);
         state = clone(action.state);
         Store.emitChange();
       }
       break;
     case ActionTypes.SETTINGS:
       if (source === Payload.SERVER_ACTION && action.state.topic === 'settings.radio') {
-        console.log('Radio Settings: SERVER', action.type, action.state);
+        Logger.debug('Radio Settings: SERVER', action.type, action.state);
         state = clone(action.state.data);
         Store.emitChange();
       }

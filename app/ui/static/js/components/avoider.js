@@ -85,11 +85,6 @@ module.exports = Ractive.extend({
       this.set('state.settings.avoidType', evt.node.value);
       this.fire('settings-changed', this.get('state.settings'));
     });
-
-    // this.observe('state.settings', function (newValue, oldValue) {
-    //   console.log('state.settings', newValue, this.get('state'));
-    //   StateActionCreators.avoiderSettings(newValue);
-    // });
   },
   formatTimeDiff: function (diffInMs) {
     var diffSecs = diffInMs / 1000;

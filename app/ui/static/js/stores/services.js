@@ -1,4 +1,5 @@
-var extend = require('underscore').extend,
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone  = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -37,7 +38,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 
   switch(action.type) {
     case ActionTypes.RECEIVE_INITIAL_STATE:
-      console.log('Services', action.type, action.state.services);
+      Logger.debug('Services', action.type, action.state.services);
       action.state.services.forEach(addService);
       Store.emitChange();
       break;

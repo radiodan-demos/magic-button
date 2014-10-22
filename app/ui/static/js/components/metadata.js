@@ -16,7 +16,6 @@ module.exports = Ractive.extend({
   },
   init: function () {
     this.on('track-display', function () {
-      console.log('track-display');
       var current = this.get('view');
       this.set('view', current === 'track' ? 'prog' : 'track');
     });

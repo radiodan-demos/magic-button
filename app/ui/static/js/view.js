@@ -1,4 +1,5 @@
-var Ractive = require('ractive'),
+var Logger = require('js-logger'),
+    Ractive = require('ractive'),
     Promise = require('es6-promise').Promise,
     throttle = require('./utils').throttle;
 
@@ -54,17 +55,17 @@ module.exports = {
               StateActionCreators.toggleAnnouncer();
             },
             'settings-panel-requested': function () {
-              console.log('settings-panel-requested');
+              Logger.debug('settings-panel-requested');
               StateActionCreators.requestRadioSettings();
               this.set('mainView', (this.get('mainView') === 'settings') ? 'controls' : 'settings');
             },
             'preferred-service-changed': function (serviceId) {
-              console.log('preferred-service-changed', serviceId);
+              Logger.debug('preferred-service-changed', serviceId);
               StateActionCreators.toggleRadioSettingPreferredServer(serviceId);
             }
           });
 
-          console.log('splashStartTime - now = %oms', (Date.now() - splashStartTime));
+          Logger.debug('splashStartTime - now = %oms', (Date.now() - splashStartTime));
           resolve();
         },
         components: {
@@ -79,7 +80,7 @@ module.exports = {
     });
   },
   set: function (keypath, payload) {
-    console.log('VIEW ', keypath, payload);
+    Logger.debug('VIEW ', keypath, payload);
     ractive.set(keypath, payload);
   }
 }

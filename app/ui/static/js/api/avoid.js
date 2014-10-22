@@ -21,7 +21,6 @@ module.exports.settings = function (data) {
           headers: { 'Content-type': 'application/json' },
           data: payload
         };
-    console.log('Avoid settings changed', opts);
     xhr.post('/avoider/settings.json', opts);
   }
 }

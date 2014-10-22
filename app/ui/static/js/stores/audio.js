@@ -1,4 +1,5 @@
-var extend = require('underscore').extend,
+var Logger = require('js-logger'),
+    extend = require('underscore').extend,
     clone = require('underscore').clone,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
@@ -32,10 +33,10 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       break;
     case ActionTypes.AUDIO:
       if (source === Payload.SERVER_ACTION) {
-        console.log('Audio: SERVER', action.type, action.state);
+        Logger.debug('Audio: SERVER', action.type, action.state);
         state = action.state.data;
       } else {
-        console.log('Audio: CHANGE', action.type, action.state);
+        Logger.debug('Audio: CHANGE', action.type, action.state);
         state.volume = action.state.volume;
       }
       Store.emitChange();
