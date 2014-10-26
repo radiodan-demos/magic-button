@@ -1,0 +1,8 @@
+{
+  "avoid": ["online"],
+  "announce": ["online"],
+  "play": ["online", "standby"],
+  "playNext": ["online"],
+  "powerOn", ["standby"],
+  "standby", ["online"]
+}

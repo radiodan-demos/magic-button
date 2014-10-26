@@ -77,5 +77,16 @@ describe('State', function() {
       this.subject.handle('testAction');
       assert.equal(this.actionStub.callCount, 0);
     });
+
+    it('can alter state', function() {
+      var subject = State.create({'testAction': function() {
+        this.handle('shutdown');
+      }});
+
+      subject.state = 'online';
+      subject.handle('testAction');
+
+      assert.equal(subject.state, 'shutdown');
+    });
   });
 });
