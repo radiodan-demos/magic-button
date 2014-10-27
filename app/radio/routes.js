@@ -77,6 +77,8 @@ function routes(app, eventBus, radiodan, states, services, settings) {
   function getState(req, res) {
     var current, state;
 
+    var logLevel = utils.logger.logLevel ? utils.logger.logLevel() : null;
+
     if(services.current()) {
       var programme = services.programmeFor(services.current());
       current = {
@@ -106,7 +108,7 @@ function routes(app, eventBus, radiodan, states, services, settings) {
             avoider : { isAvoiding: false },
             services: stations,
             debug   : {
-              logLevel: utils.logger.logLevel()
+              logLevel: logLevel
             }
           };
         } catch (err) {
