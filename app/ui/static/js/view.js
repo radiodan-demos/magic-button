@@ -26,12 +26,9 @@ module.exports = {
       ractive = new Ractive({
         el        : container,
         template  : template,
-        // adapt     : [ 'Backbone' ],
         debug     : true,
         twoway    : false,
         data      : {
-          // radio: radioModel,
-          // services: radioModel.get('services'),
           mainView: 'controls'
         },
         complete  : function () {
