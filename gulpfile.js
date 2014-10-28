@@ -2,9 +2,16 @@ var gulp = require('gulp'),
     less = require('gulp-less'),
     autoprefixer = require('gulp-autoprefixer'),
     browserify = require('browserify'),
+    watchify = require('watchify'),
+    livereload = require('gulp-livereload'),
     uglify = require('gulp-uglify'),
     streamify = require('gulp-streamify'),
-    source = require('vinyl-source-stream');
+    source = require('vinyl-source-stream'),
+    transform = require('vinyl-transform'),
+    exorcist = require('exorcist'),
+    clone = require('gulp-clone'),
+    Promise = require('es6-promise').Promise,
+    _ = require('underscore');
 
 // Config
 var src  = './app/ui/static',
@@ -17,17 +24,19 @@ var copyConfig = {
 
 var cssConfig = {
   src: src + '/css/app.less',
-  dest: dest + '/css'
+  dest: dest + '/css',
+  watch: src + '/css/**'
 };
 
 var jsConfig = {
   src: src + '/js/app.js',
   dest: dest + '/js',
-  name: 'app.js',
-  min: 'app.min.js',
-  debug: 'app.debug.js'
+  name: 'app'
 };
 
+var viewsConfig = {
+  watch: './app/ui/views/**/*.html'
+};
 
 // Tasks
 
@@ -38,6 +47,10 @@ gulp.task('copy', copy);
 gulp.task('css' , css);
 gulp.task('js' , js);
 
+gulp.task('watch', watch);
+gulp.task('reload', reload);
+
+// Definitions
 function copy() {
   console.log( copyConfig.src + ' -> ' + copyConfig.dest );
   gulp.src( copyConfig.src, { cwd: src } )
@@ -54,23 +67,76 @@ function css() {
 }
 
 function js() {
-  var production = browserify( jsConfig.src, { debug: false } ).bundle();
-  var debug = browserify( jsConfig.src, { debug: true } ).bundle();
+  // Always include source maps
+  var sourceBundle = browserify( jsConfig.src, { debug: true } ).bundle();
 
-  // Production build, not minified
-  production
-      .pipe( source(jsConfig.name) )
-      .pipe( gulp.dest(jsConfig.dest) );
+  return Promise.all([
+    // Unminifed
+    compileJs(sourceBundle, jsConfig.name, jsConfig.dest, false),
+    // Minifed
+    compileJs(sourceBundle, jsConfig.name + '.min', jsConfig.dest, true)
+  ]);
+}
 
-  // Production build, minified
-  production
-      .pipe( source(jsConfig.min) )
-      .pipe( streamify(uglify()) )
-      .pipe( gulp.dest(jsConfig.dest) );
+function compileJs(sourceBundle, name, dest, shouldMinify) {
+  return new Promise(function (resolve, reject) {
+    var stream = sourceBundle
+      .pipe(  source(name + '.js') )
+      .pipe(
+        // Extract source maps into own file
+        transform(function () { return exorcist(dest + '/' + name + '.map'); })
+      );
 
-  // Debug build
-  debug
-      .pipe( source(jsConfig.debug) )
-      .pipe( gulp.dest(jsConfig.dest) );
+    if (shouldMinify) {
+      stream = stream.pipe( streamify(uglify()) );
+    }
 
+    stream.pipe( gulp.dest(dest) )
+      .on('error', reject)
+      .on('end', resolve);
+  });
+}
+
+function watch() {
+  var opts = {
+    cache: {},
+    packageCache: {},
+    fullPaths: true,
+    debug: true
+  },
+  bundler;
+
+  bundler = watchify( browserify( jsConfig.src, opts ) );
+
+  livereload.listen();
+
+  function rebundle() {
+    console.log('Starting Watchify rebundle');
+    var t = Date.now();
+
+    bundler
+      .bundle()
+      .pipe( source(jsConfig.name + '.js') )
+      .pipe(
+        // Extract source maps into own file
+        transform(function () { return exorcist(jsConfig.dest + '/' + jsConfig.name + '.map'); })
+      )
+      .pipe( gulp.dest(jsConfig.dest) )
+      .on('end', function () {
+        console.log('Finished bundling', ( Date.now() -  t ) / 1000 + ' s');
+        livereload.changed();
+      });
+  }
+
+  bundler.on('update', rebundle);
+
+  gulp.watch(cssConfig.watch, ['css', 'reload']);
+  gulp.watch(copyConfig.watch, { cwd: copyConfig.src }, ['copy', 'reload']);
+  gulp.watch(viewsConfig.watch, ['reload']);
+
+  return rebundle();
+}
+
+function reload() {
+  livereload.changed();
 }
