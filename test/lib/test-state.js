@@ -54,34 +54,40 @@ describe('State', function() {
 
   describe('adding actions', function() {
     beforeEach(function(){
-      this.actionStub = sinon.stub(),
-      this.actions = {'testAction': this.actionStub},
-      this.subject = State.create(this.actions);
+      this.actionStub = sinon.stub();
+      this.actions = {'testAction': this.actionStub};
     });
 
     it('adds transitions to online state', function() {
+      this.subject = State.create({ 'online': this.actions });
+
       this.subject.state = 'online';
       this.subject.handle('testAction');
 
       assert.equal(this.actionStub.callCount, 1);
     });
 
-    it('does not add transitions to standby', function() {
+    it('adds transitions to standby', function() {
+      this.subject = State.create({ 'standby': this.actions });
+
       this.subject.state = 'standby';
       this.subject.handle('testAction');
-      assert.equal(this.actionStub.callCount, 0);
+      assert.equal(this.actionStub.callCount, 1);
     });
 
-    it('does not add transitions to shutdown', function() {
+    it('adds transitions to shutdown', function() {
+      this.subject = State.create({ 'shutdown': this.actions });
+
       this.subject.state = 'shutdown';
       this.subject.handle('testAction');
-      assert.equal(this.actionStub.callCount, 0);
+      assert.equal(this.actionStub.callCount, 1);
     });
 
     it('can alter state', function() {
-      var subject = State.create({'testAction': function() {
-        this.handle('shutdown');
-      }});
+      var subject = State.create({'online':
+        {'testAction': function() {
+          this.handle('shutdown');
+      }}});
 
       subject.state = 'online';
       subject.handle('testAction');
