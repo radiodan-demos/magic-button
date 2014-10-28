@@ -17,6 +17,7 @@
   padding: 12px 0;
   border: 1px solid transparent;
   background-color: #f9f9f9;
+  cursor: pointer;
 }
 
 .service-item * {
