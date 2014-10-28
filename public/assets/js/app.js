@@ -1,207 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-'use strict';
-
-var Logger = require('js-logger'),
-    AppDispatcher = require('../dispatcher/dispatcher'),
-    ActionTypes = require('../constants/constants').ActionTypes;
-
-module.exports = {
-  receiveInitialState: function (state) {
-    Logger.debug('receiveInitialState', state);
-    AppDispatcher.handleServerAction({
-       type: ActionTypes.RECEIVE_INITIAL_STATE,
-       state: state
-    });
-  },
-  receiveStateUpdate: function (data) {
-    var topic = data.topic.split('.')[0],
-        state = data;
-
-    Logger.debug('receiveStateUpdate', topic, state);
-
-    AppDispatcher.handleServerAction({
-       type: topic,
-       state: state
-    });
-  },
-  receiveAnnouncerState: function (state) {
-    Logger.debug('receiveAnnouncerState', state);
-    AppDispatcher.handleServerAction({
-       type: ActionTypes.ANNOUNCER,
-       state: state
-    });
-  },
-  receiveAvoiderSettings: function (state) {
-    Logger.debug('receiveAvoiderSettings', state);
-    AppDispatcher.handleServerAction({
-       type: ActionTypes.RECEIVE_AVOIDER_SETTINGS,
-       state: state
-    });
-  },
-  receiveRadioSettings: function (state) {
-    Logger.debug('receiveRadioSettings', state);
-    AppDispatcher.handleServerAction({
-       type: ActionTypes.RECEIVE_RADIO_SETTINGS,
-       state: state
-    });
-  }
-};
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"js-logger":52}],2:[function(require,module,exports){
-var Logger = require('js-logger'),
-    AppDispatcher = require('../dispatcher/dispatcher'),
-    ActionTypes = require('../constants/constants').ActionTypes,
-    PowerStore  = require('../stores/power'),
-    AvoiderStore = require('../stores/avoider'),
-    AnnouncerStore = require('../stores/announcer'),
-    RadioSettingsStore = require('../stores/radio-settings');
-
-module.exports = {
-  togglePower: function () {
-    var newState;
-    Logger.debug('togglePower');
-    AppDispatcher.handleViewAction({
-       type: ActionTypes.POWER
-    });
-    newState = PowerStore.getState().isOn;
-    require('../api/power')(newState);
-  },
-  changeVolume: function (vol) {
-    Logger.debug('changeVolume', vol);
-    AppDispatcher.handleViewAction({
-       type: ActionTypes.VOLUME,
-       state: { volume: vol }
-    });
-    require('../api/volume')(vol);
-  },
-  changeService: function (serviceId) {
-    Logger.debug('changeService', serviceId);
-    require('../api/service')(serviceId);
-  },
-  toggleAvoider: function () {
-    var isAvoiding = AvoiderStore.getState().isAvoiding;
-    Logger.debug('toggleAvoider - current state', isAvoiding);
-    require('../api/avoid').set(isAvoiding);
-  },
-  requestAvoiderSettings: function () {
-    require('../api/avoid').settings();
-  },
-  requestRadioSettings: function () {
-    require('../api/radio-settings')();
-  },
-  avoiderSettings: function (params) {
-    require('../api/avoid').settings(params);
-  },
-  toggleAnnouncer: function () {
-    var isAnnouncing = AnnouncerStore.getState().isAnnouncing;
-    Logger.debug('toggleAnnouncer - current state', isAnnouncing);
-    require('../api/announce')(isAnnouncing);
-  },
-  toggleRadioSettingPreferredServer: function (serviceId) {
-    RadioSettingsStore.togglePreferredService(serviceId);
-    AppDispatcher.handleViewAction({
-       type: ActionTypes.SETTINGS,
-       state: RadioSettingsStore.getState()
-    });
-    require('../api/radio-settings')(RadioSettingsStore.getState());
-  }
-};
-},{"../api/announce":3,"../api/avoid":4,"../api/power":5,"../api/radio-settings":6,"../api/service":7,"../api/volume":8,"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/announcer":24,"../stores/avoider":26,"../stores/power":30,"../stores/radio-settings":31,"js-logger":52}],3:[function(require,module,exports){
-var xhr = require('../xhr'),
-    success = require('../utils').success,
-    failure = require('../utils').failure,
-    ServerActionCreators = require('../actions/server-action-creators');
-
-module.exports = function (isAnnouncing) {
-  if (isAnnouncing == null) {
-    xhr.get('/announcer/state.json')
-       .then(function (data) {
-          return JSON.parse(data);
-       })
-       .then(ServerActionCreators.receiveAnnouncerState, failure);
-  }
-  var method = isAnnouncing ? 'DELETE' : 'POST';
-  xhr(method, '/announcer').catch(failure);
-}
-},{"../actions/server-action-creators":1,"../utils":33,"../xhr":36}],4:[function(require,module,exports){
-var xhr = require('../xhr'),
-    success = require('../utils').success,
-    failure = require('../utils').failure,
-    ServerActionCreators = require('../actions/server-action-creators');
-
-module.exports.set = function (isAvoiding) {
-  var method = isAvoiding ? 'DELETE' : 'POST';
-  xhr(method, '/avoider');
-}
-
-module.exports.settings = function (data) {
-  if (!data) {
-    xhr.get('/avoider/settings.json')
-       .then(function (data) {
-        return JSON.parse(data);
-       })
-       .then(ServerActionCreators.receiveAvoiderSettings);
-  } else {
-    var payload = JSON.stringify(data),
-        opts = {
-          headers: { 'Content-type': 'application/json' },
-          data: payload
-        };
-    xhr.post('/avoider/settings.json', opts);
-  }
-}
-},{"../actions/server-action-creators":1,"../utils":33,"../xhr":36}],5:[function(require,module,exports){
-var xhr = require('../xhr'),
-    success = require('../utils').success,
-    failure = require('../utils').failure;
-
-module.exports = function (turnOn) {
-  var method = turnOn ? 'PUT' : 'DELETE';
-  xhr(method, '/radio/power');
-}
-},{"../utils":33,"../xhr":36}],6:[function(require,module,exports){
-var xhr = require('../xhr'),
-    utils = require('../utils'),
-    success = utils.success,
-    failure = utils.failure,
-    ServerActionCreators = require('../actions/server-action-creators');
-
-module.exports = function (data) {
-  if (!data) {
-    xhr.get('/radio/settings.json')
-       .then(function (data) {
-        return JSON.parse(data);
-       })
-       .then(ServerActionCreators.receiveRadioSettings)
-       .catch(failure);
-  } else {
-    console.warn('data', data);
-    var payload = JSON.stringify(data),
-        opts = {
-          headers: { 'Content-type': 'application/json' },
-          data: payload
-        };
-    xhr.post('/radio/settings.json', opts).catch(failure);
-  }
-}
-},{"../actions/server-action-creators":1,"../utils":33,"../xhr":36}],7:[function(require,module,exports){
-var xhr = require('../xhr'),
-    success = require('../utils').success,
-    failure = require('../utils').failure;
-
-module.exports = function (value) {
-  xhr.post('/radio/service/' + value )
-     .then(success('service'), failure('service'));
-}
-},{"../utils":33,"../xhr":36}],8:[function(require,module,exports){
-var xhr = require('../xhr'),
-    success = require('../utils').success,
-    failure = require('../utils').failure;
-
-module.exports = function (value) {
-  xhr.post('/radio/volume/value/' + value )
-     .then(success('volume'), failure('volume'));
-}
-},{"../utils":33,"../xhr":36}],9:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var api = require('./utils/api');
 
 var PowerStore = require('./stores/power'),
@@ -285,7 +82,210 @@ function initState() {
   // Read announcer current state
   require('./api/announce')();
 }
-},{"./api/announce":3,"./stores/announcer":24,"./stores/audio":25,"./stores/avoider":26,"./stores/current-service":27,"./stores/now-and-next":28,"./stores/now-playing":29,"./stores/power":30,"./stores/radio-settings":31,"./stores/services":32,"./utils/api":34,"./view":35,"js-logger":52}],10:[function(require,module,exports){
+},{"./api/announce":4,"./stores/announcer":24,"./stores/audio":25,"./stores/avoider":26,"./stores/current-service":27,"./stores/now-and-next":28,"./stores/now-playing":29,"./stores/power":30,"./stores/radio-settings":31,"./stores/services":32,"./utils/api":34,"./view":35,"js-logger":42}],2:[function(require,module,exports){
+'use strict';
+
+var Logger = require('js-logger'),
+    AppDispatcher = require('../dispatcher/dispatcher'),
+    ActionTypes = require('../constants/constants').ActionTypes;
+
+module.exports = {
+  receiveInitialState: function (state) {
+    Logger.debug('receiveInitialState', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.RECEIVE_INITIAL_STATE,
+       state: state
+    });
+  },
+  receiveStateUpdate: function (data) {
+    var topic = data.topic.split('.')[0],
+        state = data;
+
+    Logger.debug('receiveStateUpdate', topic, state);
+
+    AppDispatcher.handleServerAction({
+       type: topic,
+       state: state
+    });
+  },
+  receiveAnnouncerState: function (state) {
+    Logger.debug('receiveAnnouncerState', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.ANNOUNCER,
+       state: state
+    });
+  },
+  receiveAvoiderSettings: function (state) {
+    Logger.debug('receiveAvoiderSettings', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.RECEIVE_AVOIDER_SETTINGS,
+       state: state
+    });
+  },
+  receiveRadioSettings: function (state) {
+    Logger.debug('receiveRadioSettings', state);
+    AppDispatcher.handleServerAction({
+       type: ActionTypes.RECEIVE_RADIO_SETTINGS,
+       state: state
+    });
+  }
+};
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"js-logger":42}],3:[function(require,module,exports){
+var Logger = require('js-logger'),
+    AppDispatcher = require('../dispatcher/dispatcher'),
+    ActionTypes = require('../constants/constants').ActionTypes,
+    PowerStore  = require('../stores/power'),
+    AvoiderStore = require('../stores/avoider'),
+    AnnouncerStore = require('../stores/announcer'),
+    RadioSettingsStore = require('../stores/radio-settings');
+
+module.exports = {
+  togglePower: function () {
+    var newState;
+    Logger.debug('togglePower');
+    AppDispatcher.handleViewAction({
+       type: ActionTypes.POWER
+    });
+    newState = PowerStore.getState().isOn;
+    require('../api/power')(newState);
+  },
+  changeVolume: function (vol) {
+    Logger.debug('changeVolume', vol);
+    AppDispatcher.handleViewAction({
+       type: ActionTypes.VOLUME,
+       state: { volume: vol }
+    });
+    require('../api/volume')(vol);
+  },
+  changeService: function (serviceId) {
+    Logger.debug('changeService', serviceId);
+    require('../api/service')(serviceId);
+  },
+  toggleAvoider: function () {
+    var isAvoiding = AvoiderStore.getState().isAvoiding;
+    Logger.debug('toggleAvoider - current state', isAvoiding);
+    require('../api/avoid').set(isAvoiding);
+  },
+  requestAvoiderSettings: function () {
+    require('../api/avoid').settings();
+  },
+  requestRadioSettings: function () {
+    require('../api/radio-settings')();
+  },
+  avoiderSettings: function (params) {
+    require('../api/avoid').settings(params);
+  },
+  toggleAnnouncer: function () {
+    var isAnnouncing = AnnouncerStore.getState().isAnnouncing;
+    Logger.debug('toggleAnnouncer - current state', isAnnouncing);
+    require('../api/announce')(isAnnouncing);
+  },
+  toggleRadioSettingPreferredServer: function (serviceId) {
+    RadioSettingsStore.togglePreferredService(serviceId);
+    AppDispatcher.handleViewAction({
+       type: ActionTypes.SETTINGS,
+       state: RadioSettingsStore.getState()
+    });
+    require('../api/radio-settings')(RadioSettingsStore.getState());
+  }
+};
+},{"../api/announce":4,"../api/avoid":5,"../api/power":6,"../api/radio-settings":7,"../api/service":8,"../api/volume":9,"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/announcer":24,"../stores/avoider":26,"../stores/power":30,"../stores/radio-settings":31,"js-logger":42}],4:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure,
+    ServerActionCreators = require('../actions/server-action-creators');
+
+module.exports = function (isAnnouncing) {
+  if (isAnnouncing == null) {
+    xhr.get('/announcer/state.json')
+       .then(function (data) {
+          return JSON.parse(data);
+       })
+       .then(ServerActionCreators.receiveAnnouncerState, failure);
+  }
+  var method = isAnnouncing ? 'DELETE' : 'POST';
+  xhr(method, '/announcer').catch(failure);
+}
+},{"../actions/server-action-creators":2,"../utils":33,"../xhr":36}],5:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure,
+    ServerActionCreators = require('../actions/server-action-creators');
+
+module.exports.set = function (isAvoiding) {
+  var method = isAvoiding ? 'DELETE' : 'POST';
+  xhr(method, '/avoider');
+}
+
+module.exports.settings = function (data) {
+  if (!data) {
+    xhr.get('/avoider/settings.json')
+       .then(function (data) {
+        return JSON.parse(data);
+       })
+       .then(ServerActionCreators.receiveAvoiderSettings);
+  } else {
+    var payload = JSON.stringify(data),
+        opts = {
+          headers: { 'Content-type': 'application/json' },
+          data: payload
+        };
+    xhr.post('/avoider/settings.json', opts);
+  }
+}
+},{"../actions/server-action-creators":2,"../utils":33,"../xhr":36}],6:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
+module.exports = function (turnOn) {
+  var method = turnOn ? 'PUT' : 'DELETE';
+  xhr(method, '/radio/power');
+}
+},{"../utils":33,"../xhr":36}],7:[function(require,module,exports){
+var xhr = require('../xhr'),
+    utils = require('../utils'),
+    success = utils.success,
+    failure = utils.failure,
+    ServerActionCreators = require('../actions/server-action-creators');
+
+module.exports = function (data) {
+  if (!data) {
+    xhr.get('/radio/settings.json')
+       .then(function (data) {
+        return JSON.parse(data);
+       })
+       .then(ServerActionCreators.receiveRadioSettings)
+       .catch(failure);
+  } else {
+    console.warn('data', data);
+    var payload = JSON.stringify(data),
+        opts = {
+          headers: { 'Content-type': 'application/json' },
+          data: payload
+        };
+    xhr.post('/radio/settings.json', opts).catch(failure);
+  }
+}
+},{"../actions/server-action-creators":2,"../utils":33,"../xhr":36}],8:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
+module.exports = function (value) {
+  xhr.post('/radio/service/' + value )
+     .then(success('service'), failure('service'));
+}
+},{"../utils":33,"../xhr":36}],9:[function(require,module,exports){
+var xhr = require('../xhr'),
+    success = require('../utils').success,
+    failure = require('../utils').failure;
+
+module.exports = function (value) {
+  xhr.post('/radio/volume/value/' + value )
+     .then(success('volume'), failure('volume'));
+}
+},{"../utils":33,"../xhr":36}],10:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -357,7 +357,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./circular-progress":12,"ractive":53}],11:[function(require,module,exports){
+},{"./circular-progress":12,"ractive":43}],11:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -457,7 +457,7 @@ module.exports = Ractive.extend({
     return Math.floor(mins) + 'm ' + secsLeft;
   }
 });
-},{"./circular-progress":12,"./services-list":15,"ractive":53}],12:[function(require,module,exports){
+},{"./circular-progress":12,"./services-list":15,"ractive":43}],12:[function(require,module,exports){
 var Ractive = require('ractive'),
     d3      = require('../lib/d3');
 
@@ -515,7 +515,7 @@ var CircularProgress = Ractive.extend({
 });
 
 module.exports = CircularProgress;
-},{"../lib/d3":19,"ractive":53}],13:[function(require,module,exports){
+},{"../lib/d3":19,"ractive":43}],13:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -549,7 +549,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"./announcer":10,"./avoider":11,"./metadata":14,"./services-list":15,"./simple":16,"ractive":53}],14:[function(require,module,exports){
+},{"./announcer":10,"./avoider":11,"./metadata":14,"./services-list":15,"./simple":16,"ractive":43}],14:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -573,7 +573,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":53}],15:[function(require,module,exports){
+},{"ractive":43}],15:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = Ractive.extend({
@@ -592,7 +592,7 @@ module.exports = Ractive.extend({
     });
   }
 });
-},{"ractive":53}],16:[function(require,module,exports){
+},{"ractive":43}],16:[function(require,module,exports){
 var Ractive = require('ractive');
 
 module.exports = function (selector) {
@@ -606,7 +606,7 @@ module.exports = function (selector) {
     }
   });
 };
-},{"./services-list":15,"ractive":53}],17:[function(require,module,exports){
+},{"./services-list":15,"ractive":43}],17:[function(require,module,exports){
 module.exports = {
   ActionTypes: {
     RECEIVE_INITIAL_STATE: 'RECEIVE_INITIAL_STATE',
@@ -649,7 +649,7 @@ module.exports = _.extend(new Dispatcher(), {
     this.dispatch(payload);
   }
 });
-},{"../constants/constants":17,"../lib/flux":20,"underscore":54}],19:[function(require,module,exports){
+},{"../constants/constants":17,"../lib/flux":20,"underscore":44}],19:[function(require,module,exports){
 !function() {
   var d3 = {
     version: "3.4.4"
@@ -10542,7 +10542,7 @@ module.exports = invariant;
 	Ractive.events.tap = tap;
 
 }));
-},{"ractive":53}],24:[function(require,module,exports){
+},{"ractive":43}],24:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone = require('underscore').clone,
@@ -10600,7 +10600,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":52,"underscore":54}],25:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":42,"underscore":44}],25:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone = require('underscore').clone,
@@ -10648,7 +10648,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":38,"js-logger":52,"underscore":54}],26:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":38,"js-logger":42,"underscore":44}],26:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone = require('underscore').clone,
@@ -10720,7 +10720,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":52,"underscore":54}],27:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":42,"underscore":44}],27:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone = require('underscore').clone,
@@ -10772,7 +10772,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":52,"underscore":54}],28:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":42,"underscore":44}],28:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone  = require('underscore').clone,
@@ -10841,7 +10841,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":38,"js-logger":52,"underscore":54}],29:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":38,"js-logger":42,"underscore":44}],29:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone  = require('underscore').clone,
@@ -10910,7 +10910,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":38,"js-logger":52,"underscore":54}],30:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/current-service":27,"events":38,"js-logger":42,"underscore":44}],30:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone = require('underscore').clone,
@@ -10958,7 +10958,7 @@ Power.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Power;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":38,"js-logger":52,"underscore":54}],31:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":38,"js-logger":42,"underscore":44}],31:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone = require('underscore').clone,
@@ -11014,7 +11014,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":52,"underscore":54}],32:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"../stores/services":32,"events":38,"js-logger":42,"underscore":44}],32:[function(require,module,exports){
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone  = require('underscore').clone,
@@ -11063,7 +11063,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
 });
 
 module.exports = Store;
-},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":38,"js-logger":52,"underscore":54}],33:[function(require,module,exports){
+},{"../constants/constants":17,"../dispatcher/dispatcher":18,"events":38,"js-logger":42,"underscore":44}],33:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -11143,7 +11143,7 @@ module.exports = {
   }
 };
 
-},{"js-logger":52,"underscore":54}],34:[function(require,module,exports){
+},{"js-logger":42,"underscore":44}],34:[function(require,module,exports){
 var ServerActionCreators = require('../actions/server-action-creators'),
     xhr = require('../xhr');
 
@@ -11170,7 +11170,7 @@ module.exports = {
     });
   }
 }
-},{"../actions/server-action-creators":1,"../xhr":36}],35:[function(require,module,exports){
+},{"../actions/server-action-creators":2,"../xhr":36}],35:[function(require,module,exports){
 var Logger = require('js-logger'),
     Ractive = require('ractive'),
     Promise = require('es6-promise').Promise,
@@ -11261,7 +11261,7 @@ module.exports = {
     ractive.set(keypath, payload);
   }
 }
-},{"../lib/owl-carousel/owl.carousel":37,"./actions/state-action-creators":2,"./components/controls":13,"./components/simple":16,"./lib/ractive-events-tap":23,"./utils":33,"es6-promise":40,"jquery":51,"js-logger":52,"ractive":53}],36:[function(require,module,exports){
+},{"../lib/owl-carousel/owl.carousel":37,"./actions/state-action-creators":3,"./components/controls":13,"./components/simple":16,"./lib/ractive-events-tap":23,"./utils":33,"es6-promise":40,"jquery":41,"js-logger":42,"ractive":43}],36:[function(require,module,exports){
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
@@ -12896,10 +12896,8 @@ EventEmitter.prototype.emit = function(type) {
       er = arguments[1];
       if (er instanceof Error) {
         throw er; // Unhandled 'error' event
-      } else {
-        throw TypeError('Uncaught, unspecified "error" event.');
       }
-      return false;
+      throw TypeError('Uncaught, unspecified "error" event.');
     }
   }
 
@@ -13149,6 +13147,8 @@ var process = module.exports = {};
 process.nextTick = (function () {
     var canSetImmediate = typeof window !== 'undefined'
     && window.setImmediate;
+    var canMutationObserver = typeof window !== 'undefined'
+    && window.MutationObserver;
     var canPost = typeof window !== 'undefined'
     && window.postMessage && window.addEventListener
     ;
@@ -13157,8 +13157,29 @@ process.nextTick = (function () {
         return function (f) { return window.setImmediate(f) };
     }
 
+    var queue = [];
+
+    if (canMutationObserver) {
+        var hiddenDiv = document.createElement("div");
+        var observer = new MutationObserver(function () {
+            var queueList = queue.slice();
+            queue.length = 0;
+            queueList.forEach(function (fn) {
+                fn();
+            });
+        });
+
+        observer.observe(hiddenDiv, { attributes: true });
+
+        return function nextTick(fn) {
+            if (!queue.length) {
+                hiddenDiv.setAttribute('yes', 'no');
+            }
+            queue.push(fn);
+        };
+    }
+
     if (canPost) {
-        var queue = [];
         window.addEventListener('message', function (ev) {
             var source = ev.source;
             if ((source === window || source === null) && ev.data === 'process-tick') {
@@ -13198,7 +13219,7 @@ process.emit = noop;
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
-}
+};
 
 // TODO(shtylman)
 process.cwd = function () { return '/' };
@@ -13207,714 +13228,975 @@ process.chdir = function (dir) {
 };
 
 },{}],40:[function(require,module,exports){
-"use strict";
-var Promise = require("./promise/promise").Promise;
-var polyfill = require("./promise/polyfill").polyfill;
-exports.Promise = Promise;
-exports.polyfill = polyfill;
-},{"./promise/polyfill":45,"./promise/promise":46}],41:[function(require,module,exports){
-"use strict";
-/* global toString */
+(function (process,global){
+/*!
+ * @overview es6-promise - a tiny implementation of Promises/A+.
+ * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
+ * @license   Licensed under MIT license
+ *            See https://raw.githubusercontent.com/jakearchibald/es6-promise/master/LICENSE
+ * @version   2.0.0
+ */
 
-var isArray = require("./utils").isArray;
-var isFunction = require("./utils").isFunction;
+(function() {
+    "use strict";
 
-/**
-  Returns a promise that is fulfilled when all the given promises have been
-  fulfilled, or rejected if any of them become rejected. The return promise
-  is fulfilled with an array that gives all the values in the order they were
-  passed in the `promises` array argument.
-
-  Example:
-
-  ```javascript
-  var promise1 = RSVP.resolve(1);
-  var promise2 = RSVP.resolve(2);
-  var promise3 = RSVP.resolve(3);
-  var promises = [ promise1, promise2, promise3 ];
-
-  RSVP.all(promises).then(function(array){
-    // The array here would be [ 1, 2, 3 ];
-  });
-  ```
-
-  If any of the `promises` given to `RSVP.all` are rejected, the first promise
-  that is rejected will be given as an argument to the returned promises's
-  rejection handler. For example:
-
-  Example:
-
-  ```javascript
-  var promise1 = RSVP.resolve(1);
-  var promise2 = RSVP.reject(new Error("2"));
-  var promise3 = RSVP.reject(new Error("3"));
-  var promises = [ promise1, promise2, promise3 ];
-
-  RSVP.all(promises).then(function(array){
-    // Code here never runs because there are rejected promises!
-  }, function(error) {
-    // error.message === "2"
-  });
-  ```
-
-  @method all
-  @for RSVP
-  @param {Array} promises
-  @param {String} label
-  @return {Promise} promise that is fulfilled when all `promises` have been
-  fulfilled, or rejected if any of them become rejected.
-*/
-function all(promises) {
-  /*jshint validthis:true */
-  var Promise = this;
-
-  if (!isArray(promises)) {
-    throw new TypeError('You must pass an array to all.');
-  }
-
-  return new Promise(function(resolve, reject) {
-    var results = [], remaining = promises.length,
-    promise;
-
-    if (remaining === 0) {
-      resolve([]);
+    function $$utils$$objectOrFunction(x) {
+      return typeof x === 'function' || (typeof x === 'object' && x !== null);
     }
 
-    function resolver(index) {
-      return function(value) {
-        resolveAll(index, value);
+    function $$utils$$isFunction(x) {
+      return typeof x === 'function';
+    }
+
+    function $$utils$$isMaybeThenable(x) {
+      return typeof x === 'object' && x !== null;
+    }
+
+    var $$utils$$_isArray;
+
+    if (!Array.isArray) {
+      $$utils$$_isArray = function (x) {
+        return Object.prototype.toString.call(x) === '[object Array]';
+      };
+    } else {
+      $$utils$$_isArray = Array.isArray;
+    }
+
+    var $$utils$$isArray = $$utils$$_isArray;
+    var $$utils$$now = Date.now || function() { return new Date().getTime(); };
+    function $$utils$$F() { }
+
+    var $$utils$$o_create = (Object.create || function (o) {
+      if (arguments.length > 1) {
+        throw new Error('Second argument not supported');
+      }
+      if (typeof o !== 'object') {
+        throw new TypeError('Argument must be an object');
+      }
+      $$utils$$F.prototype = o;
+      return new $$utils$$F();
+    });
+
+    var $$asap$$len = 0;
+
+    var $$asap$$default = function asap(callback, arg) {
+      $$asap$$queue[$$asap$$len] = callback;
+      $$asap$$queue[$$asap$$len + 1] = arg;
+      $$asap$$len += 2;
+      if ($$asap$$len === 2) {
+        // If len is 1, that means that we need to schedule an async flush.
+        // If additional callbacks are queued before the queue is flushed, they
+        // will be processed by this flush that we are scheduling.
+        $$asap$$scheduleFlush();
+      }
+    };
+
+    var $$asap$$browserGlobal = (typeof window !== 'undefined') ? window : {};
+    var $$asap$$BrowserMutationObserver = $$asap$$browserGlobal.MutationObserver || $$asap$$browserGlobal.WebKitMutationObserver;
+
+    // test for web worker but not in IE10
+    var $$asap$$isWorker = typeof Uint8ClampedArray !== 'undefined' &&
+      typeof importScripts !== 'undefined' &&
+      typeof MessageChannel !== 'undefined';
+
+    // node
+    function $$asap$$useNextTick() {
+      return function() {
+        process.nextTick($$asap$$flush);
       };
     }
 
-    function resolveAll(index, value) {
-      results[index] = value;
-      if (--remaining === 0) {
-        resolve(results);
+    function $$asap$$useMutationObserver() {
+      var iterations = 0;
+      var observer = new $$asap$$BrowserMutationObserver($$asap$$flush);
+      var node = document.createTextNode('');
+      observer.observe(node, { characterData: true });
+
+      return function() {
+        node.data = (iterations = ++iterations % 2);
+      };
+    }
+
+    // web worker
+    function $$asap$$useMessageChannel() {
+      var channel = new MessageChannel();
+      channel.port1.onmessage = $$asap$$flush;
+      return function () {
+        channel.port2.postMessage(0);
+      };
+    }
+
+    function $$asap$$useSetTimeout() {
+      return function() {
+        setTimeout($$asap$$flush, 1);
+      };
+    }
+
+    var $$asap$$queue = new Array(1000);
+
+    function $$asap$$flush() {
+      for (var i = 0; i < $$asap$$len; i+=2) {
+        var callback = $$asap$$queue[i];
+        var arg = $$asap$$queue[i+1];
+
+        callback(arg);
+
+        $$asap$$queue[i] = undefined;
+        $$asap$$queue[i+1] = undefined;
       }
+
+      $$asap$$len = 0;
     }
 
-    for (var i = 0; i < promises.length; i++) {
-      promise = promises[i];
+    var $$asap$$scheduleFlush;
 
-      if (promise && isFunction(promise.then)) {
-        promise.then(resolver(i), reject);
-      } else {
-        resolveAll(i, promise);
-      }
-    }
-  });
-}
-
-exports.all = all;
-},{"./utils":50}],42:[function(require,module,exports){
-(function (process,global){
-"use strict";
-var browserGlobal = (typeof window !== 'undefined') ? window : {};
-var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-var local = (typeof global !== 'undefined') ? global : (this === undefined? window:this);
-
-// node
-function useNextTick() {
-  return function() {
-    process.nextTick(flush);
-  };
-}
-
-function useMutationObserver() {
-  var iterations = 0;
-  var observer = new BrowserMutationObserver(flush);
-  var node = document.createTextNode('');
-  observer.observe(node, { characterData: true });
-
-  return function() {
-    node.data = (iterations = ++iterations % 2);
-  };
-}
-
-function useSetTimeout() {
-  return function() {
-    local.setTimeout(flush, 1);
-  };
-}
-
-var queue = [];
-function flush() {
-  for (var i = 0; i < queue.length; i++) {
-    var tuple = queue[i];
-    var callback = tuple[0], arg = tuple[1];
-    callback(arg);
-  }
-  queue = [];
-}
-
-var scheduleFlush;
-
-// Decide what async method to use to triggering processing of queued callbacks:
-if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
-  scheduleFlush = useNextTick();
-} else if (BrowserMutationObserver) {
-  scheduleFlush = useMutationObserver();
-} else {
-  scheduleFlush = useSetTimeout();
-}
-
-function asap(callback, arg) {
-  var length = queue.push([callback, arg]);
-  if (length === 1) {
-    // If length is 1, that means that we need to schedule an async flush.
-    // If additional callbacks are queued before the queue is flushed, they
-    // will be processed by this flush that we are scheduling.
-    scheduleFlush();
-  }
-}
-
-exports.asap = asap;
-}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"FWaASH":39}],43:[function(require,module,exports){
-"use strict";
-/**
-  `RSVP.Promise.cast` returns the same promise if that promise shares a constructor
-  with the promise being casted.
-
-  Example:
-
-  ```javascript
-  var promise = RSVP.resolve(1);
-  var casted = RSVP.Promise.cast(promise);
-
-  console.log(promise === casted); // true
-  ```
-
-  In the case of a promise whose constructor does not match, it is assimilated.
-  The resulting promise will fulfill or reject based on the outcome of the
-  promise being casted.
-
-  In the case of a non-promise, a promise which will fulfill with that value is
-  returned.
-
-  Example:
-
-  ```javascript
-  var value = 1; // could be a number, boolean, string, undefined...
-  var casted = RSVP.Promise.cast(value);
-
-  console.log(value === casted); // false
-  console.log(casted instanceof RSVP.Promise) // true
-
-  casted.then(function(val) {
-    val === value // => true
-  });
-  ```
-
-  `RSVP.Promise.cast` is similar to `RSVP.resolve`, but `RSVP.Promise.cast` differs in the
-  following ways:
-  * `RSVP.Promise.cast` serves as a memory-efficient way of getting a promise, when you
-  have something that could either be a promise or a value. RSVP.resolve
-  will have the same effect but will create a new promise wrapper if the
-  argument is a promise.
-  * `RSVP.Promise.cast` is a way of casting incoming thenables or promise subclasses to
-  promises of the exact class specified, so that the resulting object's `then` is
-  ensured to have the behavior of the constructor you are calling cast on (i.e., RSVP.Promise).
-
-  @method cast
-  @for RSVP
-  @param {Object} object to be casted
-  @return {Promise} promise that is fulfilled when all properties of `promises`
-  have been fulfilled, or rejected if any of them become rejected.
-*/
-
-
-function cast(object) {
-  /*jshint validthis:true */
-  if (object && typeof object === 'object' && object.constructor === this) {
-    return object;
-  }
-
-  var Promise = this;
-
-  return new Promise(function(resolve) {
-    resolve(object);
-  });
-}
-
-exports.cast = cast;
-},{}],44:[function(require,module,exports){
-"use strict";
-var config = {
-  instrument: false
-};
-
-function configure(name, value) {
-  if (arguments.length === 2) {
-    config[name] = value;
-  } else {
-    return config[name];
-  }
-}
-
-exports.config = config;
-exports.configure = configure;
-},{}],45:[function(require,module,exports){
-(function (global){
-"use strict";
-/*global self*/
-var RSVPPromise = require("./promise").Promise;
-var isFunction = require("./utils").isFunction;
-
-function polyfill() {
-  var local;
-
-  if (typeof global !== 'undefined') {
-    local = global;
-  } else if (typeof window !== 'undefined' && window.document) {
-    local = window;
-  } else {
-    local = self;
-  }
-
-  var es6PromiseSupport = 
-    "Promise" in local &&
-    // Some of these methods are missing from
-    // Firefox/Chrome experimental implementations
-    "cast" in local.Promise &&
-    "resolve" in local.Promise &&
-    "reject" in local.Promise &&
-    "all" in local.Promise &&
-    "race" in local.Promise &&
-    // Older version of the spec had a resolver object
-    // as the arg rather than a function
-    (function() {
-      var resolve;
-      new local.Promise(function(r) { resolve = r; });
-      return isFunction(resolve);
-    }());
-
-  if (!es6PromiseSupport) {
-    local.Promise = RSVPPromise;
-  }
-}
-
-exports.polyfill = polyfill;
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./promise":46,"./utils":50}],46:[function(require,module,exports){
-"use strict";
-var config = require("./config").config;
-var configure = require("./config").configure;
-var objectOrFunction = require("./utils").objectOrFunction;
-var isFunction = require("./utils").isFunction;
-var now = require("./utils").now;
-var cast = require("./cast").cast;
-var all = require("./all").all;
-var race = require("./race").race;
-var staticResolve = require("./resolve").resolve;
-var staticReject = require("./reject").reject;
-var asap = require("./asap").asap;
-
-var counter = 0;
-
-config.async = asap; // default async is asap;
-
-function Promise(resolver) {
-  if (!isFunction(resolver)) {
-    throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
-  }
-
-  if (!(this instanceof Promise)) {
-    throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
-  }
-
-  this._subscribers = [];
-
-  invokeResolver(resolver, this);
-}
-
-function invokeResolver(resolver, promise) {
-  function resolvePromise(value) {
-    resolve(promise, value);
-  }
-
-  function rejectPromise(reason) {
-    reject(promise, reason);
-  }
-
-  try {
-    resolver(resolvePromise, rejectPromise);
-  } catch(e) {
-    rejectPromise(e);
-  }
-}
-
-function invokeCallback(settled, promise, callback, detail) {
-  var hasCallback = isFunction(callback),
-      value, error, succeeded, failed;
-
-  if (hasCallback) {
-    try {
-      value = callback(detail);
-      succeeded = true;
-    } catch(e) {
-      failed = true;
-      error = e;
-    }
-  } else {
-    value = detail;
-    succeeded = true;
-  }
-
-  if (handleThenable(promise, value)) {
-    return;
-  } else if (hasCallback && succeeded) {
-    resolve(promise, value);
-  } else if (failed) {
-    reject(promise, error);
-  } else if (settled === FULFILLED) {
-    resolve(promise, value);
-  } else if (settled === REJECTED) {
-    reject(promise, value);
-  }
-}
-
-var PENDING   = void 0;
-var SEALED    = 0;
-var FULFILLED = 1;
-var REJECTED  = 2;
-
-function subscribe(parent, child, onFulfillment, onRejection) {
-  var subscribers = parent._subscribers;
-  var length = subscribers.length;
-
-  subscribers[length] = child;
-  subscribers[length + FULFILLED] = onFulfillment;
-  subscribers[length + REJECTED]  = onRejection;
-}
-
-function publish(promise, settled) {
-  var child, callback, subscribers = promise._subscribers, detail = promise._detail;
-
-  for (var i = 0; i < subscribers.length; i += 3) {
-    child = subscribers[i];
-    callback = subscribers[i + settled];
-
-    invokeCallback(settled, child, callback, detail);
-  }
-
-  promise._subscribers = null;
-}
-
-Promise.prototype = {
-  constructor: Promise,
-
-  _state: undefined,
-  _detail: undefined,
-  _subscribers: undefined,
-
-  then: function(onFulfillment, onRejection) {
-    var promise = this;
-
-    var thenPromise = new this.constructor(function() {});
-
-    if (this._state) {
-      var callbacks = arguments;
-      config.async(function invokePromiseCallback() {
-        invokeCallback(promise._state, thenPromise, callbacks[promise._state - 1], promise._detail);
-      });
+    // Decide what async method to use to triggering processing of queued callbacks:
+    if (typeof process !== 'undefined' && {}.toString.call(process) === '[object process]') {
+      $$asap$$scheduleFlush = $$asap$$useNextTick();
+    } else if ($$asap$$BrowserMutationObserver) {
+      $$asap$$scheduleFlush = $$asap$$useMutationObserver();
+    } else if ($$asap$$isWorker) {
+      $$asap$$scheduleFlush = $$asap$$useMessageChannel();
     } else {
-      subscribe(this, thenPromise, onFulfillment, onRejection);
+      $$asap$$scheduleFlush = $$asap$$useSetTimeout();
     }
 
-    return thenPromise;
-  },
+    function $$$internal$$noop() {}
+    var $$$internal$$PENDING   = void 0;
+    var $$$internal$$FULFILLED = 1;
+    var $$$internal$$REJECTED  = 2;
+    var $$$internal$$GET_THEN_ERROR = new $$$internal$$ErrorObject();
 
-  'catch': function(onRejection) {
-    return this.then(null, onRejection);
-  }
-};
-
-Promise.all = all;
-Promise.cast = cast;
-Promise.race = race;
-Promise.resolve = staticResolve;
-Promise.reject = staticReject;
-
-function handleThenable(promise, value) {
-  var then = null,
-  resolved;
-
-  try {
-    if (promise === value) {
-      throw new TypeError("A promises callback cannot return that same promise.");
+    function $$$internal$$selfFullfillment() {
+      return new TypeError("You cannot resolve a promise with itself");
     }
 
-    if (objectOrFunction(value)) {
-      then = value.then;
+    function $$$internal$$cannotReturnOwn() {
+      return new TypeError('A promises callback cannot return that same promise.')
+    }
 
-      if (isFunction(then)) {
-        then.call(value, function(val) {
-          if (resolved) { return true; }
-          resolved = true;
+    function $$$internal$$getThen(promise) {
+      try {
+        return promise.then;
+      } catch(error) {
+        $$$internal$$GET_THEN_ERROR.error = error;
+        return $$$internal$$GET_THEN_ERROR;
+      }
+    }
 
-          if (value !== val) {
-            resolve(promise, val);
+    function $$$internal$$tryThen(then, value, fulfillmentHandler, rejectionHandler) {
+      try {
+        then.call(value, fulfillmentHandler, rejectionHandler);
+      } catch(e) {
+        return e;
+      }
+    }
+
+    function $$$internal$$handleForeignThenable(promise, thenable, then) {
+       $$asap$$default(function(promise) {
+        var sealed = false;
+        var error = $$$internal$$tryThen(then, thenable, function(value) {
+          if (sealed) { return; }
+          sealed = true;
+          if (thenable !== value) {
+            $$$internal$$resolve(promise, value);
           } else {
-            fulfill(promise, val);
+            $$$internal$$fulfill(promise, value);
           }
-        }, function(val) {
-          if (resolved) { return true; }
-          resolved = true;
+        }, function(reason) {
+          if (sealed) { return; }
+          sealed = true;
 
-          reject(promise, val);
-        });
+          $$$internal$$reject(promise, reason);
+        }, 'Settle: ' + (promise._label || ' unknown promise'));
 
-        return true;
-      }
+        if (!sealed && error) {
+          sealed = true;
+          $$$internal$$reject(promise, error);
+        }
+      }, promise);
     }
-  } catch (error) {
-    if (resolved) { return true; }
-    reject(promise, error);
-    return true;
-  }
 
-  return false;
-}
-
-function resolve(promise, value) {
-  if (promise === value) {
-    fulfill(promise, value);
-  } else if (!handleThenable(promise, value)) {
-    fulfill(promise, value);
-  }
-}
-
-function fulfill(promise, value) {
-  if (promise._state !== PENDING) { return; }
-  promise._state = SEALED;
-  promise._detail = value;
-
-  config.async(publishFulfillment, promise);
-}
-
-function reject(promise, reason) {
-  if (promise._state !== PENDING) { return; }
-  promise._state = SEALED;
-  promise._detail = reason;
-
-  config.async(publishRejection, promise);
-}
-
-function publishFulfillment(promise) {
-  publish(promise, promise._state = FULFILLED);
-}
-
-function publishRejection(promise) {
-  publish(promise, promise._state = REJECTED);
-}
-
-exports.Promise = Promise;
-},{"./all":41,"./asap":42,"./cast":43,"./config":44,"./race":47,"./reject":48,"./resolve":49,"./utils":50}],47:[function(require,module,exports){
-"use strict";
-/* global toString */
-var isArray = require("./utils").isArray;
-
-/**
-  `RSVP.race` allows you to watch a series of promises and act as soon as the
-  first promise given to the `promises` argument fulfills or rejects.
-
-  Example:
-
-  ```javascript
-  var promise1 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve("promise 1");
-    }, 200);
-  });
-
-  var promise2 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve("promise 2");
-    }, 100);
-  });
-
-  RSVP.race([promise1, promise2]).then(function(result){
-    // result === "promise 2" because it was resolved before promise1
-    // was resolved.
-  });
-  ```
-
-  `RSVP.race` is deterministic in that only the state of the first completed
-  promise matters. For example, even if other promises given to the `promises`
-  array argument are resolved, but the first completed promise has become
-  rejected before the other promises became fulfilled, the returned promise
-  will become rejected:
-
-  ```javascript
-  var promise1 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve("promise 1");
-    }, 200);
-  });
-
-  var promise2 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      reject(new Error("promise 2"));
-    }, 100);
-  });
-
-  RSVP.race([promise1, promise2]).then(function(result){
-    // Code here never runs because there are rejected promises!
-  }, function(reason){
-    // reason.message === "promise2" because promise 2 became rejected before
-    // promise 1 became fulfilled
-  });
-  ```
-
-  @method race
-  @for RSVP
-  @param {Array} promises array of promises to observe
-  @param {String} label optional string for describing the promise returned.
-  Useful for tooling.
-  @return {Promise} a promise that becomes fulfilled with the value the first
-  completed promises is resolved with if the first completed promise was
-  fulfilled, or rejected with the reason that the first completed promise
-  was rejected with.
-*/
-function race(promises) {
-  /*jshint validthis:true */
-  var Promise = this;
-
-  if (!isArray(promises)) {
-    throw new TypeError('You must pass an array to race.');
-  }
-  return new Promise(function(resolve, reject) {
-    var results = [], promise;
-
-    for (var i = 0; i < promises.length; i++) {
-      promise = promises[i];
-
-      if (promise && typeof promise.then === 'function') {
-        promise.then(resolve, reject);
+    function $$$internal$$handleOwnThenable(promise, thenable) {
+      if (thenable._state === $$$internal$$FULFILLED) {
+        $$$internal$$fulfill(promise, thenable._result);
+      } else if (promise._state === $$$internal$$REJECTED) {
+        $$$internal$$reject(promise, thenable._result);
       } else {
-        resolve(promise);
+        $$$internal$$subscribe(thenable, undefined, function(value) {
+          $$$internal$$resolve(promise, value);
+        }, function(reason) {
+          $$$internal$$reject(promise, reason);
+        });
       }
     }
-  });
-}
 
-exports.race = race;
-},{"./utils":50}],48:[function(require,module,exports){
-"use strict";
-/**
-  `RSVP.reject` returns a promise that will become rejected with the passed
-  `reason`. `RSVP.reject` is essentially shorthand for the following:
+    function $$$internal$$handleMaybeThenable(promise, maybeThenable) {
+      if (maybeThenable.constructor === promise.constructor) {
+        $$$internal$$handleOwnThenable(promise, maybeThenable);
+      } else {
+        var then = $$$internal$$getThen(maybeThenable);
 
-  ```javascript
-  var promise = new RSVP.Promise(function(resolve, reject){
-    reject(new Error('WHOOPS'));
-  });
+        if (then === $$$internal$$GET_THEN_ERROR) {
+          $$$internal$$reject(promise, $$$internal$$GET_THEN_ERROR.error);
+        } else if (then === undefined) {
+          $$$internal$$fulfill(promise, maybeThenable);
+        } else if ($$utils$$isFunction(then)) {
+          $$$internal$$handleForeignThenable(promise, maybeThenable, then);
+        } else {
+          $$$internal$$fulfill(promise, maybeThenable);
+        }
+      }
+    }
 
-  promise.then(function(value){
-    // Code here doesn't run because the promise is rejected!
-  }, function(reason){
-    // reason.message === 'WHOOPS'
-  });
-  ```
+    function $$$internal$$resolve(promise, value) {
+      if (promise === value) {
+        $$$internal$$reject(promise, $$$internal$$selfFullfillment());
+      } else if ($$utils$$objectOrFunction(value)) {
+        $$$internal$$handleMaybeThenable(promise, value);
+      } else {
+        $$$internal$$fulfill(promise, value);
+      }
+    }
 
-  Instead of writing the above, your code now simply becomes the following:
+    function $$$internal$$publishRejection(promise) {
+      if (promise._onerror) {
+        promise._onerror(promise._result);
+      }
 
-  ```javascript
-  var promise = RSVP.reject(new Error('WHOOPS'));
+      $$$internal$$publish(promise);
+    }
 
-  promise.then(function(value){
-    // Code here doesn't run because the promise is rejected!
-  }, function(reason){
-    // reason.message === 'WHOOPS'
-  });
-  ```
+    function $$$internal$$fulfill(promise, value) {
+      if (promise._state !== $$$internal$$PENDING) { return; }
 
-  @method reject
-  @for RSVP
-  @param {Any} reason value that the returned promise will be rejected with.
-  @param {String} label optional string for identifying the returned promise.
-  Useful for tooling.
-  @return {Promise} a promise that will become rejected with the given
-  `reason`.
-*/
-function reject(reason) {
-  /*jshint validthis:true */
-  var Promise = this;
+      promise._result = value;
+      promise._state = $$$internal$$FULFILLED;
 
-  return new Promise(function (resolve, reject) {
-    reject(reason);
-  });
-}
+      if (promise._subscribers.length === 0) {
+      } else {
+        $$asap$$default($$$internal$$publish, promise);
+      }
+    }
 
-exports.reject = reject;
-},{}],49:[function(require,module,exports){
-"use strict";
-/**
-  `RSVP.resolve` returns a promise that will become fulfilled with the passed
-  `value`. `RSVP.resolve` is essentially shorthand for the following:
+    function $$$internal$$reject(promise, reason) {
+      if (promise._state !== $$$internal$$PENDING) { return; }
+      promise._state = $$$internal$$REJECTED;
+      promise._result = reason;
 
-  ```javascript
-  var promise = new RSVP.Promise(function(resolve, reject){
-    resolve(1);
-  });
+      $$asap$$default($$$internal$$publishRejection, promise);
+    }
 
-  promise.then(function(value){
-    // value === 1
-  });
-  ```
+    function $$$internal$$subscribe(parent, child, onFulfillment, onRejection) {
+      var subscribers = parent._subscribers;
+      var length = subscribers.length;
 
-  Instead of writing the above, your code now simply becomes the following:
+      parent._onerror = null;
 
-  ```javascript
-  var promise = RSVP.resolve(1);
+      subscribers[length] = child;
+      subscribers[length + $$$internal$$FULFILLED] = onFulfillment;
+      subscribers[length + $$$internal$$REJECTED]  = onRejection;
 
-  promise.then(function(value){
-    // value === 1
-  });
-  ```
+      if (length === 0 && parent._state) {
+        $$asap$$default($$$internal$$publish, parent);
+      }
+    }
 
-  @method resolve
-  @for RSVP
-  @param {Any} value value that the returned promise will be resolved with
-  @param {String} label optional string for identifying the returned promise.
-  Useful for tooling.
-  @return {Promise} a promise that will become fulfilled with the given
-  `value`
-*/
-function resolve(value) {
-  /*jshint validthis:true */
-  var Promise = this;
-  return new Promise(function(resolve, reject) {
-    resolve(value);
-  });
-}
+    function $$$internal$$publish(promise) {
+      var subscribers = promise._subscribers;
+      var settled = promise._state;
 
-exports.resolve = resolve;
-},{}],50:[function(require,module,exports){
-"use strict";
-function objectOrFunction(x) {
-  return isFunction(x) || (typeof x === "object" && x !== null);
-}
+      if (subscribers.length === 0) { return; }
 
-function isFunction(x) {
-  return typeof x === "function";
-}
+      var child, callback, detail = promise._result;
 
-function isArray(x) {
-  return Object.prototype.toString.call(x) === "[object Array]";
-}
+      for (var i = 0; i < subscribers.length; i += 3) {
+        child = subscribers[i];
+        callback = subscribers[i + settled];
 
-// Date.now is not available in browsers < IE9
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now#Compatibility
-var now = Date.now || function() { return new Date().getTime(); };
+        if (child) {
+          $$$internal$$invokeCallback(settled, child, callback, detail);
+        } else {
+          callback(detail);
+        }
+      }
+
+      promise._subscribers.length = 0;
+    }
+
+    function $$$internal$$ErrorObject() {
+      this.error = null;
+    }
+
+    var $$$internal$$TRY_CATCH_ERROR = new $$$internal$$ErrorObject();
+
+    function $$$internal$$tryCatch(callback, detail) {
+      try {
+        return callback(detail);
+      } catch(e) {
+        $$$internal$$TRY_CATCH_ERROR.error = e;
+        return $$$internal$$TRY_CATCH_ERROR;
+      }
+    }
+
+    function $$$internal$$invokeCallback(settled, promise, callback, detail) {
+      var hasCallback = $$utils$$isFunction(callback),
+          value, error, succeeded, failed;
+
+      if (hasCallback) {
+        value = $$$internal$$tryCatch(callback, detail);
+
+        if (value === $$$internal$$TRY_CATCH_ERROR) {
+          failed = true;
+          error = value.error;
+          value = null;
+        } else {
+          succeeded = true;
+        }
+
+        if (promise === value) {
+          $$$internal$$reject(promise, $$$internal$$cannotReturnOwn());
+          return;
+        }
+
+      } else {
+        value = detail;
+        succeeded = true;
+      }
+
+      if (promise._state !== $$$internal$$PENDING) {
+        // noop
+      } else if (hasCallback && succeeded) {
+        $$$internal$$resolve(promise, value);
+      } else if (failed) {
+        $$$internal$$reject(promise, error);
+      } else if (settled === $$$internal$$FULFILLED) {
+        $$$internal$$fulfill(promise, value);
+      } else if (settled === $$$internal$$REJECTED) {
+        $$$internal$$reject(promise, value);
+      }
+    }
+
+    function $$$internal$$initializePromise(promise, resolver) {
+      try {
+        resolver(function resolvePromise(value){
+          $$$internal$$resolve(promise, value);
+        }, function rejectPromise(reason) {
+          $$$internal$$reject(promise, reason);
+        });
+      } catch(e) {
+        $$$internal$$reject(promise, e);
+      }
+    }
+
+    function $$$enumerator$$makeSettledResult(state, position, value) {
+      if (state === $$$internal$$FULFILLED) {
+        return {
+          state: 'fulfilled',
+          value: value
+        };
+      } else {
+        return {
+          state: 'rejected',
+          reason: value
+        };
+      }
+    }
+
+    function $$$enumerator$$Enumerator(Constructor, input, abortOnReject, label) {
+      this._instanceConstructor = Constructor;
+      this.promise = new Constructor($$$internal$$noop, label);
+      this._abortOnReject = abortOnReject;
+
+      if (this._validateInput(input)) {
+        this._input     = input;
+        this.length     = input.length;
+        this._remaining = input.length;
+
+        this._init();
+
+        if (this.length === 0) {
+          $$$internal$$fulfill(this.promise, this._result);
+        } else {
+          this.length = this.length || 0;
+          this._enumerate();
+          if (this._remaining === 0) {
+            $$$internal$$fulfill(this.promise, this._result);
+          }
+        }
+      } else {
+        $$$internal$$reject(this.promise, this._validationError());
+      }
+    }
+
+    $$$enumerator$$Enumerator.prototype._validateInput = function(input) {
+      return $$utils$$isArray(input);
+    };
+
+    $$$enumerator$$Enumerator.prototype._validationError = function() {
+      return new Error('Array Methods must be provided an Array');
+    };
+
+    $$$enumerator$$Enumerator.prototype._init = function() {
+      this._result = new Array(this.length);
+    };
+
+    var $$$enumerator$$default = $$$enumerator$$Enumerator;
+
+    $$$enumerator$$Enumerator.prototype._enumerate = function() {
+      var length  = this.length;
+      var promise = this.promise;
+      var input   = this._input;
+
+      for (var i = 0; promise._state === $$$internal$$PENDING && i < length; i++) {
+        this._eachEntry(input[i], i);
+      }
+    };
+
+    $$$enumerator$$Enumerator.prototype._eachEntry = function(entry, i) {
+      var c = this._instanceConstructor;
+      if ($$utils$$isMaybeThenable(entry)) {
+        if (entry.constructor === c && entry._state !== $$$internal$$PENDING) {
+          entry._onerror = null;
+          this._settledAt(entry._state, i, entry._result);
+        } else {
+          this._willSettleAt(c.resolve(entry), i);
+        }
+      } else {
+        this._remaining--;
+        this._result[i] = this._makeResult($$$internal$$FULFILLED, i, entry);
+      }
+    };
+
+    $$$enumerator$$Enumerator.prototype._settledAt = function(state, i, value) {
+      var promise = this.promise;
+
+      if (promise._state === $$$internal$$PENDING) {
+        this._remaining--;
+
+        if (this._abortOnReject && state === $$$internal$$REJECTED) {
+          $$$internal$$reject(promise, value);
+        } else {
+          this._result[i] = this._makeResult(state, i, value);
+        }
+      }
+
+      if (this._remaining === 0) {
+        $$$internal$$fulfill(promise, this._result);
+      }
+    };
+
+    $$$enumerator$$Enumerator.prototype._makeResult = function(state, i, value) {
+      return value;
+    };
+
+    $$$enumerator$$Enumerator.prototype._willSettleAt = function(promise, i) {
+      var enumerator = this;
+
+      $$$internal$$subscribe(promise, undefined, function(value) {
+        enumerator._settledAt($$$internal$$FULFILLED, i, value);
+      }, function(reason) {
+        enumerator._settledAt($$$internal$$REJECTED, i, reason);
+      });
+    };
+
+    var $$promise$all$$default = function all(entries, label) {
+      return new $$$enumerator$$default(this, entries, true /* abort on reject */, label).promise;
+    };
+
+    var $$promise$race$$default = function race(entries, label) {
+      /*jshint validthis:true */
+      var Constructor = this;
+
+      var promise = new Constructor($$$internal$$noop, label);
+
+      if (!$$utils$$isArray(entries)) {
+        $$$internal$$reject(promise, new TypeError('You must pass an array to race.'));
+        return promise;
+      }
+
+      var length = entries.length;
+
+      function onFulfillment(value) {
+        $$$internal$$resolve(promise, value);
+      }
+
+      function onRejection(reason) {
+        $$$internal$$reject(promise, reason);
+      }
+
+      for (var i = 0; promise._state === $$$internal$$PENDING && i < length; i++) {
+        $$$internal$$subscribe(Constructor.resolve(entries[i]), undefined, onFulfillment, onRejection);
+      }
+
+      return promise;
+    };
+
+    var $$promise$resolve$$default = function resolve(object, label) {
+      /*jshint validthis:true */
+      var Constructor = this;
+
+      if (object && typeof object === 'object' && object.constructor === Constructor) {
+        return object;
+      }
+
+      var promise = new Constructor($$$internal$$noop, label);
+      $$$internal$$resolve(promise, object);
+      return promise;
+    };
+
+    var $$promise$reject$$default = function reject(reason, label) {
+      /*jshint validthis:true */
+      var Constructor = this;
+      var promise = new Constructor($$$internal$$noop, label);
+      $$$internal$$reject(promise, reason);
+      return promise;
+    };
+
+    var $$es6$promise$promise$$counter = 0;
+
+    function $$es6$promise$promise$$needsResolver() {
+      throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
+    }
+
+    function $$es6$promise$promise$$needsNew() {
+      throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
+    }
+
+    var $$es6$promise$promise$$default = $$es6$promise$promise$$Promise;
+
+    /**
+      Promise objects represent the eventual result of an asynchronous operation. The
+      primary way of interacting with a promise is through its `then` method, which
+      registers callbacks to receive either a promise’s eventual value or the reason
+      why the promise cannot be fulfilled.
+
+      Terminology
+      -----------
+
+      - `promise` is an object or function with a `then` method whose behavior conforms to this specification.
+      - `thenable` is an object or function that defines a `then` method.
+      - `value` is any legal JavaScript value (including undefined, a thenable, or a promise).
+      - `exception` is a value that is thrown using the throw statement.
+      - `reason` is a value that indicates why a promise was rejected.
+      - `settled` the final resting state of a promise, fulfilled or rejected.
+
+      A promise can be in one of three states: pending, fulfilled, or rejected.
+
+      Promises that are fulfilled have a fulfillment value and are in the fulfilled
+      state.  Promises that are rejected have a rejection reason and are in the
+      rejected state.  A fulfillment value is never a thenable.
+
+      Promises can also be said to *resolve* a value.  If this value is also a
+      promise, then the original promise's settled state will match the value's
+      settled state.  So a promise that *resolves* a promise that rejects will
+      itself reject, and a promise that *resolves* a promise that fulfills will
+      itself fulfill.
 
 
-exports.objectOrFunction = objectOrFunction;
-exports.isFunction = isFunction;
-exports.isArray = isArray;
-exports.now = now;
-},{}],51:[function(require,module,exports){
+      Basic Usage:
+      ------------
+
+      ```js
+      var promise = new Promise(function(resolve, reject) {
+        // on success
+        resolve(value);
+
+        // on failure
+        reject(reason);
+      });
+
+      promise.then(function(value) {
+        // on fulfillment
+      }, function(reason) {
+        // on rejection
+      });
+      ```
+
+      Advanced Usage:
+      ---------------
+
+      Promises shine when abstracting away asynchronous interactions such as
+      `XMLHttpRequest`s.
+
+      ```js
+      function getJSON(url) {
+        return new Promise(function(resolve, reject){
+          var xhr = new XMLHttpRequest();
+
+          xhr.open('GET', url);
+          xhr.onreadystatechange = handler;
+          xhr.responseType = 'json';
+          xhr.setRequestHeader('Accept', 'application/json');
+          xhr.send();
+
+          function handler() {
+            if (this.readyState === this.DONE) {
+              if (this.status === 200) {
+                resolve(this.response);
+              } else {
+                reject(new Error('getJSON: `' + url + '` failed with status: [' + this.status + ']'));
+              }
+            }
+          };
+        });
+      }
+
+      getJSON('/posts.json').then(function(json) {
+        // on fulfillment
+      }, function(reason) {
+        // on rejection
+      });
+      ```
+
+      Unlike callbacks, promises are great composable primitives.
+
+      ```js
+      Promise.all([
+        getJSON('/posts'),
+        getJSON('/comments')
+      ]).then(function(values){
+        values[0] // => postsJSON
+        values[1] // => commentsJSON
+
+        return values;
+      });
+      ```
+
+      @class Promise
+      @param {function} resolver
+      @param {String} label optional string for labeling the promise.
+      Useful for tooling.
+      @constructor
+    */
+    function $$es6$promise$promise$$Promise(resolver, label) {
+      this._id = $$es6$promise$promise$$counter++;
+      this._label = label;
+      this._state = undefined;
+      this._result = undefined;
+      this._subscribers = [];
+
+      if ($$$internal$$noop !== resolver) {
+        if (!$$utils$$isFunction(resolver)) {
+          $$es6$promise$promise$$needsResolver();
+        }
+
+        if (!(this instanceof $$es6$promise$promise$$Promise)) {
+          $$es6$promise$promise$$needsNew();
+        }
+
+        $$$internal$$initializePromise(this, resolver);
+      }
+    }
+
+    $$es6$promise$promise$$Promise.all = $$promise$all$$default;
+    $$es6$promise$promise$$Promise.race = $$promise$race$$default;
+    $$es6$promise$promise$$Promise.resolve = $$promise$resolve$$default;
+    $$es6$promise$promise$$Promise.reject = $$promise$reject$$default;
+
+    $$es6$promise$promise$$Promise.prototype = {
+      constructor: $$es6$promise$promise$$Promise,
+
+    /**
+      The primary way of interacting with a promise is through its `then` method,
+      which registers callbacks to receive either a promise's eventual value or the
+      reason why the promise cannot be fulfilled.
+
+      ```js
+      findUser().then(function(user){
+        // user is available
+      }, function(reason){
+        // user is unavailable, and you are given the reason why
+      });
+      ```
+
+      Chaining
+      --------
+
+      The return value of `then` is itself a promise.  This second, 'downstream'
+      promise is resolved with the return value of the first promise's fulfillment
+      or rejection handler, or rejected if the handler throws an exception.
+
+      ```js
+      findUser().then(function (user) {
+        return user.name;
+      }, function (reason) {
+        return 'default name';
+      }).then(function (userName) {
+        // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
+        // will be `'default name'`
+      });
+
+      findUser().then(function (user) {
+        throw new Error('Found user, but still unhappy');
+      }, function (reason) {
+        throw new Error('`findUser` rejected and we're unhappy');
+      }).then(function (value) {
+        // never reached
+      }, function (reason) {
+        // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
+        // If `findUser` rejected, `reason` will be '`findUser` rejected and we're unhappy'.
+      });
+      ```
+      If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
+
+      ```js
+      findUser().then(function (user) {
+        throw new PedagogicalException('Upstream error');
+      }).then(function (value) {
+        // never reached
+      }).then(function (value) {
+        // never reached
+      }, function (reason) {
+        // The `PedgagocialException` is propagated all the way down to here
+      });
+      ```
+
+      Assimilation
+      ------------
+
+      Sometimes the value you want to propagate to a downstream promise can only be
+      retrieved asynchronously. This can be achieved by returning a promise in the
+      fulfillment or rejection handler. The downstream promise will then be pending
+      until the returned promise is settled. This is called *assimilation*.
+
+      ```js
+      findUser().then(function (user) {
+        return findCommentsByAuthor(user);
+      }).then(function (comments) {
+        // The user's comments are now available
+      });
+      ```
+
+      If the assimliated promise rejects, then the downstream promise will also reject.
+
+      ```js
+      findUser().then(function (user) {
+        return findCommentsByAuthor(user);
+      }).then(function (comments) {
+        // If `findCommentsByAuthor` fulfills, we'll have the value here
+      }, function (reason) {
+        // If `findCommentsByAuthor` rejects, we'll have the reason here
+      });
+      ```
+
+      Simple Example
+      --------------
+
+      Synchronous Example
+
+      ```javascript
+      var result;
+
+      try {
+        result = findResult();
+        // success
+      } catch(reason) {
+        // failure
+      }
+      ```
+
+      Errback Example
+
+      ```js
+      findResult(function(result, err){
+        if (err) {
+          // failure
+        } else {
+          // success
+        }
+      });
+      ```
+
+      Promise Example;
+
+      ```javascript
+      findResult().then(function(result){
+        // success
+      }, function(reason){
+        // failure
+      });
+      ```
+
+      Advanced Example
+      --------------
+
+      Synchronous Example
+
+      ```javascript
+      var author, books;
+
+      try {
+        author = findAuthor();
+        books  = findBooksByAuthor(author);
+        // success
+      } catch(reason) {
+        // failure
+      }
+      ```
+
+      Errback Example
+
+      ```js
+
+      function foundBooks(books) {
+
+      }
+
+      function failure(reason) {
+
+      }
+
+      findAuthor(function(author, err){
+        if (err) {
+          failure(err);
+          // failure
+        } else {
+          try {
+            findBoooksByAuthor(author, function(books, err) {
+              if (err) {
+                failure(err);
+              } else {
+                try {
+                  foundBooks(books);
+                } catch(reason) {
+                  failure(reason);
+                }
+              }
+            });
+          } catch(error) {
+            failure(err);
+          }
+          // success
+        }
+      });
+      ```
+
+      Promise Example;
+
+      ```javascript
+      findAuthor().
+        then(findBooksByAuthor).
+        then(function(books){
+          // found books
+      }).catch(function(reason){
+        // something went wrong
+      });
+      ```
+
+      @method then
+      @param {Function} onFulfilled
+      @param {Function} onRejected
+      @param {String} label optional string for labeling the promise.
+      Useful for tooling.
+      @return {Promise}
+    */
+      then: function(onFulfillment, onRejection, label) {
+        var parent = this;
+        var state = parent._state;
+
+        if (state === $$$internal$$FULFILLED && !onFulfillment || state === $$$internal$$REJECTED && !onRejection) {
+          return this;
+        }
+
+        parent._onerror = null;
+
+        var child = new this.constructor($$$internal$$noop, label);
+        var result = parent._result;
+
+        if (state) {
+          var callback = arguments[state - 1];
+          $$asap$$default(function(){
+            $$$internal$$invokeCallback(state, child, callback, result);
+          });
+        } else {
+          $$$internal$$subscribe(parent, child, onFulfillment, onRejection);
+        }
+
+        return child;
+      },
+
+    /**
+      `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
+      as the catch block of a try/catch statement.
+
+      ```js
+      function findAuthor(){
+        throw new Error('couldn't find that author');
+      }
+
+      // synchronous
+      try {
+        findAuthor();
+      } catch(reason) {
+        // something went wrong
+      }
+
+      // async with promises
+      findAuthor().catch(function(reason){
+        // something went wrong
+      });
+      ```
+
+      @method catch
+      @param {Function} onRejection
+      @param {String} label optional string for labeling the promise.
+      Useful for tooling.
+      @return {Promise}
+    */
+      'catch': function(onRejection, label) {
+        return this.then(null, onRejection, label);
+      }
+    };
+
+    var $$es6$promise$polyfill$$default = function polyfill() {
+      var local;
+
+      if (typeof global !== 'undefined') {
+        local = global;
+      } else if (typeof window !== 'undefined' && window.document) {
+        local = window;
+      } else {
+        local = self;
+      }
+
+      var es6PromiseSupport =
+        "Promise" in local &&
+        // Some of these methods are missing from
+        // Firefox/Chrome experimental implementations
+        "resolve" in local.Promise &&
+        "reject" in local.Promise &&
+        "all" in local.Promise &&
+        "race" in local.Promise &&
+        // Older version of the spec had a resolver object
+        // as the arg rather than a function
+        (function() {
+          var resolve;
+          new local.Promise(function(r) { resolve = r; });
+          return $$utils$$isFunction(resolve);
+        }());
+
+      if (!es6PromiseSupport) {
+        local.Promise = $$es6$promise$promise$$default;
+      }
+    };
+
+    var es6$promise$umd$$ES6Promise = {
+      Promise: $$es6$promise$promise$$default,
+      polyfill: $$es6$promise$polyfill$$default
+    };
+
+    /* global define:true module:true window: true */
+    if (typeof define === 'function' && define['amd']) {
+      define(function() { return es6$promise$umd$$ES6Promise; });
+    } else if (typeof module !== 'undefined' && module['exports']) {
+      module['exports'] = es6$promise$umd$$ES6Promise;
+    } else if (typeof this !== 'undefined') {
+      this['ES6Promise'] = es6$promise$umd$$ES6Promise;
+    }
+}).call(this);
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"_process":39}],41:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -23106,7 +23388,7 @@ return jQuery;
 
 }));
 
-},{}],52:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /*!
  * js-logger - http://github.com/jonnyreeves/js-logger 
  * Jonny Reeves, http://jonnyreeves.co.uk/
@@ -23304,7 +23586,7 @@ return jQuery;
 		global.Logger = Logger;
     }
 }(this));
-},{}],53:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /*
 	ractive.js v0.5.5
 	2014-07-13 - commit 8b1d34ef 
@@ -36465,7 +36747,7 @@ return jQuery;
 
 }( typeof window !== 'undefined' ? window : this ) );
 
-},{}],54:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 //     Underscore.js 1.6.0
 //     http://underscorejs.org
 //     (c) 2009-2014 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -37810,4 +38092,4 @@ return jQuery;
   }
 }).call(this);
 
-},{}]},{},[9])
+},{}]},{},[1]);
