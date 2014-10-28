@@ -46,17 +46,6 @@ module.exports = function(grunt) {
         }
       }
     },
-    mochaTest: {
-      test: {
-        options: {
-          reporter: 'spec',
-          clearRequireCache: true,
-          globals: ['assert', 'fs', 'sinon', 'utils', 'winston', 'EventEmitter'],
-          require: 'test/helper'
-        },
-        src: [ 'test/**/test-*.js' ]
-      }
-    },
     watch: {
       js: {
         files: [ "**/static/**/*.js*", "**/static/**/**/*.js*" ],
@@ -82,10 +71,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-less');
 
   // Dev
-  grunt.loadNpmTasks('grunt-contrib-watch');
-
-  // Test
-  grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-contrib-watch');
 
   // General
