@@ -3,6 +3,8 @@ var Ractive = require('ractive');
 module.exports = Ractive.extend({
   template: '#announcerTmpl',
   isolated: true,
+  twoway: false,
+  debug: true,
   data: {
     settingsOpen: false,
     state: null

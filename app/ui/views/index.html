@@ -43,29 +43,41 @@
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
-        <div class="{{radio.isOn ? 'is-on' : 'is-off' }} is-{{ mainView }}">
+        <div class="{{power.isOn ? 'is-on' : 'is-off' }} is-{{ mainView }}">
           <!-- App masthead -->
           <Masthead 
             on-power="power" 
-            on-settings="settings"
-            isOn="{{radio.isOn}}" />
+            on-settings="settings-panel-requested"
+            isOn="{{power.isOn}}" />
 
           <!-- Main app views -->
-          {{#radio.isOn}}
-            <Controls 
-              radio="{{radio}}"
+          {{#power.isOn}}
+            <Controls
+              audio="{{audio}}"
+              current="{{current}}"
+              services="{{services}}"
+              nowAndNext="{{nowAndNext}}"
+              nowPlaying="{{nowPlaying}}"
+
+              avoider="{{avoider}}"
               on-avoid="avoid"
+              on-avoider-settings-requested="avoider-settings-requested"
+              on-avoider-settings-changed="avoider-settings-changed"
+
+              announcer="{{announcer}}"
               on-announce="announce"
-              on-tune-service="tune-service" />
-          {{/radio.isOn}}
-          {{^radio.isOn}}
-            <Standby 
-              radio="{{radio}}" />
-          {{/radio.isOn}}
+
+              on-tune-service="tune-service"
+              on-volume-slider-changed="volume-slider-changed" />
+          {{/power.isOn}}
+          {{^power.isOn}}
+            <Standby />
+          {{/power.isOn}}
 
           <RadioSettings 
-            radio="{{ radio }}"
-            on-preferred-service="preferred-service" />
+            settings="{{ settings }}"
+            services="{{ services }}"
+            on-preferred-service="preferred-service-changed" />
         </div>
       {% endraw %}
     </script>

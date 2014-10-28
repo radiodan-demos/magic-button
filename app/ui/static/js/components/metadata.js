@@ -3,6 +3,8 @@ var Ractive = require('ractive');
 module.exports = Ractive.extend({
   template: '#metadataTmpl',
   isolated: true,
+  debug: true,
+  twoway: false,
   data: {
     view: 'prog',
     first: function (array) {
@@ -14,7 +16,6 @@ module.exports = Ractive.extend({
   },
   init: function () {
     this.on('track-display', function () {
-      console.log('track-display');
       var current = this.get('view');
       this.set('view', current === 'track' ? 'prog' : 'track');
     });

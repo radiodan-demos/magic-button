@@ -2,7 +2,7 @@
 {% raw %}
 <div class="lo-single metadata-panel cf is-{{ view }}">
   <div class="md-items">
-    {{#first(nowAndNext)}}
+    {{#first(nowAndNext || [])}}
     <div class="cf metadata md-prog">
       {{#image}}
         <img class="md-img"

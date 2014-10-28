@@ -3,6 +3,8 @@ var Ractive = require('ractive');
 module.exports = Ractive.extend({
   template: '#avoiderTmpl',
   isolated: true,
+  twoway: true,
+  debug: true,
   data: {
     settingsOpen: false,
     state: null
@@ -13,8 +15,8 @@ module.exports = Ractive.extend({
   },
   computed: {
     percentThrough: function () {
-      var start = this.get('state.start'),
-          end   = this.get('state.end'),
+      var start = this.get('start'),
+          end   = this.get('end'),
           now   = this.get('now'),
           duration,
           current,
@@ -68,17 +70,20 @@ module.exports = Ractive.extend({
     });
 
     this.on('settings', function () {
+      if (!this.get('settingsOpen')) {
+        this.fire('settings-requested');
+      }
       this.set('settingsOpen', !this.get('settingsOpen'));
     });
 
     this.on('avoid-service-setting', function (serviceId) {
       this.set('state.settings.serviceId', serviceId);
+      this.fire('settings-changed', this.get('state.settings'));
     });
 
-    this.observe('state.settings', function (newValue, oldValue) {
-      console.log('state.settings', newValue, this.get('state'));
-      this.get('state')
-          .updateSettings(newValue);
+    this.on('state-settings-avoid-type', function (evt) {
+      this.set('state.settings.avoidType', evt.node.value);
+      this.fire('settings-changed', this.get('state.settings'));
     });
   },
   formatTimeDiff: function (diffInMs) {

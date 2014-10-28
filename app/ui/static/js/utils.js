@@ -1,7 +1,8 @@
 /* jshint white: false, latedef: nofunc, browser: true, devel: true */
 'use strict';
 
-var _ = require('underscore');
+var _ = require('underscore'),
+    Logger = require('js-logger');
 
 module.exports = {
   merge: _.extend,
@@ -23,12 +24,12 @@ module.exports = {
   */
   success: function success(msg) {
     return function (content) {
-      console.log(msg, 'success', content);
+      Logger.debug(msg, 'success', content);
     };
   },
   failure: function failure(msg) {
     return function (err) {
-      console.warn(msg, 'failure', err.stack);
+      Logger.warn(msg, 'failure', err.stack);
     };
   },
   /*

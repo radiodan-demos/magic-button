@@ -2,40 +2,51 @@
 {% raw %}
 <div id="controls">
   <section id="playout" class="layout panel">
-    <Playout radio="{{ radio }}" 
+    <Playout volume="{{ audio.volume }}"
+             current="{{ current }}"
+
              on-services-panel-toggle="services-panel-toggle"
              on-volume-panel-toggle="volume-panel-toggle"
              services="{{ services }}" />
   </section>
 
   <section id="services"
-           class="layout panel services {{ services.isOpen ? '' : 'is-closed' }}">
-    <ServicesList 
-        activeServiceIds="{{ [radio.tunableServices.current.id] }}"
-        services="{{ radio.tunableServices.services }}"
+           class="layout panel services {{ servicesPanel.isOpen ? '' : 'is-closed' }}">
+    <ServicesList
+        activeServiceIds="{{ [current.id] }}"
+        services="{{ services }}"
         on-selected="tune-service" />
   </section>
 
   <section id="volume" class="layout panel {{ volume.isOpen ? '' : 'is-closed' }}">
-    <Volume
-      volume="{{ radio.volume }}" />
+    <div class="lo-center">
+      {{#audio}}
+      <input type="range"
+             on-change="volume-slider-changed"
+             min="0" max="100" value="{{volume}}" />
+      {{/audio}}
+    </div>
   </section>
 
   <section id="metadata" class="layout">
-    <Metadata 
-      nowAndNext="{{radio.current.nowAndNext}}"
-      nowPlaying="{{radio.current.nowPlaying}}" />
+    <Metadata
+      nowAndNext="{{nowAndNext}}"
+      nowPlaying="{{nowPlaying}}" />
   </section>
 
   <section id="magic">
     <ul class="magic">
-      <Avoider 
-        state="{{radio.magic.avoider}}"
-        services="{{ radio.services }}"
-        on-avoid="avoid" />
-      <Announcer 
-        state="{{radio.magic.announcer}}"
+      <Avoider
+        state="{{avoider}}"
+        services="{{ services }}"
+        on-avoid="avoid"
+        on-settings-requested="avoider-settings-requested"
+        on-settings-changed="avoider-settings-changed" />
+      <!--
+      <Announcer
+        state="{{announcer}}"
         on-announce="announce" />
+      -->
     </ul>
   </section>
 </div><!-- #controls -->

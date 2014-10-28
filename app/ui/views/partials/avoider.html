@@ -31,13 +31,13 @@
       <h2>What would you like to avoid?</h2>
       <p>
         <label>
-          <input type='radio' name='{{state.settings.avoidType}}' value='tracks'>
+          <input on-change="state-settings-avoid-type" type='radio' name='{{state.settings.avoidType}}' value='tracks'>
           The current track
         </label>
       </p>
       <p>
         <label>
-          <input type='radio' name='{{state.settings.avoidType}}' value='programmes'>
+          <input on-change="state-settings-avoid-type" type='radio' name='{{state.settings.avoidType}}' value='programmes'>
           The entire programme
         </label>
       </p>
