@@ -4,12 +4,19 @@ describe('Play Action', function(){
   beforeEach(function() {
     var player, ui;
 
-    this.playMock = {add: sinon.stub().returns(utils.promise.resolve()), play: sinon.spy()};
-    this.ledMock  = {emit: sinon.spy()};
+    this.playMock = {
+      add: sinon.stub().returns(utils.promise.resolve()),
+      play: sinon.spy()
+    };
+
+    this.ledMock  = { emit: sinon.spy() };
     this.services = {};
 
-    player = {main: this.playMock },
-    ui     = {colours: {green: 'green'},RGBLEDs: {power: this.ledMock }};
+    player = { main: this.playMock },
+    ui     = {
+      colours: {green: 'green'},
+      RGBLEDs: {power: this.ledMock }
+    };
 
     this.subject = play.create(player, ui, this.services, null);
   });
