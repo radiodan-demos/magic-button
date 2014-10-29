@@ -46,7 +46,10 @@ function initState() {
   });
 
   CurrentServiceStore.addChangeListener(function () {
+    var currentId = CurrentServiceStore.getCurrentId();
     AppView.set('current', CurrentServiceStore.getCurrent());
+    AppView.set('nowPlaying', NowPlayingStore.get(currentId));
+    AppView.set('nowAndNext', NowAndNextStore.get(currentId));
   });
 
   AvoiderStore.addChangeListener(function () {
