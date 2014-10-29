@@ -19,5 +19,11 @@ module.exports = Ractive.extend({
       var current = this.get('view');
       this.set('view', current === 'track' ? 'prog' : 'track');
     });
+    this.observe('nowPlaying', function (newValue) {
+      var current = this.get('view');
+      if (newValue == undefined && current === 'track') {
+        this.set('view', 'prog');
+      }
+    });
   }
 });
