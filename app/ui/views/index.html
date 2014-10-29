@@ -81,6 +81,6 @@
         </div>
       {% endraw %}
     </script>
-    <script src="assets/js/app.{% if isDebug %}debug.{% endif %}js"></script>
+    <script src="assets/js/app.{% if !isDebug %}min.{% endif %}js"></script>
   </body>
 </html>
