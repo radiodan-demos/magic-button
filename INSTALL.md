@@ -92,11 +92,13 @@ Any javascript files in `static/js` must be `required` into `app.js`  otherwise 
 
 ### Building
 
-`grunt` is used to compile all the javascript into a single file `public/assets/js/app.js` for deployment and all the CSS into a single file `public/assets/css/app.css`.
+`gulp` is used to compile all the javascript into a single file `public/assets/js/app.js` for deployment and all the CSS into a single file `public/assets/css/app.css`.
 
 Any other directories in `app/ui/static` will be copied unchanged to `public/assets`.
 
-When changing the front-end code you must run `grunt build` otherwise you won't see the changes to your javascript or CSS.
+When changing the front-end code you should run `gulp build` otherwise you won't see the changes to your javascript or CSS. You can use `gulp watch` to quikcly and automatically recompile when any of the files change.
 
-You must commit the compiled JS/CSS in `public` when you commit your code changes.
+You must commit the compiled CSS and images in `public` when you commit your code changes.
+
+The compiled JS isn't comitted, it's generated on `npm install`.
 

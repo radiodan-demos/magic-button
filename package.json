@@ -4,7 +4,7 @@
   "description": "The radiodan demo app",
   "main": "main.js",
   "scripts": {
-    "postinstall": "cp -n config/radiodan-config.json.example config/radiodan-config.json; cp -n config/physical-ui-config.json.example config/physical-ui-config.json; exit 0",
+    "postinstall": "cp -n config/radiodan-config.json.example config/radiodan-config.json; cp -n config/physical-ui-config.json.example config/physical-ui-config.json; node_modules/.bin/gulp js; exit 0",
     "test": "LOG_LEVEL=fatal node_modules/mocha/bin/mocha --recursive --require test/helper",
     "testWatch": "LOG_LEVEL=fatal node_modules/mocha/bin/mocha --watch --recursive --require test/helper",
     "coverage": "LOG_LEVEL=fatal node_modules/istanbul/lib/cli.js cover _mocha -- --require test/helper --recursive --ui bdd -R spec -t 5000",
@@ -44,15 +44,6 @@
   "devDependencies": {
     "chai": "^1.9.0",
     "chai-as-promised": "^4.1.1",
-    "es6-promise": "^0.1.1",
-    "grunt": "~0.4.5",
-    "grunt-autoprefixer": "~0.7.2",
-    "grunt-browserify": "~2.0.1",
-    "grunt-contrib-copy": "~0.5.0",
-    "grunt-contrib-less": "~0.11.0",
-    "grunt-contrib-uglify": "~0.4.0",
-    "grunt-contrib-watch": "~0.5.3",
-    "grunt-mocha-test": "~0.12.2",
     "istanbul": "^0.2.6",
     "jquery": "~2.1.0",
     "mocha": "^1.21.5",
@@ -62,6 +53,19 @@
     "supertest": "^0.9.0",
     "underscore": "~1.6.0",
     "flux": "~2.0.1",
-    "js-logger": "~0.9.14"
+    "js-logger": "~0.9.14",
+    "gulp": "~3.8.9",
+    "gulp-less": "~1.3.6",
+    "gulp-autoprefixer": "~1.0.1",
+    "vinyl-source-stream": "~1.0.0",
+    "gulp-uglify": "~1.0.1",
+    "gulp-streamify": "0.0.5",
+    "es6-promise": "~2.0.0",
+    "watchify": "~2.1.0",
+    "gulp-livereload": "~2.1.1",
+    "browserify": "~6.2.0",
+    "exorcist": "~0.1.6",
+    "vinyl-transform": "0.0.1",
+    "gulp-clone": "~1.0.0"
   }
 }

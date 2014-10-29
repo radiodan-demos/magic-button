@@ -2,7 +2,6 @@
 *,
 *:before,
 *:after {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 body {
@@ -134,7 +133,6 @@ dfn {
   font-style: italic;
 }
 hr {
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
   height: 0;
 }
@@ -257,7 +255,6 @@ html input[disabled] {
 }
 input[type=checkbox],
 input[type=radio] {
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 0;
   *height: 13px;
@@ -265,7 +262,6 @@ input[type=radio] {
 }
 input[type=search] {
   -webkit-appearance: textfield;
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
 }
 input[type=search]::-webkit-search-cancel-button,
@@ -655,7 +651,6 @@ a.pure-button-selected {
   border: 1px solid #ccc;
   box-shadow: inset 0 1px 3px #ddd;
   border-radius: 4px;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .pure-form input:not([type]) {
@@ -664,7 +659,6 @@ a.pure-button-selected {
   border: 1px solid #ccc;
   box-shadow: inset 0 1px 3px #ddd;
   border-radius: 4px;
-  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .pure-form input[type=color] {
