@@ -4,7 +4,7 @@
   "description": "The radiodan demo app",
   "main": "main.js",
   "scripts": {
-    "postinstall": "cp -n config/radiodan-config.json.example config/radiodan-config.json; cp -n config/physical-ui-config.json.example config/physical-ui-config.json; exit 0",
+    "postinstall": "cp -n config/radiodan-config.json.example config/radiodan-config.json; cp -n config/physical-ui-config.json.example config/physical-ui-config.json; node_modules/.bin/gulp js; exit 0",
     "test": "LOG_LEVEL=fatal node_modules/mocha/bin/mocha --recursive --require test/helper",
     "testWatch": "LOG_LEVEL=fatal node_modules/mocha/bin/mocha --watch --recursive --require test/helper",
     "coverage": "LOG_LEVEL=fatal node_modules/istanbul/lib/cli.js cover _mocha -- --require test/helper --recursive --ui bdd -R spec -t 5000",

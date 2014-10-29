@@ -18,3 +18,5 @@ node_modules
 db/*db*
 *.debug.js
 .DS_Store
+
+public/assets/js/
