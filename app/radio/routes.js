@@ -1,16 +1,16 @@
-var utils = require("radiodan-client").utils,
+var radiodanClient = require("radiodan-client"),
+    utils          = radiodanClient.utils,
+    radiodan       = radiodanClient.create(),
     settingsRoutes = require("../settings/routes"),
-    logger = utils.logger('radio-routes');
+    logger         = utils.logger('radio-routes');
 
 module.exports = routes;
 
-function routes(app, eventBus, radiodan, states, services, settings) {
-
-  var audio       = radiodan.audio.get('default'),
-      devicePower = radiodan.device.get();
+function routes(app, eventBus, device, services, settings) {
+  var audio = radiodan.audio.get('default');
 
   app.get('/next', function(req, res) {
-    states.handle('playNextService');
+    device.handle('playNext');
     res.send(200);
   });
 
@@ -53,7 +53,7 @@ function routes(app, eventBus, radiodan, states, services, settings) {
   */
   app.get('/power', function (req, res) {
     res.json({
-      power: { isOn: (states.state != 'standby') }
+      power: { isOn: (device.state != 'standby') }
     });
   });
   app.put('/power', start); // tee hee
@@ -61,23 +61,19 @@ function routes(app, eventBus, radiodan, states, services, settings) {
   app.delete('/power', standby);
 
   app.post('/shutdown', function (req, res) {
-    devicePower.shutdown()
-      .then(function() {
-        res.json({ shutdown: true });
-      });
+    device.handle('shutdown');
+    res.json({ shutdown: true });
   });
 
   app.post('/restart', function (req, res) {
-    devicePower.restart()
-      .then(function() {
-        res.json({ restart: true });
-      });
+    device.handle('restart');
+    res.json({ shutdown: true });
   });
 
   function getState(req, res) {
-    var current, state;
+    var current, state, logLevel;
 
-    var logLevel = utils.logger.logLevel ? utils.logger.logLevel() : null;
+    logLevel = utils.logger.logLevel ? utils.logger.logLevel() : null;
 
     if(services.current()) {
       var programme = services.programmeFor(services.current());
@@ -99,10 +95,10 @@ function routes(app, eventBus, radiodan, states, services, settings) {
       function (audioStatus, stations) {
         logger.info('Stations %s, status:', stations.length, audioStatus);
         try {
-          logger.info('Responding with state', states.state);
+          logger.info('Responding with state', device.state);
 
           state = {
-            power   : { isOn: (states.state != 'standby') },
+            power   : { isOn: (device.state != 'standby') },
             current : current,
             audio   : { volume  : audioStatus.volume },
             avoider : { isAvoiding: false },
@@ -122,13 +118,13 @@ function routes(app, eventBus, radiodan, states, services, settings) {
 
   function start(req, res) {
     settings.get().then(function(settings){
-      states.handle('startPlaying', settings.serviceId);
+      device.handle('play', settings.serviceId);
       res.send(200);
     });
   }
 
   function standby(req, res) {
-    states.handle('standby');
+    device.handle('standby');
     res.send(200);
   }
 
@@ -159,7 +155,7 @@ function routes(app, eventBus, radiodan, states, services, settings) {
     var id = req.params.id;
 
     settings.update({serviceId: id}).then(function() {
-      states.handle('startPlaying', id);
+      device.handle('play', id);
       res.send(200);
     });
   }

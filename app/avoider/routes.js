@@ -4,7 +4,7 @@ var utils    = require('radiodan-client').utils,
 
 module.exports = routes;
 
-function routes(app, states, settings, eventBus) {
+function routes(app, device, settings, eventBus) {
   var currentAvoid = { isAvoiding: false };
 
   app.get('/', index);
@@ -28,7 +28,7 @@ function routes(app, states, settings, eventBus) {
   }
 
   function state(req, res) {
-    var isAvoiding = (states.state === 'avoiding'),
+    var isAvoiding = (device.state === 'avoiding'),
         json = currentAvoid;
 
     res.json(currentAvoid);
@@ -37,12 +37,12 @@ function routes(app, states, settings, eventBus) {
   function avoid(req, res) {
     settings.get().then(function(avoidSettings) {
       res.send(200);
-      states.handle('startAvoiding', avoidSettings);
+      device.handle('startAvoiding', avoidSettings);
     }).then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
-    states.handle('stopAvoiding');
+    device.handle('stopAvoiding');
     res.send(200);
   }
 }

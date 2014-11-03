@@ -3,30 +3,25 @@ var express        = require('express'),
     swig           = require('swig'),
     radiodanClient = require('radiodan-client'),
     logger         = radiodanClient.utils.logger(__filename),
-    radiodan       = radiodanClient.create(),
-    port           = (process.env.PORT || 5000),
-    app            = module.exports = express(),
     eventBus       = require('./lib/event-bus').create(),
     Settings       = require('./lib/settings').create(eventBus),
     services       = require('./lib/services').create(
                        eventBus, Settings.get('radio')
                      ),
-    states         = require('./lib/states').create(radiodan, services, eventBus, Settings);
-
-if (!module.parent) {
-  var gracefulExit = require('./lib/graceful-exit')(radiodan);
-  process.on('SIGINT', gracefulExit).on('SIGTERM', gracefulExit);
-}
+    device         = require('./lib/device').create(services, eventBus),
+    app            = module.exports = express(),
+    port           = (process.env.PORT || 5000);
 
 app.engine('html', swig.renderFile);
 app.set('view engine', 'html');
 
-var env = process.env.NODE_ENV || 'production';
-if ('development' == env) {
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
+if ('development' == process.env.NODE_ENV) {
   swig.setDefaults({ cache: false });
 }
 
-logger.info('ENVIRONMENT', env);
+logger.info('ENVIRONMENT', process.env.NODE_ENV);
 
 app.use(require('errorhandler')({
   dumpExceptions: true,
@@ -40,13 +35,13 @@ app.use(require('morgan')('dev'));
 
 app.use('/announcer',
   require('./app/announcer/routes')(
-    express.Router(), states, Settings.get('announcer')
+    express.Router(), device, Settings.get('announcer')
   )
 );
 
 app.use('/avoider',
   require('./app/avoider/routes')(
-    express.Router(), states, Settings.get('avoider'), eventBus
+    express.Router(), device, Settings.get('avoider'), eventBus
   )
 );
 
@@ -58,20 +53,20 @@ app.use('/events',
 
 app.use('/magic-button',
   require('./app/magic-button/routes')(
-    express.Router(), states, Settings.get('magic-button')
+    express.Router(), device, Settings.get('magic-button')
   )
 );
 
 app.use('/radio',
   require('./app/radio/routes')(
-    express.Router(), eventBus, radiodan,
-    states, services, Settings.get('radio')
+    express.Router(), eventBus,
+    device, services, Settings.get('radio')
   )
 );
 
 app.use('/',
   require('./app/ui/routes')(
-    express.Router(), radiodan, services
+    express.Router()
   )
 );
 

@@ -1,7 +1,11 @@
 'use strict';
 
+
 //supress log messages
 process.env.LOG_LEVEL = 'fatal';
+
+//set test mode
+process.env.NODE_ENV = 'test';
 
 var chai = require('chai'),
     cap  = require('chai-as-promised');

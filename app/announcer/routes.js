@@ -6,7 +6,7 @@ var fs             = require('fs'),
 
 module.exports = routes;
 
-function routes(app, states, settings) {
+function routes(app, device, settings) {
   var availableAnnouncers = findAvailableAnnouncers(announcersPath);
 
   settings.update({available: availableAnnouncers});
@@ -26,19 +26,19 @@ function routes(app, states, settings) {
 
   function state(req, res) {
     res.json({
-      isAnnouncing: (states.state === 'announcing')
+      isAnnouncing: (device.state === 'announcing')
     });
   }
 
   function announce(req, res) {
     settings.get().then(function(settings) {
-      states.handle('startAnnouncing', settings);
+      device.handle('startAnnouncing', settings);
       res.send(200);
     }).then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
-    states.handle('stopAnnouncing');
+    device.handle('stopAnnouncing');
     res.send(200);
   }
 
