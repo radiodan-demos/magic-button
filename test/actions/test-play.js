@@ -4,21 +4,11 @@ describe('Play Action', function(){
   beforeEach(function() {
     var player, ui;
 
-    this.playMock = {
-      add: sinon.stub().returns(utils.promise.resolve()),
-      play: sinon.spy()
-    };
-
-    this.ledMock  = { emit: sinon.spy() };
     this.services = {};
 
-    player = { main: this.playMock },
-    ui     = {
-      colours: {green: 'green'},
-      RGBLEDs: {power: this.ledMock }
-    };
-
-    this.subject = play.create(player, ui, this.services, null);
+    this.player = fakeRadiodan('player');
+    this.ui     = fakeRadiodan('ui');
+    this.subject = play.create(this.player, this.ui, this.services, null);
   });
 
   describe('determining the station to play', function(){
@@ -65,7 +55,7 @@ describe('Play Action', function(){
 
       return this.subject.action(stationId)
         .then(function() {
-          var emit = that.ledMock.emit,
+          var emit = that.ui.RGBLEDs.power.emit,
               expected = { emit: true, colour: 'green' };
 
           assert.equal(emit.callCount, 1);
@@ -74,10 +64,31 @@ describe('Play Action', function(){
         .then(done,done);
     });
 
-    // TODO: on hold until devices/physical-ui and devices/players
-    // have been implemented & stubable for use here
-    xit('sets a new playlist');
-    xit('starts the player');
-    xit('alerts the services object to the new stationId');
+    it('sets a new playlist', function(done) {
+      var that = this,
+          stationId = sinon.stub(),
+          playlist  = sinon.stub();
+
+      this.services.playlist.returns(playlist);
+
+      return this.subject.action(stationId)
+        .then(function() {
+          var add  = that.player.main.add,
+              play = that.player.main.play,
+              expected = { clear: true, playlist: [playlist]};
+
+          // creates playlist
+          assert.isTrue(that.services.playlist.calledWith(stationId));
+          assert.deepEqual(add.getCall(0).args[0], expected);
+
+          // plays playlist
+          assert.equal(play.callCount, 1);
+
+          // changes service
+          assert.equal(that.services.change.callCount, 1);
+          assert.isTrue(that.services.change.calledWith(stationId));
+        })
+        .then(done,done);
+    });
   });
 });
