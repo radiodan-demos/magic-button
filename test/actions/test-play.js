@@ -9,6 +9,8 @@ describe('Play Action', function(){
     this.player = fakeRadiodan('player');
     this.ui     = fakeRadiodan('ui');
     this.subject = play.create(this.player, this.ui, this.services, null);
+
+    this.subject.transition = sinon.spy();
   });
 
   describe('determining the station to play', function(){
@@ -47,6 +49,18 @@ describe('Play Action', function(){
     beforeEach(function(){
       this.services.playlist = sinon.stub();
       this.services.change = sinon.stub();
+    });
+
+    it('transisions to online', function(done) {
+      var that = this,
+          stationId = sinon.stub();
+
+      return this.subject.action(stationId)
+        .then(function() {
+          assert.equal(that.subject.transition.callCount, 1);
+          assert.isTrue(that.subject.transition.calledWith('online'));
+        })
+        .then(done,done);
     });
 
     it('turns the powerLED to green', function(done){
