@@ -8,7 +8,6 @@ module.exports = Ractive.extend({
   components: {
     Playout      : require('./simple')('#playoutTmpl'),
     ServicesList : require('./services-list'),
-    Volume       : require('./simple')('#volumeTmpl'),
     Metadata     : require('./metadata'),
     Avoider      : require('./avoider'),
     Announcer    : require('./announcer')
