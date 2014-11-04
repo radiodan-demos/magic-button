@@ -102,15 +102,15 @@ describe("BBC Services", function() {
       stationPromise = utils.promise.defer(),
         topicPromise = utils.promise.defer();
 
-      self.subject.once("1xtra", function(topic, emitData) {
-        assert.deepEqual(data.topic, topic);
-        assert.deepEqual(data.data, emitData);
+      self.subject.on("1xtra", function(topicKey, emitData) {
+        assert.equal(topicKey, 'nowPlaying');
+        assert.deepEqual(emitData, data.data);
 
         stationPromise.resolve();
       });
 
-      self.subject.once("1xtra.nowPlaying", function(emitData) {
-        assert.deepEqual(data.data, emitData);
+      self.subject.on("1xtra.nowPlaying", function(emitData) {
+        assert.deepEqual(emitData, data.data);
 
         topicPromise.resolve();
       });
