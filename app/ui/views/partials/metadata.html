@@ -2,18 +2,18 @@
 {% raw %}
 <div class="lo-single metadata-panel cf">
   <Carousel activeSlide="{{ activeSlide }}">
-    {{#first(nowAndNext || [])}}
+    {{#nowAndNext.1}}
     <div class="carousel-item">
       <div class="cf metadata md-prog">
         {{#image}}
           <img class="md-img"
-               src="{{ imageUrl(templateUrl, '272x153') }}" />
+               src="{{ templateUrl.replace('$recipe', '272x153') }}" />
         {{/image}}
         <p class="md-primary">{{ brand }}</p>
         <p class="md-secondary">{{ episode }}</p>
       </div>
     </div>
-    {{/nowAndNext}}
+    {{/nowAndNext.1}}
     {{#nowPlaying}}
     <div class="carousel-item">
       <div class="cf metadata md-track">

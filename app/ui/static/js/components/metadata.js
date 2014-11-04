@@ -10,13 +10,7 @@ module.exports = Ractive.extend({
     'Carousel': require('./carousel')
   },
   data: {
-    activeSlide: 0,
-    first: function (array) {
-      return array[0];
-    },
-    imageUrl: function (template, size) {
-      return template.replace('$recipe', size);
-    }
+    activeSlide: 0
   },
   init: function () {
     var progSlide  = 0,
