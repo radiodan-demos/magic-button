@@ -11,3 +11,31 @@
   background: transparent url('../img/volume.svg') no-repeat;
   vertical-align: middle;
 }
+
+.volume-steps {
+  display: inline-block;
+  height: inherit;
+
+  margin-top: -1px;
+}
+
+.volume-steps button {
+  width: 4.7vw;
+  height: 24px;
+
+  vertical-align: middle;
+
+  padding: 0;
+
+  border: none;
+  border-right: 1px solid #fff;
+  background: #868686;
+}
+
+.volume-steps button:hover {
+  background: #165e95;
+}
+
+.volume-steps .is-active {
+  background: #19abd3;
+}

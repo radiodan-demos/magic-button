@@ -1701,6 +1701,26 @@ Pagination Styles
   background: transparent url('../img/volume.svg') no-repeat;
   vertical-align: middle;
 }
+.volume-steps {
+  display: inline-block;
+  height: inherit;
+  margin-top: -1px;
+}
+.volume-steps button {
+  width: 4.7vw;
+  height: 24px;
+  vertical-align: middle;
+  padding: 0;
+  border: none;
+  border-right: 1px solid #fff;
+  background: #868686;
+}
+.volume-steps button:hover {
+  background: #165e95;
+}
+.volume-steps .is-active {
+  background: #19abd3;
+}
 .power-button > i {
   display: inline-block;
   width: 29px;
@@ -1813,8 +1833,8 @@ Pagination Styles
   background-color: #fff;
 }
 #volume {
-  height: 40px;
-  line-height: 40px;
+  height: 48px;
+  line-height: 48px;
 }
 #metadata {
   min-height: 130px;

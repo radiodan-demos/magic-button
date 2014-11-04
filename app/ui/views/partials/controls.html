@@ -19,13 +19,13 @@
   </section>
 
   <section id="volume" class="layout panel {{ volume.isOpen ? '' : 'is-closed' }}">
-    <div class="lo-center">
-      {{#audio}}
-      <input type="range"
-             on-change="volume-slider-changed"
-             min="0" max="100" value="{{volume}}" />
-      {{/audio}}
+    {{#audio}}
+    <div class="volume-steps">
+      {{# volumeSteps }}
+      <button class="vol {{ volume >= this ? 'is-active' : '' }}" value="{{ this }}" on-tap="volume-slider-changed"></button>
+      {{/ volumeSteps }}
     </div>
+    {{/audio}}
   </section>
 
   <section id="metadata" class="layout">

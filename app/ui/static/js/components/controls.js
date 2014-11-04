@@ -1,4 +1,5 @@
-var Ractive = require('ractive');
+var Ractive = require('ractive'),
+    range = require('underscore').range;
 
 module.exports = Ractive.extend({
   template: '#controlsTmpl',
@@ -15,7 +16,8 @@ module.exports = Ractive.extend({
   data: {
     servicesPanel: {
       isOpen: false
-    }
+    },
+    volumeSteps: range(0, 105, 5)
   },
   init: function () {
     this.on({
