@@ -28,17 +28,34 @@ function routes(app, device, settings, eventBus) {
   }
 
   function state(req, res) {
-    var isAvoiding = (device.state === 'avoiding'),
-        json = currentAvoid;
+    var isAvoiding = (device._priorAction == 'online.startAvoiding'),
+        stateObj = {isAvoiding: isAvoiding};
 
-    res.json(currentAvoid);
+    res.json(stateObj);
   }
 
   function avoid(req, res) {
     settings.get().then(function(avoidSettings) {
       res.send(200);
       device.handle('startAvoiding', avoidSettings);
-    }).then(null, utils.failedPromiseHandler(logger));
+    })
+    .then(function() {
+      // listen for station switching, cancel avoid
+      var listener = device.on('*', function(_, handled) {
+        switch(handled.inputType) {
+          case 'play':
+            logger.debug('cancel avoid, new station playing');
+            device.handle('stopAvoiding');
+            listener.off();
+            break;
+          case 'stopAvoiding':
+            logger.debug('avoiding finished, clear listener');
+            listener.off();
+            break;
+        }
+      });
+    })
+    .then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
