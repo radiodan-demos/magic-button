@@ -19,7 +19,7 @@ module.exports = {
   changeVolume: function (vol) {
     Logger.debug('changeVolume', vol);
     AppDispatcher.handleViewAction({
-       type: ActionTypes.VOLUME,
+       type: ActionTypes.AUDIO,
        state: { volume: vol }
     });
     require('../api/volume')(vol);
