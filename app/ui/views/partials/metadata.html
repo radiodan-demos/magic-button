@@ -1,30 +1,34 @@
 <script id="metadataTmpl" data-ui-template type="text/ractive">
 {% raw %}
-<div class="lo-single metadata-panel cf is-{{ view }}">
-  <div class="md-items">
+<div class="lo-single metadata-panel cf">
+  <Carousel activeSlide="{{ activeSlide }}">
     {{#first(nowAndNext || [])}}
-    <div class="cf metadata md-prog">
-      {{#image}}
-        <img class="md-img"
-             src="{{ imageUrl(templateUrl, '272x153') }}" />
-      {{/image}}
-      <p class="md-primary">{{ brand }}</p>
-      <p class="md-secondary">{{ episode }}</p>
+    <div class="carousel-item">
+      <div class="cf metadata md-prog">
+        {{#image}}
+          <img class="md-img"
+               src="{{ imageUrl(templateUrl, '272x153') }}" />
+        {{/image}}
+        <p class="md-primary">{{ brand }}</p>
+        <p class="md-secondary">{{ episode }}</p>
+      </div>
     </div>
     {{/nowAndNext}}
     {{#nowPlaying}}
-    <div class="cf metadata md-track">
-      {{#contributions.0}}
-        {{#image_pid}}
-        <img class="md-img"
-             src="http://ichef.bbci.co.uk/images/ic/272x153/{{image_pid}}" />
-        {{/image_pid}}
-      {{/contributions.0}}
-      <p class="md-primary">{{ title }}</p>
-      <p class="md-secondary">{{ artist }}</p>
+    <div class="carousel-item">
+      <div class="cf metadata md-track">
+        {{#contributions.0}}
+          {{#image_pid}}
+          <img class="md-img"
+               src="http://ichef.bbci.co.uk/images/ic/272x153/{{image_pid}}" />
+          {{/image_pid}}
+        {{/contributions.0}}
+        <p class="md-primary">{{ title }}</p>
+        <p class="md-secondary">{{ artist }}</p>
+      </div>
     </div>
     {{/nowPlaying}}
-  </div><!-- .md-items -->
+  </Carousel><!-- .md-items -->
 
   <a class="track {{ nowPlaying ? 'is-available' : 'is-unavailable' }}" on-tap="track-display">
     <i></i>

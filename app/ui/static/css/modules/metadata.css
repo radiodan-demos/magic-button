@@ -4,29 +4,14 @@
   margin: 0;
 }
 
-.md-items {
-  width: 200%;
-  overflow: hidden;
-  min-height: 90px;
-  transition: all 0.4s ease-in-out;
-}
-
 .metadata {
-  float: left;
-  width: 50%;
   padding: 0 16px;
+  height: 153px;
 }
 
-.is-prog .md-items {
-  transform: translate(0);
-}
-
-.is-track .md-items {
-  transform: translate(-50%);
-}
-
-.is-prog .track > span {
-  opacity: 0;
+.carousel-item {
+  float: left;
+  width: 100%;
 }
 
 .metadata {
@@ -69,6 +54,7 @@
   left: 16px;
   bottom: 16px;
   transition: all 0.4s ease-in-out;
+  z-index: 100;
 }
 
 .track.is-unavailable {

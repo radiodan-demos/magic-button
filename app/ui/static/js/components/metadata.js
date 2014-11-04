@@ -1,12 +1,16 @@
-var Ractive = require('ractive');
+var Ractive = require('ractive'),
+    $ = require('jquery');
 
 module.exports = Ractive.extend({
   template: '#metadataTmpl',
   isolated: true,
   debug: true,
   twoway: false,
+  components: {
+    'Carousel': require('./carousel')
+  },
   data: {
-    view: 'prog',
+    activeSlide: 0,
     first: function (array) {
       return array[0];
     },
@@ -15,14 +19,16 @@ module.exports = Ractive.extend({
     }
   },
   init: function () {
+    var progSlide  = 0,
+        trackSlide = 1;
+
     this.on('track-display', function () {
-      var current = this.get('view');
-      this.set('view', current === 'track' ? 'prog' : 'track');
+      var currentSlide = this.get('activeSlide');
+      this.set('activeSlide', (currentSlide + 1) % 2);
     });
     this.observe('nowPlaying', function (newValue) {
-      var current = this.get('view');
-      if (newValue == undefined && current === 'track') {
-        this.set('view', 'prog');
+      if (newValue == null) {
+        this.set('activeSlide', progSlide);
       }
     });
   }

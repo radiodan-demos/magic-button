@@ -1,0 +1,6 @@
+@import (less) '../../lib/swiper/idangerous.swiper.css';
+
+.carousel-item {
+  float: left;
+  box-sizing: content-box;
+}

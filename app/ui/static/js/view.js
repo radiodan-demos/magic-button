@@ -10,8 +10,6 @@ var Logger = require('js-logger'),
 require('./lib/ractive-events-tap');
 
 window.jQuery = jQuery;
-// owl.carousel requires global jQuery - boo!
-require('../lib/owl-carousel/owl.carousel');
 
 var StateActionCreators = require('./actions/state-action-creators');
 
@@ -66,8 +64,6 @@ module.exports = {
               StateActionCreators.toggleRadioSettingPreferredServer(serviceId);
             }
           });
-
-          var magicButtonCarousel = jQuery('#magic ul').owlCarousel();
 
           Logger.debug('splashStartTime - now = %oms', (Date.now() - splashStartTime));
           resolve();
