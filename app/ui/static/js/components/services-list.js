@@ -5,7 +5,7 @@ module.exports = Ractive.extend({
   isolated: true,
   twoway: false,
   debug: true,
-  init: function () {
+  oninit: function () {
     var self = this;
     this.on({
       'services-partial': function (evt) {

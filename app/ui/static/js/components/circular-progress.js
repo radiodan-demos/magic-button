@@ -42,7 +42,7 @@ var CircularProgress = Ractive.extend({
       return percentThrough ? percentToAngle(percentThrough) : 0;
     }
   },
-  init: function () {
+  oninit: function () {
     this.set(initialState);
 
     this.observe('angle', function (angle) {

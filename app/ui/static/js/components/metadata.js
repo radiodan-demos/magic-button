@@ -13,7 +13,7 @@ module.exports = Ractive.extend({
   data: {
     activeSlide: 0
   },
-  init: function () {
+  oninit: function () {
     var progSlide  = 0,
         trackSlide = 1;
 

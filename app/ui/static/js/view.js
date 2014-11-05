@@ -29,7 +29,7 @@ module.exports = {
         data      : {
           mainView: 'controls'
         },
-        complete  : function () {
+        oncomplete  : function () {
           this.on({
             'power': function (evt) {
               evt.original.preventDefault();

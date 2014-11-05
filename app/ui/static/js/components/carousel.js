@@ -6,7 +6,7 @@ module.exports = Ractive.extend({
   isolated: false,
   twoway: true,
   debug: true,
-  init: function () {
+  onrender: function () {
     var self = this;
 
     this.sliderOpts = {
@@ -34,7 +34,7 @@ module.exports = Ractive.extend({
       }
     })
   },
-  complete: function () {
+  oncomplete: function () {
     this.swiper = new Swiper(
       this.node,
       this.sliderOpts

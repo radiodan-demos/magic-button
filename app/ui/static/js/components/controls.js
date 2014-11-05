@@ -19,7 +19,7 @@ module.exports = Ractive.extend({
     },
     volumeSteps: range(0, 105, 5)
   },
-  init: function () {
+  oninit: function () {
     this.on({
       'services-panel-toggle': function (evt) {
         var currentState = this.get('servicesPanel.isOpen');

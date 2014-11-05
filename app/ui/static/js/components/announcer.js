@@ -56,7 +56,7 @@ module.exports = Ractive.extend({
       return left;
     }
   },
-  init: function () {
+  oninit: function () {
     this.observe('state.end', function (newValue, oldValue) {
       if (newValue && !this.countdownTimerId) {
         this.countdownTimerId = window.setInterval(function () {
