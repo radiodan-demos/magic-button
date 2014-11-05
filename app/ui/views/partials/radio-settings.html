@@ -1,4 +1,4 @@
-<script id="settingsTmpl" data-ui-template type="text/ractive">
+<script id="radioSettingsTmpl" data-ui-template type="text/ractive">
 {% raw %}
 <section id="settings">
   <div class="settings-panel">
@@ -14,7 +14,7 @@
           <ServicesList 
             activeServiceIds="{{ settings.preferredServices }}"
             services="{{ services }}"
-            on-selected="preferred-service" />
+            on-selected="preferred-service-changed" />
         </div>
       </div>
       <div class="st-item panel">

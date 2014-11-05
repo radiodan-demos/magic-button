@@ -32,35 +32,35 @@ module.exports = {
         },
         oncomplete  : function () {
           this.on({
-            'power': function (evt) {
+            'Masthead.power': function (evt) {
               evt.original.preventDefault();
               StateActionCreators.togglePower();
             },
-            'volume-slider-changed': throttle(function (evt) {
+            'Controls.volume-slider-changed': throttle(function (evt) {
               var value = evt.node.value;
               StateActionCreators.changeVolume(value);
             }, 1000),
-            'tune-service': function (serviceId) {
+            'Controls.tune-service': function (serviceId) {
               StateActionCreators.changeService(serviceId);
             },
-            'avoid': function () {
+            'Controls.avoid': function () {
               StateActionCreators.toggleAvoider();
             },
-            'avoider-settings-requested': function () {
+            'Controls.avoider-settings-requested': function () {
               StateActionCreators.requestAvoiderSettings();
             },
-            'avoider-settings-changed': function (newValue) {
+            'Controls.avoider-settings-changed': function (newValue) {
               StateActionCreators.avoiderSettings(newValue);
             },
-            'announce': function () {
+            'Controls.announce': function () {
               StateActionCreators.toggleAnnouncer();
             },
-            'settings-panel-requested': function () {
+            'Masthead.settings-panel-requested': function () {
               Logger.debug('settings-panel-requested');
               StateActionCreators.requestRadioSettings();
               this.set('mainView', (this.get('mainView') === 'settings') ? 'controls' : 'settings');
             },
-            'preferred-service-changed': function (serviceId) {
+            'RadioSettings.preferred-service-changed': function (serviceId) {
               Logger.debug('preferred-service-changed', serviceId);
               StateActionCreators.toggleRadioSettingPreferredServer(serviceId);
             }
@@ -73,7 +73,7 @@ module.exports = {
           // Main Views
           Standby : require('./components/simple')('#standbyTmpl'),
           Controls: require('./components/controls'),
-          RadioSettings: require('./components/simple')('#settingsTmpl'),
+          RadioSettings: require('./components/simple')('#radioSettingsTmpl'),
           // Components
           Masthead: require('./components/simple')('#mastheadTmpl')
         }

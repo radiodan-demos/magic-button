@@ -38,15 +38,13 @@
     {% include "partials/error.html" %}
     {% include "partials/controls.html" %}
     {% include "partials/standby.html" %}
-    {% include "partials/settings.html" %}
+    {% include "partials/radio-settings.html" %}
 
     <script id="mainTmpl" data-ui-template type="text/ractive">
       {% raw %}
         <div class="{{power.isOn ? 'is-on' : 'is-off' }} is-{{ mainView }}">
           <!-- App masthead -->
-          <Masthead 
-            on-power="power" 
-            on-settings="settings-panel-requested"
+          <Masthead
             isOn="{{power.isOn}}" />
 
           <!-- Main app views -->
@@ -59,24 +57,15 @@
               nowPlaying="{{nowPlaying}}"
 
               avoider="{{avoider}}"
-              on-avoid="avoid"
-              on-avoider-settings-requested="avoider-settings-requested"
-              on-avoider-settings-changed="avoider-settings-changed"
-
-              announcer="{{announcer}}"
-              on-announce="announce"
-
-              on-tune-service="tune-service"
-              on-volume-slider-changed="volume-slider-changed" />
+              announcer="{{announcer}}" />
           {{/power.isOn}}
           {{^power.isOn}}
             <Standby />
           {{/power.isOn}}
 
-          <RadioSettings 
+          <RadioSettings
             settings="{{ settings }}"
-            services="{{ services }}"
-            on-preferred-service="preferred-service-changed" />
+            services="{{ services }}" />
         </div>
       {% endraw %}
     </script>
