@@ -25,8 +25,11 @@ function routes(app, device, settings) {
   }
 
   function state(req, res) {
+    console.log('*** device', device.state, device._priorAction, device._currentAction);
+    var isAnnouncing = device._priorAction == 'online.startAnnouncing' 
+          || device._priorAction == 'standby.startAnnouncing';
     res.json({
-      isAnnouncing: (device.state === 'announcing')
+      isAnnouncing: isAnnouncing
     });
   }
 
