@@ -8,7 +8,8 @@ describe('Play Action', function(){
 
     this.player = fakeRadiodan('player');
     this.ui     = fakeRadiodan('ui');
-    this.subject = play.create(this.player, this.ui, this.services, null);
+    this.eventBus = { emit: sinon.spy() };
+    this.subject = play.create(this.player, this.ui, this.services, this.eventBus);
 
     this.subject.transition = sinon.spy();
   });
