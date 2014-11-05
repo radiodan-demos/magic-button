@@ -10,7 +10,7 @@ module.exports = function (isAnnouncing) {
           return JSON.parse(data);
        })
        .then(ServerActionCreators.receiveAnnouncerState, failure);
+  } else {
+    xhr((isAnnouncing ? 'DELETE' : 'POST'), '/announcer').catch(failure);
   }
-  var method = isAnnouncing ? 'DELETE' : 'POST';
-  xhr(method, '/announcer').catch(failure);
 }
