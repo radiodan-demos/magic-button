@@ -1,5 +1,6 @@
 var Ractive = require('ractive'),
-    $ = require('jquery');
+    $ = require('jquery'),
+    isEmpty = require('underscore').isEmpty;
 
 module.exports = Ractive.extend({
   template: '#metadataTmpl',
@@ -21,7 +22,7 @@ module.exports = Ractive.extend({
       this.set('activeSlide', (currentSlide + 1) % 2);
     });
     this.observe('nowPlaying', function (newValue) {
-      if (newValue == null) {
+      if ( isEmpty(newValue) ) {
         this.set('activeSlide', progSlide);
       }
     });
