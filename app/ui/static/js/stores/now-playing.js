@@ -1,6 +1,7 @@
 var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone  = require('underscore').clone,
+    isEmpty = require('underscore').isEmpty,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
     CurrentServiceStore = require('../stores/current-service'),
@@ -10,8 +11,8 @@ var Logger = require('js-logger'),
 var state = {};
 
 function update(id, data) {
-  Logger.debug('NowPlaying update', id, data)
-  state[id] = data;
+  Logger.debug('NowPlaying update', id, data);
+  state[id] = isEmpty(data) ? null : data;
 }
 
 var Store = extend(new EventEmitter(), {
