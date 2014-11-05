@@ -26,6 +26,7 @@ module.exports = {
         template  : template,
         debug     : true,
         twoway    : false,
+        modifyArrays: false,
         data      : {
           mainView: 'controls'
         },
