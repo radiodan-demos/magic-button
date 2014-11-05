@@ -5,7 +5,7 @@ var fs             = require('fs'),
 
 module.exports = routes;
 
-function routes(app, states, settings) {
+function routes(app, device, settings) {
   app.get('/', index);
   app.post('/', push);
 
@@ -22,11 +22,11 @@ function routes(app, states, settings) {
       switch(magicButton.action) {
         case "announcer":
           logger.info("announcing");
-          state.handle("toggleAnnouncing");
+          device.handle("toggleAnnouncing");
           break;
         case "avoider":
           logger.info("avoiding");
-          state.handle("toggleAvoiding");
+          device.handle("toggleAvoiding");
           break;
         default:
           logger.debug("No action assigned for", magicButton.action);
