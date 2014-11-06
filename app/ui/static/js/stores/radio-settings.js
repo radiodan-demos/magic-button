@@ -2,6 +2,8 @@ var Logger = require('js-logger'),
     extend = require('underscore').extend,
     clone = require('underscore').clone,
     without = require('underscore').without,
+    intersection = require('underscore').intersection,
+    pluck = require('underscore').pluck,
     EventEmitter  = require('events').EventEmitter,
     AppDispatcher = require('../dispatcher/dispatcher'),
     Payload       = require('../constants/constants').Payload,
@@ -10,12 +12,23 @@ var Logger = require('js-logger'),
 
 var state = {};
 
+function removeService(list, id) {
+  return without(list, id);
+}
+
+function addService(ordered, list, id) {
+  list = list || [];
+  return intersection(ordered, list.concat(id));
+}
+
 var Store = extend(new EventEmitter(), {
   togglePreferredService: function (serviceId) {
+    var allServices;
     if (state.preferredServices && state.preferredServices.indexOf(serviceId) > -1) {
-      state.preferredServices = without(state.preferredServices, serviceId);
+      state.preferredServices = removeService(state.preferredServices, serviceId);
     } else {
-      state.preferredServices.push(serviceId);
+      allServices = pluck(ServicesStore.getAllServicesAsArray(), 'id');
+      state.preferredServices = addService(allServices, state.preferredServices, serviceId);
     }
   },
   getState: function () {
