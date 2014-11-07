@@ -131,7 +131,7 @@ function watch() {
   bundler.on('update', rebundle);
 
   gulp.watch(cssConfig.watch, ['css', 'reload']);
-  gulp.watch(copyConfig.watch, { cwd: copyConfig.src }, ['copy', 'reload']);
+  gulp.watch(copyConfig.src, { cwd: src }, ['copy', 'reload']);
   gulp.watch(viewsConfig.watch, ['reload']);
 
   return rebundle();
