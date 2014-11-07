@@ -36,11 +36,24 @@ describe('Play Action', function(){
       assert.equal(determined, stationId);
     });
 
-    it('uses the services#default if current returns null', function(){
+    it('uses the services#revert if current returns null', function(){
       var stationId = sinon.stub(),
           determined;
 
       this.services.current = function() {};
+      this.services.revert = function() {return stationId};
+
+      determined = this.subject.determineStation();
+
+      assert.equal(determined, stationId);
+    });
+
+    it('uses the services#default if revert returns null', function(){
+      var stationId = sinon.stub(),
+          determined;
+
+      this.services.current = function() {};
+      this.services.revert  = function() {};
       this.services.default = stationId;
 
       determined = this.subject.determineStation();
