@@ -9,7 +9,10 @@ describe('Play Action', function(){
     this.player = fakeRadiodan('player');
     this.ui     = fakeRadiodan('ui');
     this.eventBus = { emit: sinon.spy() };
-    this.subject = play.create(this.player, this.ui, this.services, this.eventBus)[0];
+    this.subject = play.create(this.player, this.ui, this.services, this.eventBus);
+
+    // lazy hack to expose underlying action function
+    this.subject.action = this.subject.events[0].action;
 
     this.subject.transition = sinon.spy();
   });
