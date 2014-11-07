@@ -22,7 +22,7 @@
     {{#audio}}
     <div class="volume-steps">
       {{# volumeSteps }}
-      <button class="vol {{ volume >= this ? 'is-active' : '' }}" value="{{ this }}" on-tap="volume-slider-changed"></button>
+      <button class="vol vol-step-{{ this }} {{ volume >= this ? 'is-active' : '' }}" value="{{ this }}" on-tap="volume-slider-changed"></button>
       {{/ volumeSteps }}
     </div>
     {{/audio}}

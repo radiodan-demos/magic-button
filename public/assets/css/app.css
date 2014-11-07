@@ -1713,13 +1713,19 @@ Pagination Styles
   padding: 0;
   border: none;
   border-right: 1px solid #fff;
-  background: #868686;
+  background-color: #868686;
+}
+.volume-steps .vol-step-0 {
+  background-image: url('../img/volume-mute.svg');
+  background-repeat: no-repeat;
+  background-size: 70% 70%;
+  background-position: center center;
 }
 .volume-steps button:hover {
-  background: #165e95;
+  background-color: #165e95;
 }
 .volume-steps .is-active {
-  background: #19abd3;
+  background-color: #19abd3;
 }
 .power-button > i {
   display: inline-block;
