@@ -5,7 +5,10 @@ describe('Services Manager', function() {
   beforeEach(function() {
     this.register = {metadata: function() {}};
     this.eventBus = new EventEmitter();
-    this.settings = {get: function(){ return utils.promise.resolve({})}};
+    this.settings = {
+      get: function(){ return utils.promise.resolve({})},
+      update: function(){ return utils.promise.resolve({})}
+    };
   });
 
   it('changes current service', function() {
@@ -22,7 +25,7 @@ describe('Services Manager', function() {
   it('emits new service on eventBus', function() {
     var eventMock = sinon.spy(),
         subject = ServicesManager.create(
-          this.register, {emit: eventMock}, this.settings);
+          this.register, {emit: eventMock, on: sinon.stub()}, this.settings);
 
     subject.change('radio3');
     assert.deepEqual(['service.id', 'radio3'], eventMock.args[0]);
@@ -34,7 +37,7 @@ describe('Services Manager', function() {
         registerMock = sinon.stub().returns(metadataMock),
         subject = ServicesManager.create(
             {metadata: registerMock},
-            {emit: eventMock}, this.settings);
+            {emit: eventMock, on: sinon.stub()}, this.settings);
 
     subject.change('my-music');
     assert.deepEqual(['my-music'], registerMock.args[0]);
@@ -45,7 +48,7 @@ describe('Services Manager', function() {
     var preferredServices = ['radio1', 'radio2', 'radio3'],
         servicesMock = sinon.stub().returns(
           utils.promise.resolve({preferredServices: preferredServices})),
-        settings = {get: servicesMock},
+        settings = {get: servicesMock, update: this.settings.update},
         subject = ServicesManager.create(
           this.register, this.eventBus, settings);
 

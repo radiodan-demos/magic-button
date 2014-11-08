@@ -154,10 +154,8 @@ function routes(app, eventBus, device, services, settings) {
   function changeService(req, res) {
     var id = req.params.id;
 
-    settings.update({serviceId: id}).then(function() {
-      device.handle('play', id);
-      res.send(200);
-    });
+    device.handle('play', id);
+    res.send(200);
   }
 
   function respondWithSuccess(req, res) {
