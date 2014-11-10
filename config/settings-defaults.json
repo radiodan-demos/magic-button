@@ -12,7 +12,7 @@
     "action": null
   },
   "radio": {
-    "serviceId": "radio4",
+    "serviceId": "radio1",
     "playing":   true,
     "preferredServices": [
       "radio1", "1xtra", "radio2", "radio3",

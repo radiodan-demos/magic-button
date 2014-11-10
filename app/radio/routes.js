@@ -9,6 +9,11 @@ module.exports = routes;
 function routes(app, eventBus, device, services, settings) {
   var audio = radiodan.audio.get('default');
 
+  app.post('/button', function (req, res) {
+    device.handle('power');
+    res.send(200);
+  })
+
   app.get('/next', function(req, res) {
     device.handle('playNext');
     res.send(200);
@@ -75,7 +80,7 @@ function routes(app, eventBus, device, services, settings) {
 
     logLevel = utils.logger.logLevel ? utils.logger.logLevel() : null;
 
-    if(services.current()) {
+    if(device.state != 'standby') {
       var programme = services.programmeFor(services.current());
       current = {
         id: programme.id,
@@ -154,10 +159,8 @@ function routes(app, eventBus, device, services, settings) {
   function changeService(req, res) {
     var id = req.params.id;
 
-    settings.update({serviceId: id}).then(function() {
-      device.handle('play', id);
-      res.send(200);
-    });
+    device.handle('play', id);
+    res.send(200);
   }
 
   function respondWithSuccess(req, res) {
