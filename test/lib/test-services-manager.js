@@ -7,7 +7,8 @@ describe('Services Manager', function() {
     this.eventBus = new EventEmitter();
     this.settings = {
       get: function(){ return utils.promise.resolve({})},
-      update: function(){ return utils.promise.resolve({})}
+      update: function(){ return utils.promise.resolve({})},
+      on: function(){}
     };
   });
 
@@ -70,7 +71,7 @@ describe('Services Manager', function() {
     var preferredServices = ['radio1', 'radio2', 'radio3'],
         servicesMock = sinon.stub().returns(
           utils.promise.resolve({preferredServices: preferredServices})),
-        settings = {get: servicesMock, update: this.settings.update},
+        settings = {get: servicesMock, update: this.settings.update, on: function () {}},
         subject = ServicesManager.create(
           this.register, this.eventBus, settings);
 
@@ -83,5 +84,35 @@ describe('Services Manager', function() {
         return assert.eventually.equal(subject.next(), 'radio1');
       })
     .then(done, done);
+  });
+
+  it('fetches initial service from settings', function (done) {
+    var settings = new EventEmitter(),
+        subject;
+
+    settings.get = function () { return utils.promise.resolve({ serviceId: 'radio4' }) };
+
+    subject = ServicesManager.create(
+          this.register, this.eventBus, settings);
+
+    subject.ready.then(function () {
+      assert.equal(subject.default, 'radio4');
+    }).then(done, done);
+  });
+
+  it('tracks changes to service settings', function () {
+    var settings = new EventEmitter(),
+        subject;
+
+    settings.get = function () { return utils.promise.resolve({}) };
+
+    subject = ServicesManager.create(
+          this.register, this.eventBus, settings);
+
+    settings.emit('update', { serviceId: 'radio1' });
+    assert.equal(subject.default, 'radio1');
+
+    settings.emit('update', { serviceId: 'radio2' });
+    assert.equal(subject.default, 'radio2');
   });
 });
