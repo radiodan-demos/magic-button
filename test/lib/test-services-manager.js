@@ -40,6 +40,20 @@ describe('Services Manager', function() {
     });
   });
 
+  it('current returns default service from settings on creation', function(done) {
+
+    this.settings.get = function () {
+      return utils.promise.resolve({ serviceId: 'koolfm' });
+    };
+
+    var subject = ServicesManager.create(
+      this.register, this.eventBus, this.settings);
+
+    subject.ready.then(function () {
+      assert.equal(subject.current(), 'koolfm');
+    })
+    .then(done, done);
+  });
 
   it('emits new service on eventBus', function() {
     var eventMock = sinon.spy(),

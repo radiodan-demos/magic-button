@@ -35,18 +35,6 @@ describe('Play Action', function(){
 
       assert.equal(determined, stationId);
     });
-
-    it('uses the services#default if current returns null', function(){
-      var stationId = sinon.stub(),
-          determined;
-
-      this.services.current = function() {};
-      this.services.default = stationId;
-
-      determined = this.subject.determineStation();
-
-      assert.equal(determined, stationId);
-    });
   });
 
   describe('playing a station', function() {
