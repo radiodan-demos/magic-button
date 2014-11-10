@@ -9,6 +9,11 @@ module.exports = routes;
 function routes(app, eventBus, device, services, settings) {
   var audio = radiodan.audio.get('default');
 
+  app.post('/button', function (req, res) {
+    device.handle('power');
+    res.send(200);
+  })
+
   app.get('/next', function(req, res) {
     device.handle('playNext');
     res.send(200);

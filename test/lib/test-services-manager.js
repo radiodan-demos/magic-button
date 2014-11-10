@@ -62,18 +62,4 @@ describe('Services Manager', function() {
       })
     .then(done, done);
   });
-
-  it('reverts to previous service', function(){
-    var subject = ServicesManager.create(
-      this.register, this.eventBus, this.settings);
-
-    subject.change('radio1');
-    assert.equal(subject.current(), 'radio1');
-
-    subject.change('radio2');
-    assert.equal(subject.current(), 'radio2');
-
-    subject.revert();
-    assert.equal(subject.current(), 'radio1');
-  });
 });
