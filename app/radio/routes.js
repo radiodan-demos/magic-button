@@ -80,7 +80,7 @@ function routes(app, eventBus, device, services, settings) {
 
     logLevel = utils.logger.logLevel ? utils.logger.logLevel() : null;
 
-    if(services.current()) {
+    if(device.state != 'standby') {
       var programme = services.programmeFor(services.current());
       current = {
         id: programme.id,
