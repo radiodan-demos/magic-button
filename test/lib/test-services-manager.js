@@ -3,7 +3,7 @@ var ServicesManager = require(libDir + 'services/manager'),
 
 describe('Services Manager', function() {
   beforeEach(function() {
-    this.register = {metadata: function() {}};
+    this.register = {metadata: function() {}, providerOf: function () { return {}; }};
     this.eventBus = new EventEmitter();
     this.settings = {
       get: function(){ return utils.promise.resolve({})},
@@ -22,6 +22,24 @@ describe('Services Manager', function() {
     assert.equal(subject.current(), 'my-music');
   });
 
+  it('throws if service doesn\'t exist', function() {
+    var subject = ServicesManager.create(
+      this.register, this.eventBus, this.settings);
+
+    this.register.providerOf = function () {
+      return undefined;
+    };
+
+    assert.throws(function () {
+      subject.change(null);
+    });
+
+    assert.throws(function () {
+      subject.change('my-80s-music');
+    });
+  });
+
+
   it('emits new service on eventBus', function() {
     var eventMock = sinon.spy(),
         subject = ServicesManager.create(
@@ -35,8 +53,12 @@ describe('Services Manager', function() {
     var eventMock = sinon.spy(),
         metadataMock = sinon.stub(),
         registerMock = sinon.stub().returns(metadataMock),
-        subject = ServicesManager.create(
-            {metadata: registerMock},
+        subject;
+
+    this.register.metadata = registerMock;
+
+    subject = ServicesManager.create(
+            this.register,
             {emit: eventMock, on: sinon.stub()}, this.settings);
 
     subject.change('my-music');
