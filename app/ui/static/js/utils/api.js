@@ -1,4 +1,5 @@
 var ServerActionCreators = require('../actions/server-action-creators'),
+    StateActionCreators = require('../actions/state-action-creators'),
     xhr = require('../xhr');
 
 module.exports = {
@@ -21,6 +22,12 @@ module.exports = {
     events.addEventListener('message', function (evt) {
       var content = JSON.parse(evt.data);
       ServerActionCreators.receiveStateUpdate(content);
+    });
+    events.addEventListener('error', function (evt) {
+      StateActionCreators.createConnectionError();
+    });
+    events.addEventListener('open', function (evt) {
+      StateActionCreators.clearError();
     });
   }
 }

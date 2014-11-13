@@ -63,6 +63,10 @@ module.exports = {
             'RadioSettings.preferred-service-changed': function (serviceId) {
               Logger.debug('preferred-service-changed', serviceId);
               StateActionCreators.toggleRadioSettingPreferredServer(serviceId);
+            },
+            'error-actioned': function () {
+              Logger.debug('error-actioned');
+              StateActionCreators.clearError();
             }
           });
 

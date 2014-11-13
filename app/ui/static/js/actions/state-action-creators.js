@@ -4,6 +4,7 @@ var Logger = require('js-logger'),
     PowerStore  = require('../stores/power'),
     AvoiderStore = require('../stores/avoider'),
     AnnouncerStore = require('../stores/announcer'),
+    ErrorStore = require('../stores/error'),
     RadioSettingsStore = require('../stores/radio-settings');
 
 module.exports = {
@@ -54,5 +55,14 @@ module.exports = {
        state: RadioSettingsStore.getState()
     });
     require('../api/radio-settings')(RadioSettingsStore.getState());
+  },
+  createGenericError: function () {
+    ErrorStore.createError(ErrorStore.GENERIC_ERROR);
+  },
+  createConnectionError: function () {
+    ErrorStore.createError(ErrorStore.CONNECTION_ERROR);
+  },
+  clearError: function () {
+    ErrorStore.clearError();
   }
 };

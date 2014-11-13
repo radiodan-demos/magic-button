@@ -47,6 +47,9 @@
           <Masthead
             isOn="{{power.isOn}}" />
 
+          <!-- Error message -->
+          {{> errorTmpl }}
+
           <!-- Main app views -->
           {{#power.isOn}}
             <Controls

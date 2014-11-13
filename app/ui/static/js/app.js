@@ -9,6 +9,7 @@ var PowerStore = require('./stores/power'),
     AvoiderStore = require('./stores/avoider'),
     AnnouncerStore = require('./stores/announcer'),
     RadioSettingsStore = require('./stores/radio-settings'),
+    ErrorStore = require('./stores/error'),
     Logger = require('js-logger');
 
 var AppView = require('./view');
@@ -64,6 +65,9 @@ function initState() {
     AppView.set('settings', RadioSettingsStore.getState());
   });
 
+  ErrorStore.addChangeListener(function () {
+    AppView.set('error', ErrorStore.currentError());
+  });
 
   api.connectEventStream();
   api.getInitialState()
