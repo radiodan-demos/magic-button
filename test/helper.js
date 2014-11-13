@@ -44,7 +44,7 @@ function fakeRadiodanPlayer() {
 }
 
 function fakeRadiodanUI() {
-  var actions = ['emit'],
+  var actions = ['emit', 'clearQueue'],
       obj     = { 'RGBLEDs': ['power'] },
       colours = { 'green': 'green'},
       output  = { colours: colours };
