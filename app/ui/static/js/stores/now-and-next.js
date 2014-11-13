@@ -9,8 +9,19 @@ var Logger = require('js-logger'),
 
 var state = {};
 
+function convertStringsToDates(datum) {
+  if (datum.start) {
+    datum.start = new Date(datum.start);
+  }
+  if (datum.end) {
+    datum.end = new Date(datum.end);
+  }
+  return datum;
+}
+
 function update(id, data) {
-  Logger.debug('NowAndNext update', id, data)
+  Logger.debug('NowAndNext update', id, data);
+  data.forEach(convertStringsToDates);
   state[id] = data;
 }
 

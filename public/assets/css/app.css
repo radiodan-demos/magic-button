@@ -1561,6 +1561,13 @@ Pagination Styles
   width: 50%;
   max-width: 272px;
 }
+.md-img img {
+  width: 100%;
+}
+.md-progress-bar {
+  height: 3px;
+  background-color: #16a0e8;
+}
 .track {
   display: inline-block;
   height: 25px;
