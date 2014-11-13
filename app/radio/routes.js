@@ -147,13 +147,8 @@ function routes(app, eventBus, device, services, settings) {
         params = {};
 
     params[action] = value;
-
-    audio.volume(params)
-         .then(
-            respondWithSuccess(req, res),
-            respondWithError(req, res)
-          )
-         .then(null, utils.failedPromiseHandler(logger));
+    device.handle('volume', params);
+    res.send(200);
   }
 
   function changeService(req, res) {
