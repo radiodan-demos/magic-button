@@ -11,6 +11,13 @@
         {{/image}}
         <p class="md-primary">{{ brand }}</p>
         <p class="md-secondary">{{ episode }}</p>
+        {{#if start && end }}
+        <p class="md-time">
+          <time>{{ formatTime(start) }}</time>
+          &mdash;
+          <time>{{ formatTime(end) }}</time>
+        </p>
+        {{/if}}
       </div>
     </div>
     {{/nowAndNext.0}}

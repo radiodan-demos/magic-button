@@ -2,12 +2,13 @@ var Logger = require('js-logger'),
     Ractive = require('ractive'),
     Promise = require('es6-promise').Promise,
     throttle = require('./utils').throttle,
-    jQuery  = require('jquery');;
+    jQuery  = require('jquery');
 
 /*
   Ractive plugins
 */
 require('./lib/ractive-events-tap');
+require('./view/helpers');
 
 window.jQuery = jQuery;
 

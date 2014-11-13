@@ -67,6 +67,7 @@
     "browserify": "~6.2.0",
     "exorcist": "~0.1.6",
     "vinyl-transform": "0.0.1",
-    "gulp-clone": "~1.0.0"
+    "gulp-clone": "~1.0.0",
+    "moment": "~2.8.3"
   }
 }
