@@ -8,8 +8,9 @@ describe('Play Action', function(){
 
     this.player = fakeRadiodan('player');
     this.ui     = fakeRadiodan('ui');
+    this.audio  = { volume: sinon.spy() };
     this.eventBus = { emit: sinon.spy(), on: sinon.spy() };
-    this.subject = play.create(this.player, this.ui, this.services, this.eventBus);
+    this.subject = play.create(this.player, this.ui, this.audio, this.services, this.eventBus);
 
     // lazy hack to expose underlying action function
     this.subject.action = this.subject.events[0].action;
