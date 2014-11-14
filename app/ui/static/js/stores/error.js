@@ -16,6 +16,14 @@ var errors = {
     message: 'The radio has crashed unexpectedly, please wait while it restarts',
     priority: 10
   },
+  'SHUTDOWN_ERROR': {
+    message: 'The radio is now shutting down. Don\'t forget to unplug it.',
+    priority: 20
+  },
+  'RESTART_ERROR': {
+    message: 'The radio is now restarting. It will be ready in a few miniutes.',
+    priority: 20
+  },
   'CONNECTION_ERROR': {
     message: 'This app can\'t connect to the radio'
   }
@@ -34,6 +42,8 @@ function getErrorDetails(id) {
 var ErrorStore = extend(new EventEmitter(), {
   GENERIC_ERROR: 'GENERIC_ERROR',
   EXIT_ERROR: 'EXIT_ERROR',
+  SHUTDOWN_ERROR: 'SHUTDOWN_ERROR',
+  RESTART_ERROR: 'RESTART_ERROR',
   CONNECTION_ERROR: 'CONNECTION_ERROR',
   currentError: function () {
     var details = getErrorDetails(currentErrorId);
@@ -72,6 +82,13 @@ ErrorStore.dispatchToken = AppDispatcher.register(function (payload) {
   switch(action.type) {
     case ActionTypes.EXIT:
       ErrorStore.createError(ErrorStore.EXIT_ERROR);
+      break;
+    case ActionTypes.SHUTDOWN:
+      if (action.state.data.type === 'restart') {
+        ErrorStore.createError(ErrorStore.RESTART_ERROR);
+      } else {
+        ErrorStore.createError(ErrorStore.SHUTDOWN_ERROR);
+      }
       break;
   }
 });
