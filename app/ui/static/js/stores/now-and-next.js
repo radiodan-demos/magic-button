@@ -53,7 +53,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       }
       break;
     case ActionTypes.SERVICE:
-      Logger.debug('NowAndNext: ', action.type, action.state);
+      Logger.debug('NowAndNext.SERVICE: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
         AppDispatcher.waitFor([CurrentServiceStore.dispatchToken]);
         Logger.debug('NowAndNext: SERVER', action.type, action.state);
@@ -64,12 +64,12 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       }
       break;
     case ActionTypes.NOW_AND_NEXT:
-      Logger.debug('NowAndNext: ', action.type, action.state);
+      Logger.debug('NowAndNext.NOW_AND_NEXT: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
         Logger.debug('NowAndNext: SERVER', action.type, action.state);
-        if (action.state.service && action.state.data) {
-          update(action.state.service, action.state.data);
-          Store.emitChange(action.state.service);
+        if (action.state.data) {
+          update(action.state.data.serviceId, action.state.data.nowAndNext.data);
+          Store.emitChange(action.state.data.serviceId);
         }
       }
       break;
