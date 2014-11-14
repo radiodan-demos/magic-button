@@ -26,13 +26,14 @@ module.exports = Ractive.extend({
         this.set('activeSlide', progSlide);
       }
     });
-    this.observe('nowAndNext.0', function (newValue) {
-      var start, end, now,
+    this.observe('nowAndNext.0.end', function (newValue) {
+      var data = this.get('nowAndNext.0'),
+          start, end, now,
           duration, timeLeft, timeThrough, percentage;
 
-      if (newValue && newValue.start && newValue.end) {
-        start = newValue.start.valueOf();
-        end   = newValue.end.valueOf();
+      if (data && data.start && data.end) {
+        start = data.start.valueOf();
+        end   = data.end.valueOf();
         now   = Date.now();
 
         duration = end - start;
@@ -41,13 +42,13 @@ module.exports = Ractive.extend({
         percentage = (timeThrough / duration) * 100 || 0;
 
         if (percentage) {
-          this.set('progress.percentage', percentage);
-          this.animate('progress.percentage', 100, { duration: timeLeft });
+          this.set('nowAndNext.0.progress.percentage', percentage);
+          this.animate('nowAndNext.0.progress.percentage', 100, { duration: timeLeft });
         } else {
-          this.set('progress', {});
+          this.set('nowAndNext.0.progress', null);
         }
       } else {
-        this.set('progress', {});
+        this.set('nowAndNext.0.progress', null);
       }
     });
   }

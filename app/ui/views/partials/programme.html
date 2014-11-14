@@ -1,0 +1,24 @@
+<script id="programmeTempl" data-ui-template type="text/ractive">
+{% raw %}
+<div class="cf metadata md-prog">
+  {{#image}}
+  <div class="md-img">
+    <img src="{{ templateUrl.replace('$recipe', '272x153') }}" />
+    {{#progress}}
+      <div class="md-progress-bar"
+           style="width: {{ percentage }}%"></div>
+    {{/progress}}
+  </div>
+  {{/image}}
+  <p class="md-primary">{{ brand }}</p>
+  <p class="md-secondary">{{ episode }}</p>
+  {{#if start && end }}
+  <p class="md-time">
+    <time>{{ formatTime(start) }}</time>
+    &mdash;
+    <time>{{ formatTime(end) }}</time>
+  </p>
+  {{/if}}
+</div>
+{% endraw %}
+</script>

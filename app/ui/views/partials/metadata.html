@@ -4,26 +4,7 @@
   <Carousel activeSlide="{{ activeSlide }}">
     {{#nowAndNext.0}}
     <div class="carousel-item">
-      <div class="cf metadata md-prog">
-        {{#image}}
-        <div class="md-img">
-          <img src="{{ templateUrl.replace('$recipe', '272x153') }}" />
-          {{#progress}}
-            <div class="md-progress-bar"
-                 style="width: {{ percentage }}%"></div>
-          {{/progress}}
-        </div>
-        {{/image}}
-        <p class="md-primary">{{ brand }}</p>
-        <p class="md-secondary">{{ episode }}</p>
-        {{#if start && end }}
-        <p class="md-time">
-          <time>{{ formatTime(start) }}</time>
-          &mdash;
-          <time>{{ formatTime(end) }}</time>
-        </p>
-        {{/if}}
-      </div>
+      {{> programmeTempl }}
     </div>
     {{/nowAndNext.0}}
     {{#nowPlaying}}
@@ -40,6 +21,11 @@
       </div>
     </div>
     {{/nowPlaying}}
+    {{#nowAndNext.1}}
+    <div class="carousel-item">
+      {{> programmeTempl }}
+    </div>
+    {{/nowAndNext.1}}
   </Carousel><!-- .md-items -->
 
   <a class="track {{ nowPlaying ? 'is-available' : 'is-unavailable' }}" on-tap="track-display">
