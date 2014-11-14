@@ -10,31 +10,59 @@ var currentErrorId = null;
 
 var errors = {
   'GENERIC_ERROR': {
-    msg: 'Something has gone wrong'
+    message: 'Something has gone wrong',
+  },
+  'EXIT_ERROR': {
+    message: 'The radio has crashed unexpectedly, please wait while it restarts',
+    priority: 10
+  },
+  'SHUTDOWN_ERROR': {
+    message: 'The radio is now shutting down. Don\'t forget to unplug it.',
+    priority: 20
+  },
+  'RESTART_ERROR': {
+    message: 'The radio is now restarting. It will be ready in a few miniutes.',
+    priority: 20
   },
   'CONNECTION_ERROR': {
-    msg: 'This app can\'t connect to the radio'
+    message: 'This app can\'t connect to the radio'
   }
 };
 
+function getErrorDetails(id) {
+  var err = clone(errors[id]);
+
+  if (err) {
+    err.priority = err.priority || 0;
+  }
+
+  return err;
+}
+
 var ErrorStore = extend(new EventEmitter(), {
   GENERIC_ERROR: 'GENERIC_ERROR',
+  EXIT_ERROR: 'EXIT_ERROR',
+  SHUTDOWN_ERROR: 'SHUTDOWN_ERROR',
+  RESTART_ERROR: 'RESTART_ERROR',
   CONNECTION_ERROR: 'CONNECTION_ERROR',
   currentError: function () {
-    var details;
-
-    if (errors[currentErrorId]) {
-      details = {
-        message: errors[currentErrorId].msg
+    var details = getErrorDetails(currentErrorId);
+    if (details) {
+      return {
+        message: details.message
       };
+    } else {
+      return null;
     }
-
-    return details;
   },
   createError: function (id) {
-    // TODO: Validate
-    currentErrorId = id;
-    this.emitChange();
+    var current = getErrorDetails(currentErrorId)
+        newError = getErrorDetails(id);
+
+    if (!current || current.priority <= newError.priority) {
+      currentErrorId = id;
+      this.emitChange();
+    } else {}
   },
   clearError: function () {
     currentErrorId = null;
@@ -48,20 +76,21 @@ var ErrorStore = extend(new EventEmitter(), {
   }
 });
 
-// ErrorStore.dispatchToken = AppDispatcher.register(function (payload) {
-//   var source = payload.source,
-//       action = payload.action;
-//   switch(action.type) {
-//     case ActionTypes.ERROR:
-//       if (source === Payload.SERVER_ACTION) {
-//         Logger.debug('Power: SERVER', action.type, action.state.data);
-//         state = action.state.data;
-//       } else {
-//         state.isOn = !state.isOn;
-//       }
-//       Power.emitChange();
-//       break;
-//   }
-// });
+ErrorStore.dispatchToken = AppDispatcher.register(function (payload) {
+  var source = payload.source,
+      action = payload.action;
+  switch(action.type) {
+    case ActionTypes.EXIT:
+      ErrorStore.createError(ErrorStore.EXIT_ERROR);
+      break;
+    case ActionTypes.SHUTDOWN:
+      if (action.state.data.type === 'restart') {
+        ErrorStore.createError(ErrorStore.RESTART_ERROR);
+      } else {
+        ErrorStore.createError(ErrorStore.SHUTDOWN_ERROR);
+      }
+      break;
+  }
+});
 
 module.exports = ErrorStore;
