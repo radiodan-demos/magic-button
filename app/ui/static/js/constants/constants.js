@@ -11,7 +11,8 @@ module.exports = {
     NOW_AND_NEXT : 'nowAndNext',
     NOW_PLAYING : 'nowPlaying',
     AVOIDER : 'avoider',
-    ANNOUNCER : 'announcer'
+    ANNOUNCER : 'announcer',
+    EXIT : 'exit'
   },
   Payload: {
     SERVER_ACTION: 'SERVER_ACTION',
