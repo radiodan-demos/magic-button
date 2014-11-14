@@ -1,7 +1,8 @@
 {
   "dataPath": "/tmp/.radiodan",
   "defaults": {
-    "music": "/media/music"
+    "music": "/media/music",
+    "outputFormat": "44100:16:1"
   },
   "players": [
     {
