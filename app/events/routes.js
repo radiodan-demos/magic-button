@@ -8,9 +8,15 @@ module.exports = function (app, eventBus, services) {
   // To send data call: eventStream.send(dataObj, 'eventName');
   app.use('/', eventStream.middleware());
 
-  services.events.on('*', function (data) {
-    eventStream.send(data);
+  ['nowAndNext', 'nowPlaying', 'liveText'].forEach(function (topic) {
+    services.events.on('*.' + topic, createMessageEmitter(topic));
   });
+
+  function createMessageEmitter(topic) {
+    return function (data, metadata) {
+      eventStream.send({ topic: topic, serviceId: metadata.serviceId, data: data });
+    };
+  }
 
   eventBus.on('*', function (eventName, args) {
     if (args.length === 1) {
