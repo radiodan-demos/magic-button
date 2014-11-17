@@ -18,12 +18,13 @@ module.exports = function (app, eventBus, services) {
     };
   }
 
-  eventBus.on('*', function (eventName, args) {
-    if (args.length === 1) {
-      args = args[0];
-    }
-
-    eventStream.send({ topic: eventName, data: args });
+  ['settings.*', 'service.changed', 'power', 'exit', 'shutdown'].forEach(function (topic) {
+    eventBus.on(topic, function (args) {
+      if (args && args.length === 1) {
+        args = args[0];
+      }
+      eventStream.send({ topic: this.event, data: args });
+    });
   });
 
   return app;

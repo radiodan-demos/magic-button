@@ -68,8 +68,8 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       if (source === Payload.SERVER_ACTION) {
         Logger.debug('NowAndNext: SERVER', action.type, action.state);
         if (action.state.data) {
-          update(action.state.data.serviceId, action.state.data.nowAndNext.data);
-          Store.emitChange(action.state.data.serviceId);
+          update(action.state.serviceId, action.state.data);
+          Store.emitChange(action.state.serviceId);
         }
       }
       break;
