@@ -65,14 +65,15 @@ describe("BBC Services", function() {
       var subject = BBCServices.create();
 
       subject.cacheStore("radio1",
-          "audioStreams", [{url: 'http://playlist'}]);
+          "playlist", "http://playlist");
 
       subject.ready = utils.promise.resolve();
       this.subject = subject;
     });
 
     it("returns a playlist for a given station", function() {
-      assert.equal(this.subject.playlist("radio1"), 'http://playlist');
+      assert.equal(this.subject.playlist("radio1").type, 'playlist');
+      assert.equal(this.subject.playlist("radio1").value, 'http://playlist');
     });
   });
 

@@ -46,7 +46,8 @@ describe('My Music service', function() {
   it('Returns a playlist of the root music directory', function() {
     var myMusic = MyMusic.create(this.eventBus);
 
-    assert.deepEqual(myMusic.playlist(), '');
+    assert.deepEqual(myMusic.playlist().type, 'file');
+    assert.deepEqual(myMusic.playlist().value, '');
   });
 
   // TODO: abstract this technique into own object

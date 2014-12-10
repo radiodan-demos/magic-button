@@ -40,7 +40,7 @@ describe('Play Action', function(){
 
   describe('playing a station', function() {
     beforeEach(function(){
-      this.services.playlist = sinon.stub();
+      this.services.playlist = sinon.stub().returns({});
       this.services.change = sinon.stub();
     });
 
@@ -74,7 +74,7 @@ describe('Play Action', function(){
     it('sets a new playlist', function(done) {
       var that = this,
           stationId = sinon.stub(),
-          playlist  = sinon.stub();
+          playlist  = { type: 'file', value: '' };
 
       this.services.playlist.returns(playlist);
 
@@ -82,7 +82,7 @@ describe('Play Action', function(){
         .then(function() {
           var add  = that.player.main.add,
               play = that.player.main.play,
-              expected = { clear: true, playlist: [playlist]};
+              expected = { clear: true, playlist: [playlist.value]};
 
           // creates playlist
           assert.isTrue(that.services.playlist.calledWith(stationId));
