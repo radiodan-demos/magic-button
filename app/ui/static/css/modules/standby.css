@@ -10,6 +10,11 @@
   background-color: #718692;
 }
 
+.sb-hd h2 + p {
+  margin-top: 0.6em;
+  margin-bottom: 0.2em;
+}
+
 .sb-hd h2,
 .sb-hd p {
   font-weight: normal;
@@ -44,4 +49,8 @@
   min-height: 128px;
   background: transparent url('../img/radio-power-highlight.svg') no-repeat;
   background-position: 50% 50%;
+}
+
+.label-shutdown {
+  color: darken(#ffffff, 15%);
 }
