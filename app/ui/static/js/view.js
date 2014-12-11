@@ -7,7 +7,7 @@ var Logger = require('js-logger'),
 /*
   Ractive plugins
 */
-require('./lib/ractive-events-tap');
+require('ractive-touch');
 require('./view/helpers');
 
 window.jQuery = jQuery;

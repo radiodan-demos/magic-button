@@ -1734,6 +1734,12 @@ Pagination Styles
 .volume-steps .is-active {
   background-color: #19abd3;
 }
+.power-button {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+}
 .power-button > i {
   display: inline-block;
   width: 29px;

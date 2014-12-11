@@ -68,6 +68,7 @@
     "exorcist": "~0.1.6",
     "vinyl-transform": "0.0.1",
     "gulp-clone": "~1.0.0",
-    "moment": "~2.8.3"
+    "moment": "~2.8.3",
+    "ractive-touch": "~0.4.0"
   }
 }

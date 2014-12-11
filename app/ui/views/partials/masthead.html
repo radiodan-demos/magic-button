@@ -2,9 +2,10 @@
 {% raw %}
 <section id="masthead" class="layout panel masthead">
   <p class="lo-left">
-    <a  class="power-button {{ isOn ? 'is-on' : 'is-off' }}"
+    <button
+        class="power-button {{ isOn ? 'is-on' : 'is-off' }}"
         on-tap="power"
-        href="/power"><i></i></a>
+        href="/power"><i></i></button>
   </p>
   <p class="lo-center radiodan-logo">
     <span><img src="/assets/img/radiodan.svg" alt="Radiodan"/></span>
