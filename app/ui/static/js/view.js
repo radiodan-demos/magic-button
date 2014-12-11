@@ -37,6 +37,9 @@ module.exports = {
               evt.original.preventDefault();
               StateActionCreators.togglePower();
             },
+            'Masthead.shutdown': function (evt) {
+              alert('Shutdown');
+            },
             'Controls.volume-slider-changed': throttle(function (evt) {
               var value = evt.node.value;
               StateActionCreators.changeVolume(value);

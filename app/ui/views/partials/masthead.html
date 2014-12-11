@@ -5,6 +5,7 @@
     <button
         class="power-button {{ isOn ? 'is-on' : 'is-off' }}"
         on-tap="power"
+        on-press="shutdown" press-time='3000'
         href="/power"><i></i></button>
   </p>
   <p class="lo-center radiodan-logo">
