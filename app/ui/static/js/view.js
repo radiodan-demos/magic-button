@@ -2,7 +2,8 @@ var Logger = require('js-logger'),
     Ractive = require('ractive'),
     Promise = require('es6-promise').Promise,
     throttle = require('./utils').throttle,
-    jQuery  = require('jquery');
+    jQuery  = require('jquery'),
+    dialogPolyfill = require('../lib/dialog-polyfill/dialog-polyfill');
 
 /*
   Ractive plugins
@@ -38,7 +39,16 @@ module.exports = {
               StateActionCreators.togglePower();
             },
             'Masthead.shutdown': function (evt) {
-              alert('Shutdown');
+              var el = this.find('dialog');
+              dialogPolyfill.registerDialog(el);
+              el.showModal();
+            },
+            'Masthead.shutdown-cancel': function (evt) {
+              this.find('dialog').close();
+            },
+            'Masthead.shutdown-confirm': function (evt) {
+              StateActionCreators.triggerShutdown();
+              this.find('dialog').close();
             },
             'Controls.volume-slider-changed': throttle(function (evt) {
               var value = evt.node.value;

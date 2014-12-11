@@ -20,5 +20,17 @@
     </a>
   </p>
 </section>
+<dialog id="shutdown">
+  <h2>Shutdown?</h2>
+  <p>This will shutdown your radio.</p>
+  <p>Are you sure?</p>
+
+  <button
+    on-tap="shutdown-cancel"
+    class="pure-button button-cancel">Cancel</button>
+  <button
+    on-tap="shutdown-confirm"
+    class="pure-button pure-button-primary button-confirm">Shutdown</button>
+</dialog>
 {% endraw %}
 </script>

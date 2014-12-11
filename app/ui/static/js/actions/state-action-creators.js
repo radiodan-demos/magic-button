@@ -17,6 +17,10 @@ module.exports = {
     newState = PowerStore.getState().isOn;
     require('../api/power')(newState);
   },
+  triggerShutdown: function () {
+    Logger.debug('triggerShutdown');
+    require('../api/shutdown')();
+  },
   changeVolume: function (vol) {
     Logger.debug('changeVolume', vol);
     AppDispatcher.handleViewAction({

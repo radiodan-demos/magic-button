@@ -32,3 +32,19 @@
   height: 100%;
   padding: 16px;
 }
+
+/*
+  Shutdown dialog
+*/
+#shutdown {
+  width: 100%;
+  border: none;
+}
+
+#shutdown h2 {
+  margin: 0;
+}
+
+#shutdown + .backdrop {
+  background-color: rgba(0, 0, 0, 0.7);
+}

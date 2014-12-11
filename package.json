@@ -70,5 +70,14 @@
     "gulp-clone": "~1.0.0",
     "moment": "~2.8.3",
     "ractive-touch": "~0.4.0"
+  },
+  "browser": {
+    "dialog-polyfill": "./app/ui/static/lib/dialog-polyfill/dialog-polyfill.js"
+  },
+  "browserify-shim": {
+    "dialog-polyfill": "dialogPolyfill"
+  },
+  "browserify": {
+    "transform": [ "browserify-shim" ]
   }
 }
