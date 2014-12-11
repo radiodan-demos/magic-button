@@ -1,7 +1,7 @@
 <script id="mastheadTmpl" data-ui-template type="text/ractive">
 {% raw %}
 <section id="masthead" class="layout panel masthead">
-  <p class="lo-left">
+  <p class="lo-left lo-left-flush">
     <button
         class="power-button {{ isOn ? 'is-on' : 'is-off' }}"
         on-tap="power"
@@ -11,13 +11,13 @@
   <p class="lo-center radiodan-logo">
     <span><img src="/assets/img/radiodan.svg" alt="Radiodan"/></span>
   </p>
-  <p class="lo-right {{ isOn ? 'is-on' : 'is-off' }}">
-    <a on-tap="settings-panel-requested"
+  <p class="lo-right lo-right-flush {{ isOn ? 'is-on' : 'is-off' }}">
+    <button on-tap="settings-panel-requested"
        class="setup-btn">
        <span class="sb-inner">
         <i></i> setup
       </span>
-    </a>
+    </button>
   </p>
 </section>
 <dialog id="shutdown">

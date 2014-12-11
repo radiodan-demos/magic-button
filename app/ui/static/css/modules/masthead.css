@@ -4,25 +4,21 @@
 
 .setup-btn {
   display: inline-block;
-  height: 100%;
-  padding-left: 10px;
-  padding-top: 15px;
-  padding-bottom: 15px;
+  height: inherit;
+  width: 60px;
+  background: none;
+  border: none;
+  color: #666;
 }
 
 .sb-inner {
   display: inline-block;
-  width: 30px;
-  height: 100%;
-  line-height: 1em;
-  border-left: 1px solid #e1e1e2;
   font-size: 12px;
-  text-align: center;
 }
 
 .sb-inner > i {
   display: inline-block;
-  width: 30px;
+  width: 27px;
   height: 20px;
   background: transparent url('../img/radio.svg') no-repeat;
 }

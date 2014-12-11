@@ -18,6 +18,10 @@
   left: 16px;
 }
 
+.lo-left-flush {
+  left: 0;
+}
+
 .lo-center {
   left: 20%;
   right: 20%;
@@ -26,6 +30,10 @@
 
 .lo-right {
   right: 16px;
+}
+
+.lo-right-flush {
+  right: 0;
 }
 
 .lo-single {
