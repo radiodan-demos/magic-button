@@ -27,6 +27,7 @@
   "homepage": "https://github.com/radiodan/magic-button",
   "dependencies": {
     "body-parser": "^1.0.0",
+    "browserify-shim": "^3.8.1",
     "deepequal": "0.0.1",
     "errorhandler": "^1.0.0",
     "eventemitter2": "^0.4.14",
@@ -78,6 +79,8 @@
     "dialog-polyfill": "dialogPolyfill"
   },
   "browserify": {
-    "transform": [ "browserify-shim" ]
+    "transform": [
+      "browserify-shim"
+    ]
   }
 }
