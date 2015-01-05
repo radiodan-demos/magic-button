@@ -15,5 +15,24 @@
 }
 
 .ct-logo {
-  padding: 8px 0;
+  padding: 8px 8px 8px 0;
+}
+
+.ct-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 13px;
+  transition: transform 0.5s ease-in-out;
+}
+
+.ct-indicator.is-open {
+  transform: rotate(90deg);
+}
+
+.ct-indicator img {
+  display: block;
+}
+
+.ct-title {
+  color: #26a2e7;
 }

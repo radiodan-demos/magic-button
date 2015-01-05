@@ -8,8 +8,8 @@
            src="{{current.logos.active}}" />
     {{/current.logos.active}}
 
-    <span class="ct-indicator">
-      {{ services.isOpen ? '⬇' : '⬆' }}
+    <span class="ct-indicator {{ servicesPanel.isOpen ? 'is-open' : 'is-closed' }}">
+      <img src="/assets/img/disclosure-arrow.svg" />
     </span>
 
     {{^current}}
