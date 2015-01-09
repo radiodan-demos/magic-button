@@ -8,7 +8,7 @@ var express        = require('express'),
     services       = require('./lib/services').create(
                        eventBus, Settings.get('radio')
                      ),
-    device         = require('./lib/device').create(services, eventBus),
+    device         = require('./lib/device').create(services, eventBus, Settings),
     app            = module.exports = express(),
     port           = (process.env.PORT || 5000);
 

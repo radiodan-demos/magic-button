@@ -35,14 +35,9 @@ function routes(app, device, settings) {
   function announce(req, res) {
     device.handle('announce:start');
     res.sendStatus(200);
-    // settings.get().then(function(settings) {
-    //   device.handle('startAnnouncing', settings);
-    //   res.send(200);
-    // }).then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
-    // device.handle('stopAnnouncing');
     device.handle('announce:stop');
     res.send(200);
   }
