@@ -34,7 +34,7 @@
     "eventsource": "^0.1",
     "express": "^4.0.0",
     "express-eventsource": "0.0.3",
-    "machina": "^0.3.6",
+    "machina": "~0.3.8",
     "method-override": "^1.0.0",
     "morgan": "^1.0.0",
     "nedb": "^0.10.4",
