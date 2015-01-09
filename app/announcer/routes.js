@@ -25,8 +25,7 @@ function routes(app, device, settings) {
   }
 
   function state(req, res) {
-    var isAnnouncing = device._priorAction == 'online.startAnnouncing' 
-          || device._priorAction == 'standby.startAnnouncing';
+    var isAnnouncing = device.currentMagicAction() == 'announce';
     res.json({
       isAnnouncing: isAnnouncing
     });
