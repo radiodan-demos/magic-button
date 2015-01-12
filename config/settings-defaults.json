@@ -9,7 +9,7 @@
     "avoidType": "programme"
   },
   "magic-button": {
-    "action": null
+    "action": "announcer"
   },
   "radio": {
     "serviceId": "radio1",
