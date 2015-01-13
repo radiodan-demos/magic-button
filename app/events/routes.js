@@ -18,7 +18,8 @@ module.exports = function (app, eventBus, services) {
     };
   }
 
-  ['settings.*', 'service.changed', 'power', 'exit', 'shutdown', 'audio'].forEach(function (topic) {
+  [ 'settings.*', 'service.changed', 'power', 'exit', 'shutdown',
+    'audio', 'announcer'].forEach(function (topic) {
     eventBus.on(topic, function (args) {
       if (args && args.length === 1) {
         args = args[0];

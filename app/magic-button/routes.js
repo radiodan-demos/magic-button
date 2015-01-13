@@ -18,19 +18,7 @@ function routes(app, device, settings) {
   }
 
   function push(req, res) {
-    settings.get().then(function(magicButton) {
-      switch(magicButton.action) {
-        case "announcer":
-          logger.info("announcing");
-          device.handle("toggleAnnouncing");
-          break;
-        case "avoider":
-          logger.info("avoiding");
-          device.handle("toggleAvoiding");
-          break;
-        default:
-          logger.debug("No action assigned for", magicButton.action);
-      }
-    });
+    device.handle('magic');
+    res.sendStatus(202);
   }
 }

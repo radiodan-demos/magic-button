@@ -25,22 +25,19 @@ function routes(app, device, settings) {
   }
 
   function state(req, res) {
-    var isAnnouncing = device._priorAction == 'online.startAnnouncing' 
-          || device._priorAction == 'standby.startAnnouncing';
+    var isAnnouncing = device.currentMagicAction() == 'announce';
     res.json({
       isAnnouncing: isAnnouncing
     });
   }
 
   function announce(req, res) {
-    settings.get().then(function(settings) {
-      device.handle('startAnnouncing', settings);
-      res.send(200);
-    }).then(null, utils.failedPromiseHandler(logger));
+    device.handle('announce:start');
+    res.sendStatus(200);
   }
 
   function cancel(req, res) {
-    device.handle('stopAnnouncing');
+    device.handle('announce:stop');
     res.send(200);
   }
 
