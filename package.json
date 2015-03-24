@@ -38,7 +38,7 @@
     "method-override": "^1.0.0",
     "morgan": "^1.0.0",
     "nedb": "^0.10.4",
-    "radiodan-client": "git://github.com/radiodan/radiodan-client.js.git",
+    "radiodan-client": "^0.3.0",
     "request": "~2.34.0",
     "serve-static": "^1.0.2",
     "swig": "^1.3.2"
