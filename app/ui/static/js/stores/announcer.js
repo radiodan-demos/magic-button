@@ -42,7 +42,7 @@ Store.dispatchToken = AppDispatcher.register(function (payload) {
       Logger.debug('Announcer: ', action.type, action.state);
       if (source === Payload.SERVER_ACTION) {
         Logger.debug('Announcer: SERVER', action.type, action.state);
-        set(action.state.data);
+        set(action.state.data ? action.state.data : action.state);
         Store.emitChange();
       } else {
         Logger.debug('Announcer: VIEW ACTION pre', state.isAnnouncing);

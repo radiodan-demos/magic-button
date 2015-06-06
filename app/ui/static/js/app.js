@@ -83,8 +83,8 @@ function initState() {
             console.warn('%o not available', level);
           }
         }
-     });
 
-  // Read announcer current state
-  require('./api/announce')();
+        // Read announcer current state
+        require('./api/announce')();
+     });
 }
