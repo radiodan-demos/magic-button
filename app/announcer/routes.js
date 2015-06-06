@@ -11,18 +11,13 @@ function routes(app, device, settings) {
 
   settings.update({available: availableAnnouncers});
 
-  app.get('/', index);
-  app.get('/state.json', state);
+  app.get('/', state);
   app.post('/', announce);
   app.delete('/', cancel);
 
   app.use(settingsRoutes(settings));
 
   return app;
-
-  function index(req, res) {
-    res.json({page: 'Announcer'});
-  }
 
   function state(req, res) {
     var isAnnouncing = device.currentMagicAction() == 'announce';

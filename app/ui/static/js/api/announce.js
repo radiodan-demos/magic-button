@@ -5,7 +5,7 @@ var xhr = require('../xhr'),
 
 module.exports = function (isAnnouncing) {
   if (isAnnouncing == null) {
-    xhr.get('/announcer/state.json')
+    xhr.get('/announcer')
        .then(function (data) {
           return JSON.parse(data);
        })

@@ -22,9 +22,7 @@ function routes(app, device, settings, eventBus) {
   return app;
 
   function index(req, res) {
-    res.render(
-      __dirname+'/views/index'
-    );
+    res.json({page: 'Avoider'});
   }
 
   function state(req, res) {
