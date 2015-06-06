@@ -100,6 +100,7 @@ function routes(app, eventBus, device, services, settings) {
       function (audioStatus, stations) {
         logger.info('Stations %s, status:', stations.length, audioStatus);
         try {
+          logger.info('Device', device);
           logger.info('Responding with state', device.state);
 
           state = {

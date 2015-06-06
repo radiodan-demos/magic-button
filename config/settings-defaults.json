@@ -6,7 +6,7 @@
   },
   "avoider": {
     "serviceId": "radio1",
-    "avoidType": "programme"
+    "avoidType": "programmes"
   },
   "magic-button": {
     "action": "announcer"
