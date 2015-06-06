@@ -68,6 +68,8 @@ it shuts down. If this is not possible, it will exit with a non-zero code.
 
 The front-end single-page web app is in `app/ui`. Templates are in `views`. `index.html` is the main page that pulls in a load of partials representing the different components on the page.
 
+When developing start with `NODE_ENV=development` as this will load unminified javascript and other things that speed up development.
+
 ### Static assets
 
 All static assets to be exposed to a browser must be in the `public` directory. See `Building` below for more information.
