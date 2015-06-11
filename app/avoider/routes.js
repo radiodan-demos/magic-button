@@ -30,27 +30,6 @@ function routes(app, device, settings, eventBus) {
   function avoid(req, res) {
     device.handle('avoid:start');
     res.send(200);
-    // settings.get().then(function(avoidSettings) {
-    //   res.send(200);
-    //   device.handle('startAvoiding', avoidSettings);
-    // })
-    // .then(function() {
-    //   // listen for station switching, cancel avoid
-    //   var listener = device.on('*', function(_, handled) {
-    //     switch(handled.inputType) {
-    //       case 'play':
-    //         logger.debug('cancel avoid, new station playing');
-    //         device.handle('stopAvoiding');
-    //         listener.off();
-    //         break;
-    //       case 'stopAvoiding':
-    //         logger.debug('avoiding finished, clear listener');
-    //         listener.off();
-    //         break;
-    //     }
-    //   });
-    // })
-    // .then(null, utils.failedPromiseHandler(logger));
   }
 
   function cancel(req, res) {
